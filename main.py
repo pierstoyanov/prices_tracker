@@ -1,41 +1,73 @@
+from viberbot.api.messages import TextMessage
+from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequest, ViberFailedRequest
+
+# import bot
+from flask import Flask, request, Response
+
+
+import logging
 import os
+from viberbot import Api
+from viberbot.api.bot_configuration import BotConfiguration
+from viberbot.api.messages import TextMessage, RichMediaMessage
 
-from data_enter import add_daily_row
-from data_gather import get_url_contents, cu_soup_to_data, au_soup_to_data, get_click_url_contents, ag_soup_to_data, \
-    wm_soup_to_data
+bot_configuration = BotConfiguration(
+    name=os.environ['BOT_NAME'],
+    auth_token=os.environ['BOT_TOKEN'],
+    avatar='http://viber.com/avatar.jpg'
+)
 
-load_states = ['load', 'domcontentloaded', 'networkidle']
+# viber
+viber = Api(bot_configuration)
 
-# cu
-cu_wait = 'td[class=data-set-table__main]'
-cu_soup = get_url_contents(os.environ["URL_ONE"], load_states[2])
-cu_data = cu_soup_to_data(cu_soup)
-res = add_daily_row('copper', cu_data)
-print(res)
+# logger
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
-# wm
-wm_soup = get_url_contents(os.environ["URL_THREE"])
-wm_data = wm_soup_to_data(wm_soup)
-res = add_daily_row('copperwm', wm_data)
-print(res)
 
-# au
-au_wait = "td[class=-index0]"
-au_soup = get_url_contents(os.environ["URL_TWO"], wait_selector=au_wait)
-au_data = au_soup_to_data(au_soup)
-res = add_daily_row('gold', au_data, average=True)
-print(res)
+app = Flask(__name__)
+# from viber bot
+# viber = bot.viber
+# logger = bot.logger
 
-# ag
-# ag_wait = "td[class=-index0]"
-ag_click = ['div.metals-dropdown li', 'ul.dropdown-menu >> text=Silver']
-ag_soup = get_click_url_contents(os.environ["URL_TWO"],
-                                 load_state=load_states[2],
-                                 click_locators=ag_click)
-ag_data = ag_soup_to_data(ag_soup)
-res = add_daily_row('silver', ag_data)
-print(res)
 
-# Press the green button in the gutter to run the script.
+@app.route('/incoming', methods=['POST'])
+def incoming():
+    logger.debug("received request. post data: {0}".format(request.get_data()))
+
+    # handle the request here
+    if not viber.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')):
+        return Response(status=403)
+
+    viber_request = viber.parse_request(request.get_data())
+
+    if isinstance(viber_request, ViberMessageRequest):
+        message = viber_request.message
+        # lets echo back
+        viber.send_messages(viber_request.sender.id, [
+            message
+        ])
+    elif isinstance(viber_request, ViberSubscribedRequest):
+        viber.send_messages(viber_request.get_user.id, [
+            TextMessage(text="thanks for subscribing!")
+        ])
+    elif isinstance(viber_request, ViberFailedRequest):
+        logger.warning("client failed receiving message. failure: {0}".format(viber_request))
+
+    return Response(status=200)
+
+
 if __name__ == '__main__':
-    print("Main")
+    # contex = ()
+    # ssl_context = context
+    # users = viber.get_online()
+    # viber.send_messages(to=users, messages=[TextMessage(text='sample')])
+
+    app.run(debug=True, host='localhost', port=8080)
+    # viber.set_webhook('https://26e0-79-100-153-222.eu.ngrok.io')
+
+

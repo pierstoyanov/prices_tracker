@@ -11,6 +11,8 @@ from viberbot import Api
 from viberbot.api.bot_configuration import BotConfiguration
 from viberbot.api.messages import TextMessage, RichMediaMessage
 
+from data_collection import main
+
 bot_configuration = BotConfiguration(
     name=os.environ['BOT_NAME'],
     auth_token=os.environ['BOT_TOKEN'],
@@ -66,7 +68,7 @@ if __name__ == '__main__':
     # ssl_context = context
     # users = viber.get_online()
     # viber.send_messages(to=users, messages=[TextMessage(text='sample')])
-
+    data_collection.main()
     app.run(debug=True, host='localhost', port=8080)
     # viber.set_webhook('https://26e0-79-100-153-222.eu.ngrok.io')
 

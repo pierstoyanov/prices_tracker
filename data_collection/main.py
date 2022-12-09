@@ -1,7 +1,7 @@
 import os
 
-from data_collection.data_enter import add_daily_row
-from data_collection.data_gather import get_url_contents, cu_soup_to_data, au_soup_to_data, get_click_url_contents, ag_soup_to_data, \
+from data_enter import add_daily_row
+from data_gather import get_url_contents, cu_soup_to_data, au_soup_to_data, get_click_url_contents, ag_soup_to_data, \
     wm_soup_to_data
 
 load_states = ['load', 'domcontentloaded', 'networkidle']
@@ -16,7 +16,8 @@ if __name__ == '__main__':
     print(res)
 
     # wm
-    wm_soup = get_url_contents(os.environ["URL_THREE"])
+    wm_wait = "div[class=year]"
+    wm_soup = get_url_contents(os.environ["URL_THREE"], load_state=load_states[2])
     wm_data = wm_soup_to_data(wm_soup)
     res = add_daily_row('copperwm', wm_data)
     print(res)

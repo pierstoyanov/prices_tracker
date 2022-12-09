@@ -1,13 +1,14 @@
 import os
 
-from data_enter import add_daily_row
-from data_gather import get_url_contents, cu_soup_to_data, au_soup_to_data, get_click_url_contents, ag_soup_to_data, \
+from data_collection.data_enter import add_daily_row
+from data_collection.data_gather import get_url_contents, cu_soup_to_data, au_soup_to_data, get_click_url_contents, ag_soup_to_data, \
     wm_soup_to_data
 
 load_states = ['load', 'domcontentloaded', 'networkidle']
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
+
+def data_management():
+
     # cu
     cu_wait = 'td[class=data-set-table__main]'
     cu_soup = get_url_contents(os.environ["URL_ONE"], load_states[2])
@@ -38,3 +39,8 @@ if __name__ == '__main__':
     ag_data = ag_soup_to_data(ag_soup)
     res = add_daily_row('silver', ag_data)
     print(res)
+
+
+# Press the green button in the gutter to run the script.
+if __name__ == '__main__':
+    data_management()

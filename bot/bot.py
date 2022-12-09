@@ -12,16 +12,8 @@ bot_configuration = BotConfiguration(
 
 # viber
 viber = Api(bot_configuration)
-viber.set_webhook('https://26e0-79-100-153-222.eu.ngrok.io')
-
-#logger
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+# viber.set_webhook('https://26e0-79-100-153-222.eu.ngrok.io')
 
 
-#messages
+# messages
 text_message = TextMessage(text='Sample msg!')

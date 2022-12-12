@@ -4,6 +4,8 @@ from viberbot import Api
 from viberbot.api.bot_configuration import BotConfiguration
 from viberbot.api.messages import TextMessage, RichMediaMessage
 
+from bot.users_log import get_users, add_new_user
+from users_log import *
 bot_configuration = BotConfiguration(
     name=os.environ['BOT_NAME'],
     auth_token=os.environ['BOT_TOKEN'],
@@ -17,3 +19,7 @@ viber = Api(bot_configuration)
 
 # messages
 text_message = TextMessage(text='Sample msg!')
+
+# sheets info
+
+# users = get_users()

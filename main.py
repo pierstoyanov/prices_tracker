@@ -5,10 +5,11 @@ from flask import Flask, request, Response
 from viberbot import Api
 from viberbot.api.bot_configuration import BotConfiguration
 from viberbot.api.messages import TextMessage
-from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequest, ViberFailedRequest
+from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequest, ViberFailedRequest, \
+    ViberConversationStartedRequest
 
 import logger
-import bot
+from bot import bot
 from scheduler import scheduler
 import data_collection
 from data_collection.data_management import data_management
@@ -22,16 +23,16 @@ app = Flask(__name__)
 viber = bot.viber
 
 
-@app.route('/', methods=['POST'])
+@app.route('/incoming', methods=['POST'])
 def incoming():
-    logger.logger.debug(f"received request. post data: {request.headers}")
+    logger.logger.debug(f"received request. post data: {request.get_data()}")
 
-    viber_request = viber.parse_request(request.get_data())
-    print(viber.get_account_info())
     # handle the request here
     if not viber.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')):
         return Response(status=403)
 
+    viber_request = viber.parse_request(request.get_data())
+    print(viber.get_account_info())
 
     if isinstance(viber_request, ViberMessageRequest):
         print(viber_request)
@@ -40,12 +41,22 @@ def incoming():
         viber.send_messages(viber_request.sender.id, [
             message
         ])
+    elif isinstance(viber_request, ViberConversationStartedRequest):
+        user_id = viber_request.get_user().get_id()
+        user_name = viber_request.get_user().get_id()
+
+        bot.add_new_user([user_id, user_name])
+
+        viber.send_messages(user_id, [
+            # TODO: localise messages
+            TextMessage(text=f"Welcome, {user_name}")
+        ])
     elif isinstance(viber_request, ViberSubscribedRequest):
         viber.send_messages(viber_request.get_user.id, [
             TextMessage(text="thanks for subscribing!")
         ])
     elif isinstance(viber_request, ViberFailedRequest):
-        logger.logger.warning("client failed receiving message. failure: {0}".format(viber_request))
+        logger.logger.warning(f"client failed receiving message. failure: {viber_request.get_data()}")
 
     return Response(status=200)
 

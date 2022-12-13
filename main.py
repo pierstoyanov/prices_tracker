@@ -23,9 +23,9 @@ app = Flask(__name__)
 viber = bot.viber
 
 
-@app.route('/incoming', methods=['POST'])
+@app.route('/', methods=['POST'])
 def incoming():
-    logger.logger.debug(f"received request. post data: {request.get_data()}")
+    logger.logger.debug(f"received request. post data: {request.values}")
 
     # handle the request here
     if not viber.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')):
@@ -42,8 +42,10 @@ def incoming():
             message
         ])
     elif isinstance(viber_request, ViberConversationStartedRequest):
-        user_id = viber_request.get_user().get_id()
-        user_name = viber_request.get_user().get_id()
+        user = viber_request.user
+        print(user)
+        user_id = user['id']
+        user_name = user['name']
 
         bot.add_new_user([user_id, user_name])
 
@@ -67,4 +69,4 @@ if __name__ == '__main__':
     # users = viber.get_online()
     # viber.send_messages(to=users, messages=[TextMessage(text='sample')])
     app.run(debug=True, host='localhost', port=8080)
-    # viber.set_webhook('https://0284-151-251-240-151.eu.ngrok.io')
+    # viber.set_webhook('https://f4ce-151-251-246-204.eu.ngrok.io')

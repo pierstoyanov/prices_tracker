@@ -12,6 +12,9 @@ from gspread import Client
 # module with specific data inputs
 
 # gspread
+from logger.logger import logger
+
+
 def add_cu_daily_row(client: Client, cu_date: str, cu_bid: float, cu_offer: float, cu_stock: int):
     try:
         sh = client.open(os.environ['DATA_SHEET'])
@@ -21,10 +24,9 @@ def add_cu_daily_row(client: Client, cu_date: str, cu_bid: float, cu_offer: floa
         last_row_date = sheet.row_values(empty_row - 1)[0]
 
         if last_row_date == cu_date:
-            print("Same day! No rows edited.")
+            logger.info('Same day! No rows edited.')
             return
 
-        print(empty_row, cu_date, cu_bid, cu_offer)
         sheet.append_row([cu_date, cu_bid, cu_offer, cu_stock], empty_row)
 
         return sheet.range(f'A{last_row_date}:C{last_row_date}')
@@ -49,5 +51,5 @@ def batch_update_table(values: list):
         ).execute()
         return result
     except HttpError as error:
-        print(f"An error occurred {error.error_details}")
+        logger.warn(f"An error occurred {error.error_details}")
         return error

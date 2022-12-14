@@ -1,6 +1,9 @@
+import logging
 import os
 from gspread import authorize, spreadsheet, Client, GSpreadException, service_account
-from google.oauth2.service_account import Credentials
+
+
+gspread_logger = logging.getLogger(__name__)
 
 
 # gspread
@@ -22,7 +25,6 @@ def add_row_to_page(client: Client, page: str, data: tuple, average_cols=None):
     """Using gspread client and page name adds data to next empty row.
         Average appends str formula for avrg between cols of the input data
         cols should be separated by ':'"""
-    print(data)
 
     def average_cols_formula(row_number: int) -> tuple:
         """":return: Formula for average between cols of n-th row"""
@@ -31,12 +33,12 @@ def add_row_to_page(client: Client, page: str, data: tuple, average_cols=None):
 
     try:
         sheet = client.open(os.environ['DATA_SHEET']).worksheet(page)
-
+        gspread_logger.info(f'Sheet: {sheet}')
         new_row = get_first_empty_row(sheet)
         last_row_date = sheet.row_values(new_row - 1)[0]
 
         if last_row_date == data[0]:
-            print("Same day! No rows edited.")
+            gspread_logger.error("Same day! No rows edited.")
             return
 
         if average_cols:
@@ -49,4 +51,5 @@ def add_row_to_page(client: Client, page: str, data: tuple, average_cols=None):
         return sheet.range(f'A{new_row}:D{new_row}')
 
     except GSpreadException as error:
+        gspread_logger.error(error)
         return error

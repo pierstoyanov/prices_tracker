@@ -1,10 +1,9 @@
-import logging
 import os
 from viberbot import Api
 from viberbot.api.bot_configuration import BotConfiguration
 from viberbot.api.messages import TextMessage, RichMediaMessage
 
-from bot.users_log import get_users, add_new_user
+from bot.users_info import get_users, add_new_user
 
 bot_configuration = BotConfiguration(
     name=os.environ['BOT_NAME'],

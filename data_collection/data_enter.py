@@ -1,5 +1,4 @@
 import os
-import gspread
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -8,13 +7,12 @@ from g_sheets.g_api import get_google_client
 from g_sheets.gspread import get_client, get_first_empty_row
 from gspread import Client
 
+# logger
+from data_collection.actions import data_logger
+
 
 # module with specific data inputs
-
 # gspread
-from logger.logger import logger
-
-
 def add_cu_daily_row(client: Client, cu_date: str, cu_bid: float, cu_offer: float, cu_stock: int):
     try:
         sh = client.open(os.environ['DATA_SHEET'])
@@ -24,7 +22,7 @@ def add_cu_daily_row(client: Client, cu_date: str, cu_bid: float, cu_offer: floa
         last_row_date = sheet.row_values(empty_row - 1)[0]
 
         if last_row_date == cu_date:
-            logger.info('Same day! No rows edited.')
+            data_logger.info('Same day! No rows edited.')
             return
 
         sheet.append_row([cu_date, cu_bid, cu_offer, cu_stock], empty_row)
@@ -51,5 +49,5 @@ def batch_update_table(values: list):
         ).execute()
         return result
     except HttpError as error:
-        logger.warn(f"An error occurred {error.error_details}")
+        data_logger.warn(f"An error occurred {error.error_details}")
         return error

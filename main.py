@@ -52,9 +52,9 @@ def incoming():
         # register user
         add_new_user(u)
 
-        viber.send_messages(u.user_id, [
+        viber.send_messages(u.id, [
             # TODO: localise messages
-            TextMessage(text=f"Welcome, {u.user_name}")
+            TextMessage(text=f"Welcome, {u.name}")
         ])
     elif isinstance(viber_request, ViberSubscribedRequest):
         viber.send_messages(viber_request.get_user.id, [
@@ -71,5 +71,5 @@ if __name__ == '__main__':
     # ssl_context = context
     # users = viber.get_online()
     # viber.send_messages(to=users, messages=[TextMessage(text='sample')])
-    # app.run(debug=True, host='localhost', port=8080)
-    viber.set_webhook('')
+    app.run(debug=True, host='localhost', port=8080)
+    # viber.set_webhook('https://fb00-79-100-153-222.eu.ngrok.io')

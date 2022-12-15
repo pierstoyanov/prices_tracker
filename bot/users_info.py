@@ -21,16 +21,16 @@ def get_users_id():
 
 def add_new_user(new_user):
     users = get_users_id()
+    vals = [[str(x) for x in new_user.__dict__.values()]]
     if new_user.id not in users:
         body = {
-            'values': new_user
+            'values': vals
         }
-
         try:
             sheets_service.values().append(spreadsheetId=sheet,
                                            valueInputOption="USER_ENTERED",
                                            range="A1:L1",
-                                           body=body)
+                                           body=body).execute()
             bot_logger.info(f"User {new_user.name} with id {new_user.id} added.")
         except HttpError as error:
             bot_logger.error(f"An error occurred: {error}")

@@ -1,14 +1,13 @@
 import os
 from googleapiclient.errors import HttpError
-from bot.bot import bot_logger, service
-from g_sheets.g_api import append_values
+from bot.bot import bot_logger, sheets_service
 
 sheet = os.environ['SPREADSHEET_USERS']
 
 
 def get_users_id():
     try:
-        result = service.spreadsheets().values().get(
+        result = sheets_service.values().get(
             spreadsheetId=sheet,
             range='A:A'
         ).execute()
@@ -23,10 +22,15 @@ def get_users_id():
 def add_new_user(new_user):
     users = get_users_id()
     if new_user.id not in users:
+        body = {
+            'values': new_user
+        }
+
         try:
-            append_values(spreadsheet_id=sheet,
-                          range_name="A1:E1",
-                          values=new_user)
+            sheets_service.values().append(spreadsheetId=sheet,
+                                           valueInputOption="USER_ENTERED",
+                                           range="A1:L1",
+                                           body=body)
             bot_logger.info(f"User {new_user.name} with id {new_user.id} added.")
         except HttpError as error:
             bot_logger.error(f"An error occurred: {error}")

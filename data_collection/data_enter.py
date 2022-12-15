@@ -28,21 +28,3 @@ def add_cu_daily_row(client: Client, cu_date: str, cu_bid: float, cu_offer: floa
 
     except HttpError as error:
         return error
-
-
-# google api
-def batch_update_table(values: list):
-    try:
-
-        body = {"values": values}
-
-        result = service.spreadsheets().values().append(
-            spreadsheetId=os.environ['SPREADSHEET_DATA'],
-            valueInputOption='USER_ENTERED',
-            body=body,
-            range="copperwm!A2:D2"
-        ).execute()
-        return result
-    except HttpError as error:
-        data_logger.warn(f"An error occurred {error.error_details}")
-        return error

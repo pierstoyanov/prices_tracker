@@ -1,5 +1,8 @@
 *.png
 *.pdf
-/venv
-/.idea
-/secrets
+venv/
+.idea/
+secrets/
+log/
+other_code/
+/playwright*

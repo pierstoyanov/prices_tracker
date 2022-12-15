@@ -11,7 +11,7 @@ from g_sheets.goog_service import get_goog_service
 bot_logger = logging.getLogger('bot')
 
 # google api service instance for using to sheets
-service = get_goog_service(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'))
+sheets_service = get_goog_service(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'))
 
 bot_configuration = BotConfiguration(
     name=os.environ['BOT_NAME'],

@@ -28,6 +28,7 @@ app = Flask(__name__)
 viber = bot.viber
 
 
+# TODO apply gettext for localisation
 @app.route('/', methods=['POST'])
 def incoming():
     app_logger.debug(f"received request. post data: {request}")
@@ -37,7 +38,7 @@ def incoming():
         return Response(status=403)
 
     viber_request = viber.parse_request(request.get_data())
-    print(viber.get_account_info())
+    # print(viber.get_account_info())
 
     if isinstance(viber_request, ViberMessageRequest):
         print(viber_request)
@@ -47,14 +48,13 @@ def incoming():
             message
         ])
     elif isinstance(viber_request, ViberConversationStartedRequest):
-        user = viber_request.user
-        user_id, user_name = user.id, user.name
+        u = viber_request.user
+        # register user
+        add_new_user(u)
 
-        add_new_user(user)
-
-        viber.send_messages(user_id, [
+        viber.send_messages(u.user_id, [
             # TODO: localise messages
-            TextMessage(text=f"Welcome, {user_name}")
+            TextMessage(text=f"Welcome, {u.user_name}")
         ])
     elif isinstance(viber_request, ViberSubscribedRequest):
         viber.send_messages(viber_request.get_user.id, [
@@ -71,5 +71,5 @@ if __name__ == '__main__':
     # ssl_context = context
     # users = viber.get_online()
     # viber.send_messages(to=users, messages=[TextMessage(text='sample')])
-    app.run(debug=True, host='localhost', port=8080)
-    viber.set_webhook('https://5c92-151-251-252-75.eu.ngrok.io')
+    # app.run(debug=True, host='localhost', port=8080)
+    viber.set_webhook('')

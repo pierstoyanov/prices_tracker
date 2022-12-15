@@ -1,5 +1,5 @@
 import os
-from gspread import authorize, spreadsheet, Client, GSpreadException, service_account
+from gspread import spreadsheet, Client, GSpreadException, service_account
 from logger.logger import logging
 
 gspread_logger = logging.getLogger(__name__)

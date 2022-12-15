@@ -3,7 +3,15 @@ from viberbot import Api
 from viberbot.api.bot_configuration import BotConfiguration
 from viberbot.api.messages import TextMessage, RichMediaMessage
 
-from bot.users_info import get_users, add_new_user
+from logger.logger import logging
+from g_sheets.goog_service import get_goog_service
+
+
+# logger
+bot_logger = logging.getLogger('bot')
+
+# google api service instance for using to sheets
+service = get_goog_service(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'))
 
 bot_configuration = BotConfiguration(
     name=os.environ['BOT_NAME'],
@@ -16,9 +24,8 @@ viber = Api(bot_configuration)
 # viber.set_webhook('https://26e0-79-100-153-222.eu.ngrok.io')
 
 
+
 # messages
 text_message = TextMessage(text='Sample msg!')
 
 # sheets info
-
-users = get_users()

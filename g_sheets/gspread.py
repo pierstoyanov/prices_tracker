@@ -1,7 +1,6 @@
-import logging
 import os
 from gspread import authorize, spreadsheet, Client, GSpreadException, service_account
-
+from logger.logger import logging
 
 gspread_logger = logging.getLogger(__name__)
 
@@ -21,7 +20,7 @@ def get_first_empty_row(s: spreadsheet.Spreadsheet.sheet1,
     return max([cell.row for cell in cols if cell.value]) + 1
 
 
-def add_row_to_page(client: Client, page: str, data: tuple, average_cols=None):
+def add_row_to_page(client: Client, page: str, data: tuple, average_cols: object = None) -> object:
     """Using gspread client and page name adds data to next empty row.
         Average appends str formula for avrg between cols of the input data
         cols should be separated by ':'"""

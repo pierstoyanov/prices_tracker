@@ -11,6 +11,8 @@ from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequ
 
 
 from bot import bot
+from bot.users_info import add_new_user
+from g_sheets.goog_service import get_goog_service
 from logger.logger import logging
 from scheduler import scheduler
 import data_collection
@@ -45,12 +47,10 @@ def incoming():
             message
         ])
     elif isinstance(viber_request, ViberConversationStartedRequest):
-        user = json.load(viber_request.user)
-        print(user)
-        user_id = user.get('id')
-        user_name = user.get('name')
+        user = viber_request.user
+        user_id, user_name = user.id, user.name
 
-        bot.add_new_user([user_id, user_name])
+        add_new_user(user)
 
         viber.send_messages(user_id, [
             # TODO: localise messages
@@ -72,4 +72,4 @@ if __name__ == '__main__':
     # users = viber.get_online()
     # viber.send_messages(to=users, messages=[TextMessage(text='sample')])
     app.run(debug=True, host='localhost', port=8080)
-    viber.set_webhook('')
+    viber.set_webhook('https://5c92-151-251-252-75.eu.ngrok.io')

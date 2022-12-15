@@ -1,10 +1,7 @@
 import os
 
-from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-
-from g_sheets.g_api import get_google_client
-from g_sheets.gspread import get_client, get_first_empty_row
+from g_sheets.gspread import get_first_empty_row
 from gspread import Client
 
 # logger
@@ -35,10 +32,8 @@ def add_cu_daily_row(client: Client, cu_date: str, cu_bid: float, cu_offer: floa
 
 # google api
 def batch_update_table(values: list):
-    creds = get_google_client(os.environ["DATA_KEYF_NAME"])
-
     try:
-        service = build('sheets', 'v4', credentials=creds)
+
         body = {"values": values}
 
         result = service.spreadsheets().values().append(

@@ -41,13 +41,13 @@ def get_url_contents(url: str, load_state=None, wait_selector=None, screenshot=F
     return soup
 
 
-def get_click_url_contents(url: str, load_state=None, wait_for_selector=None, click_locators=[], screenshot=False, pdf=False):
+def get_click_url_contents(url: str, load_state=None, wait_selector=None, click_locators=[], screenshot=False, pdf=False):
     with sync_playwright() as p:
         browser, page = new_page_browser(p)
         page.goto(url)
 
-        if wait_for_selector:
-            page.wait_for_selector(wait_for_selector)
+        if wait_selector:
+            page.wait_for_selector(wait_selector)
 
         if load_state:
             page.wait_for_load_state(load_state)
@@ -66,7 +66,8 @@ def get_click_url_contents(url: str, load_state=None, wait_for_selector=None, cl
 
 def cu_soup_to_data(soup: BeautifulSoup):
     try:
-        text = soup.find('div', os.environ["DATE_DIV"]).find_all('span')[2].text
+        date_div = 'data-set-tabs__content-top'
+        text = soup.find('div', date_div).find_all('span')[2].text
         date_str = text.split('for', 1)[1].strip()
         raw_date = datetime.strptime(date_str.strip(), "%d %b %Y")
         date = raw_date.date().strftime('%d.%m.%Y')

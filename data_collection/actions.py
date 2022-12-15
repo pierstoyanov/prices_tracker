@@ -1,4 +1,7 @@
 import os
+from typing import Callable
+
+from gspread import Client
 
 from data_collection.data_gather import get_url_contents, get_click_url_contents,\
     cu_soup_to_data, au_soup_to_data, ag_soup_to_data, wm_soup_to_data
@@ -14,7 +17,7 @@ data_logger = logging.getLogger('data_collection.actions')
 
 def log_data(data, url):
     if data:
-        data_logger.info(f'Gathered {data} from {url}')
+        data_logger.info(f'Gathered soup data from {url}')
     else:
         data_logger.warning('No data')
 
@@ -24,48 +27,50 @@ def log_result(res):
         data_logger.info(f'Added row: {res}')
 
 
+def scrape_data_and_store(client: Client, url: str, soup_to_data: Callable, store_to_page: str,
+                          average_cols: str = None, click: list = None, wait: str = None, load_state: str = None):
+    try:
+        if click:
+            item_soup = get_click_url_contents(
+                url=url, wait_selector=wait, load_state=load_state, click_locators=click)
+        else:
+            item_soup = get_url_contents(url, load_state=load_state, wait_selector=wait)
+
+        item_data = soup_to_data(item_soup)
+        log_data(item_soup, url)
+
+        result = add_row_to_page(client=client, page=store_to_page, data=item_data, average_cols=average_cols)
+        log_result(result)
+
+    except Exception as e:
+        data_logger.info(f"Error occurred! {e}")
+        return e
+
+
 def data_management():
     # gspread client for data sheet
-    client = get_client(os.environ["DATA_KEYF_NAME"])
+    client = get_client(os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
 
     # cu
     # cu_wait = 'td[class=data-set-table__main]'
-    cu_soup = get_url_contents(os.environ["URL_ONE"], load_state='networkidle')
-    cu_data = cu_soup_to_data(cu_soup)
-    log_data(cu_data, os.environ["URL_ONE"])
-
-    res = add_row_to_page(client=client, page='copper', data=cu_data)
-    log_result(res)
+    scrape_data_and_store(client=client, url=os.environ["URL_ONE"], load_state=load_states[2],
+                          soup_to_data=cu_soup_to_data, store_to_page='copper')
 
     # wm
     # wm_wait = "div[class=year]"
-    wm_soup = get_url_contents(os.environ["URL_THREE"], load_state='networkidle')
-    wm_data = wm_soup_to_data(wm_soup)
-    log_data(wm_data, os.environ["URL_THREE"])
-
-    res = add_row_to_page(client, 'copperwm', wm_data)
-    log_result(res)
+    scrape_data_and_store(client=client, url=os.environ["URL_THREE"], load_state=load_states[2],
+                          soup_to_data=wm_soup_to_data, store_to_page='copperwm')
 
     # au
     au_wait = "td[class=-index0]"
-    au_soup = get_url_contents(os.environ["URL_TWO"], wait_selector=au_wait)
-    au_data = au_soup_to_data(au_soup)
-    log_data(au_data, os.environ["URL_TWO"])
-
-    res = add_row_to_page(client, 'gold', au_data, average_cols='B:C')
-    log_result(res)
+    scrape_data_and_store(client=client, url=os.environ["URL_TWO"], wait=au_wait, load_state=load_states[2],
+                          soup_to_data=au_soup_to_data, store_to_page='gold', average_cols='B:C')
 
     # ag
     # ag_wait = "td[class=-index0]"
     ag_click = ['div.metals-dropdown li', 'ul.dropdown-menu >> text=Silver']
-    ag_soup = get_click_url_contents(os.environ["URL_TWO"],
-                                     load_state='networkidle',
-                                     click_locators=ag_click)
-    ag_data = ag_soup_to_data(ag_soup)
-    log_data(au_data, os.environ["URL_TWO"])
-
-    res = add_row_to_page(client, 'silver', ag_data)
-    log_result(res)
+    scrape_data_and_store(client=client, url=os.environ["URL_TWO"], load_state=load_states[2],
+                          soup_to_data=ag_soup_to_data, store_to_page='silver')
 
 
 # Press the green button in the gutter to run the script.

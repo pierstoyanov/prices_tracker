@@ -4,25 +4,15 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from logger.logger import logging
+# from main import service
+
+goog_logger = logging.getLogger(__name__)
+
 
 # google api
-def get_google_client(key_file):
-    SCOPES = ['https://www.googleapis.com/auth/spreadsheets',
-              'https://www.googleapis.com/auth/drive']
-    creds = None
-
-    try:
-        if os.path.exists(key_file):
-            creds = service_account.Credentials.from_service_account_file(os.environ["KEYF_NAME"], scopes=SCOPES)
-        return creds
-    except HttpError as error:
-        return error
-
-
 def append_values(creds, spreadsheet_id, range_name, value_input_option, values):
     try:
-        service = build('sheets', 'v4', credentials=creds)
-
         body = {
             'values': values
         }
@@ -31,8 +21,9 @@ def append_values(creds, spreadsheet_id, range_name, value_input_option, values)
             valueInputOption=value_input_option, body=body).execute()
         print(f"{result.get('updatedCells')} cells updated.")
         return result
+
     except HttpError as error:
-        print(f"An error occurred: {error}")
+        goog_logger.error(f'An error occurred {error}')
         return error
 
 
@@ -45,6 +36,7 @@ def get_values(creds, spreadsheet_id, range_name):
         rows = result.get('values', [])
         print(f"{len(rows)} rows retrieved")
         return result
+
     except HttpError as error:
-        print(f"An error occurred: {error}")
+        goog_logger.error(f'An error occurred {error}')
         return error

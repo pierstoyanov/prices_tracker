@@ -5,13 +5,13 @@ import os
 from flask import Flask, request, Response
 from viberbot import Api
 from viberbot.api.bot_configuration import BotConfiguration
-from viberbot.api.messages import TextMessage
 from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequest, ViberFailedRequest, \
-    ViberConversationStartedRequest
-
+    ViberConversationStartedRequest, ViberUnsubscribedRequest
 
 from bot import bot
-from bot.users_info import add_new_user
+from bot.messages import msg_wellcome, msg_subbed, msg_unsubbed, \
+    msg_welcome_keyboard
+from bot.users_info import add_new_user, remove_user
 from g_sheets.goog_service import get_goog_service
 from logger.logger import logging
 from scheduler import scheduler
@@ -49,17 +49,21 @@ def incoming():
         ])
     elif isinstance(viber_request, ViberConversationStartedRequest):
         u = viber_request.user
-        # register user
-        add_new_user(u)
-
         viber.send_messages(u.id, [
             # TODO: localise messages
-            TextMessage(text=f"Welcome, {u.name}")
+            msg_wellcome(u),
+            # msg_welcome_keyboard()
         ])
     elif isinstance(viber_request, ViberSubscribedRequest):
-        viber.send_messages(viber_request.get_user.id, [
-            TextMessage(text="thanks for subscribing!")
+        # register user
+        add_new_user(viber_request.user)
+
+        viber.send_messages(viber_request.user.id, [
+            msg_subbed(viber_request.user)
         ])
+    elif isinstance(viber_request, ViberUnsubscribedRequest):
+        # de-register user
+        remove_user(viber_request.user_id)
     elif isinstance(viber_request, ViberFailedRequest):
         app_logger.warning(f"client failed receiving message. failure: {viber_request.get_data()}")
 
@@ -72,4 +76,4 @@ if __name__ == '__main__':
     # users = viber.get_online()
     # viber.send_messages(to=users, messages=[TextMessage(text='sample')])
     app.run(debug=True, host='localhost', port=8080)
-    # viber.set_webhook('https://fb00-79-100-153-222.eu.ngrok.io')
+    # viber.set_webhook('https://a424-151-251-246-195.eu.ngrok.io')

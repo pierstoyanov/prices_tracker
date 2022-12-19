@@ -16,7 +16,7 @@ def get_goog_service(service_acc_file):
 
         service = build('sheets', 'v4', credentials=creds)
 
-        return service.spreadsheets()
+        return service
 
     except HttpError as error:
         goog_logger.error(f'An error occurred: {error}')

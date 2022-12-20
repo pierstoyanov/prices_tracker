@@ -1,16 +1,15 @@
 import os
 from googleapiclient.errors import HttpError
 from bot.bot import bot_logger, sheets_service
-from g_sheets.g_api import find_row_of_item_in_sheet
+from g_sheets.g_api import find_row_of_item_in_sheet, delete_row
 
-
-sheet = os.environ['SPREADSHEET_USERS']
+spreadsheet_id = os.environ['SPREADSHEET_USERS']
 
 
 def get_users_id(service=sheets_service):
     try:
         result = service.spreadsheets().values().get(
-            spreadsheetId=sheet,
+            spreadsheetId=spreadsheet_id,
             range='A:A'
         ).execute()
         bot_logger.info("Retrieved user id data")
@@ -29,7 +28,7 @@ def add_new_user(new_user, service=sheets_service):
             'values': vals
         }
         try:
-            service.spreadsheets().values().append(spreadsheetId=sheet,
+            service.spreadsheets().values().append(spreadsheetId=spreadsheet_id,
                                                    valueInputOption="USER_ENTERED",
                                                    range="A1:L1",
                                                    body=body).execute()
@@ -43,30 +42,9 @@ def add_new_user(new_user, service=sheets_service):
 
 def remove_user(u_id, s=sheets_service):
     user_row = find_row_of_item_in_sheet(
-        item=u_id, col="C", service=s, spreadsheet_id=sheet)['values'][0][0]
+        item=u_id, col="C", service=s, spreadsheet_id=spreadsheet_id)
     print(user_row)
-    request_body = {
-        "requests": [
-            {
-                "deleteDimension": {
-                    "range": {
-                        "sheetId": sheet,
-                        "dimension": "ROWS",
-                        "startIndex": user_row,
-                        "endIndex": user_row + 1
-                    }
-                }
-            }
-        ]
-    }
+    if user_row:
+        result = delete_row(row_to_delete=user_row, service=s, spreadsheet_id=spreadsheet_id)
 
-    try:
-        result = s.spreadsheets().batchUpdate(
-            spreadsheetId=sheet,
-            body=request_body
-        ).execute()
-        bot_logger.info(f"removed with id {u_id} at row {user_row}.")
-        return result
-    except HttpError as error:
-        bot_logger.error(f"An error occurred: {error}")
-        return error
+        bot_logger.info(f'Removed user with id{u_id} at row {user_row}')

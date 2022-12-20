@@ -1,22 +1,14 @@
-import json
 import os
 
 # import bot
 from flask import Flask, request, Response
-from viberbot import Api
-from viberbot.api.bot_configuration import BotConfiguration
 from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequest, ViberFailedRequest, \
     ViberConversationStartedRequest, ViberUnsubscribedRequest
 
 from bot import bot
-from bot.messages import msg_wellcome, msg_subbed, msg_unsubbed, \
-    msg_welcome_keyboard
+from bot.messages import msg_wellcome, msg_subbed
 from bot.users_info import add_new_user, remove_user
-from g_sheets.goog_service import get_goog_service
 from logger.logger import logging
-from scheduler import scheduler
-import data_collection
-from data_collection.actions import data_management
 
 # logger
 app_logger = logging.getLogger(__name__)
@@ -38,7 +30,6 @@ def incoming():
         return Response(status=403)
 
     viber_request = viber.parse_request(request.get_data())
-    # print(viber.get_account_info())
 
     if isinstance(viber_request, ViberMessageRequest):
         print(viber_request)
@@ -50,14 +41,12 @@ def incoming():
     elif isinstance(viber_request, ViberConversationStartedRequest):
         u = viber_request.user
         viber.send_messages(u.id, [
-            # TODO: localise messages
             msg_wellcome(u),
             # msg_welcome_keyboard()
         ])
     elif isinstance(viber_request, ViberSubscribedRequest):
         # register user
         add_new_user(viber_request.user)
-
         viber.send_messages(viber_request.user.id, [
             msg_subbed(viber_request.user)
         ])
@@ -76,4 +65,4 @@ if __name__ == '__main__':
     # users = viber.get_online()
     # viber.send_messages(to=users, messages=[TextMessage(text='sample')])
     app.run(debug=True, host='localhost', port=8080)
-    # viber.set_webhook('https://a424-151-251-246-195.eu.ngrok.io')
+    # viber.set_webhook('https://77c2-151-251-241-122.eu.ngrok.io')

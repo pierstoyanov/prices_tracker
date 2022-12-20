@@ -78,7 +78,8 @@ def find_row_of_item_in_sheet(item: str, col: str, service, spreadsheet_id: str,
                                        value_render_option='UNFORMATTED_VALUE',
                                        date_time_render_option='SERIAL_NUMBER')
         print(result)
-        return result
+        result_value = result['values'][0][0]
+        return result_value if isinstance(result_value, int) else None
     except HttpError as error:
         goog_logger.warning(f"An error occurred {error.error_details}")
         return error
@@ -113,4 +114,32 @@ def update_values_in_sheet(service, values: list, spreadsheet_id: str,
         return result
     except HttpError as error:
         goog_logger.warning(f"An error occurred {error.error_details}")
+        return error
+
+
+def delete_row(spreadsheet_id: str, service, row_to_delete: int, sheet_id: int = 0):
+    request_body = {
+        "requests": [
+            {
+                "deleteDimension": {
+                    "range": {
+                        "sheetId": sheet_id,
+                        "dimension": "ROWS",
+                        "startIndex": row_to_delete,
+                        "endIndex": row_to_delete + 1
+                    }
+                }
+            }
+        ]
+    }
+
+    try:
+        result = service.spreadsheets().batchUpdate(
+            spreadsheetId=spreadsheet_id,
+            body=request_body
+        ).execute()
+        goog_logger.info(f"removed row {row_to_delete}.")
+        return result
+    except HttpError as error:
+        goog_logger.error(f"An error occurred: {error}")
         return error

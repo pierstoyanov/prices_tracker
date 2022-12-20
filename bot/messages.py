@@ -1,5 +1,6 @@
 from viberbot.api.messages import TextMessage, KeyboardMessage
 
+# TODO: localise messages
 keyboard = {
     "Type": "keyboard",
     "Buttons": [{
@@ -20,7 +21,7 @@ keyboard = {
 
 def msg_wellcome(u):
     return TextMessage(
-        text=f"Добре дошли, {u.name}!\nЗа да се абонираш за бота, отговори на това съобщение със случаен текст.")
+        text=f"Здравей, {u.name}!\nЗа да се абонираш за бота, отговори на това съобщение със случаен текст.")
 
 
 def msg_welcome_keyboard():
@@ -29,7 +30,7 @@ def msg_welcome_keyboard():
 
 def msg_subbed(u):
     return TextMessage(
-        text=f"{u.name}, thanks for subscribing!")
+        text=f"{u.name},\nБлагодаря за абонамента!")
 
 
 def msg_unsubbed():

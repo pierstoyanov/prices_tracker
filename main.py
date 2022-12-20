@@ -6,6 +6,7 @@ from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequ
     ViberConversationStartedRequest, ViberUnsubscribedRequest
 
 from bot import bot
+from bot.bot import copper
 from bot.messages import msg_wellcome, msg_subbed
 from bot.users_info import add_new_user, remove_user
 from logger.logger import logging
@@ -65,4 +66,4 @@ if __name__ == '__main__':
     # users = viber.get_online()
     # viber.send_messages(to=users, messages=[TextMessage(text='sample')])
     app.run(debug=True, host='localhost', port=8080)
-    # viber.set_webhook('https://77c2-151-251-241-122.eu.ngrok.io')
+    viber.set_webhook('')

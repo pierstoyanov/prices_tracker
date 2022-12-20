@@ -36,3 +36,8 @@ def msg_subbed(u):
 def msg_unsubbed():
     return TextMessage(
         text=f"Успешно отписване!")
+
+
+def daly_info():
+    text = ''
+

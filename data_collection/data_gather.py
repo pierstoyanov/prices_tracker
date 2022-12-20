@@ -41,7 +41,7 @@ def get_url_contents(url: str, load_state=None, wait_selector=None, screenshot=F
     return soup
 
 
-def get_click_url_contents(url: str, load_state=None, wait_selector=None, click_locators=[], screenshot=False, pdf=False):
+def get_click_url_contents(url: str, load_state=None, wait_selector=None, click_locators=list(), screenshot=False, pdf=False):
     with sync_playwright() as p:
         browser, page = new_page_browser(p)
         page.goto(url)

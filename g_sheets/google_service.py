@@ -2,10 +2,10 @@ from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from g_sheets.g_api import goog_logger
+from g_sheets.google_api_operations import goog_logger
 
 
-def get_goog_service(service_acc_file):
+def build_google_service(service_acc_file):
     scopes = ['https://www.googleapis.com/auth/spreadsheets',
               'https://www.googleapis.com/auth/drive']
     try:

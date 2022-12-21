@@ -157,26 +157,9 @@ def get_last_row_values(service, spreadsheet_id: str,
         goog_logger.warning(f"ERR: {error.error_details}")
         return error
 
-# TODO
-def get_multiple_last_row_values(service, spreadsheet_id: str,
-                        sheet_names: list,
-                        value_input_option: ValueInputOptionLiterals = "USER_ENTERED",
-                        sheet_id: int = 0,
-                        start_col: str = 'A', end_col: str = 'D', ):
-    last_row: int = get_last_row_num(service=service, spreadsheet_id=spreadsheet_id,
-                                value_input_option=value_input_option,
-                                sheet_id=sheet_id)
-    # get last row data
-    try:
-        result = service.spreadsheets().values().get(
-            spreadsheetId=spreadsheet_id,
-            range=f'{sheet_name}!{start_col}{last_row}:{end_col}{last_row}'
-        ).execute()
-        return result
-    except HttpError as error:
-        goog_logger.warning(f"ERR: {error.error_details}")
-        return error
 
+def get_multiple_ranges():
+    pass
 
 
 def update_values_in_sheet(service, values: list, spreadsheet_id: str,

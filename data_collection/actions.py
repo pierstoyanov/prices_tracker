@@ -69,7 +69,8 @@ def data_management():
     # ag
     # ag_wait = "td[class=-index0]"
     ag_click = ['div.metals-dropdown li', 'ul.dropdown-menu >> text=Silver']
-    scrape_data_and_store(client=client, url=os.environ["URL_TWO"], load_state=load_states[2],
+    scrape_data_and_store(client=client, url=os.environ["URL_TWO"],
+                          load_state=load_states[2], click=ag_click,
                           soup_to_data=ag_soup_to_data, store_to_page='silver')
 
 

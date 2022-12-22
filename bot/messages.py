@@ -1,22 +1,7 @@
-from viberbot.api.messages import TextMessage, KeyboardMessage
+import os
 
-# TODO: localise messages
-keyboard = {
-    "Type": "keyboard",
-    "Buttons": [{
-        "Columns": 6,
-        "Rows": 1,
-        "BgColor": "#2db9b9",
-        "ActionType": "reply",
-        "ActionBody": "Успешно се абонирахте за pspricesbot!",
-        "Text": "Абониране",
-        "TextVAlign": "middle",
-        "TextHAlign": "center",
-        "TextOpacity": 60,
-        "TextSize": "regular"
-        }
-    ]
-}
+from viberbot.api.messages import TextMessage, KeyboardMessage
+from bot.keyboards import keyboard, welcome_keyboard
 
 
 def msg_wellcome(u):
@@ -25,6 +10,10 @@ def msg_wellcome(u):
 
 
 def msg_welcome_keyboard():
+    return KeyboardMessage(tracking_data='tracking_data', keyboard=welcome_keyboard)
+
+
+def msg_user_keyboard():
     return KeyboardMessage(tracking_data='tracking_data', keyboard=keyboard)
 
 
@@ -38,6 +27,5 @@ def msg_unsubbed():
         text=f"Успешно отписване!")
 
 
-def daly_info():
-    text = ''
-
+def msg_text(text: str):
+    return TextMessage(text=text)

@@ -14,7 +14,8 @@ def build_google_service(service_acc_file):
             scopes=scopes
         )
 
-        service = build('sheets', 'v4', credentials=creds)
+        service = build('sheets', 'v4', credentials=creds,
+                        cache_discovery=False)
 
         return service
 

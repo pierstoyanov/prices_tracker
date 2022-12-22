@@ -3,7 +3,7 @@ from viberbot import Api
 from viberbot.api.bot_configuration import BotConfiguration
 from viberbot.api.messages import TextMessage, RichMediaMessage
 
-from g_sheets.google_api_operations import get_last_row_values
+from g_sheets.google_api_operations import get_last_row_values, get_multiple_named_ranges
 from logger.logger import logging
 from g_sheets.google_service import build_google_service
 
@@ -29,11 +29,10 @@ viber = Api(bot_configuration)
 text_message = TextMessage(text='Sample msg!')
 
 # daily_data
-spreadsheet_id = os.environ['SPREADSHEET_DATA']
-copper = get_last_row_values(service=sheets_service,
-                             spreadsheet_id=spreadsheet_id,
-                             sheet_name='copper').get('values')
-silver = get_last_row_values(service=sheets_service,
-                             spreadsheet_id=spreadsheet_id,
-                             sheet_name='silver',
-                             end_col='B')
+# spreadsheet_id = os.environ['SPREADSHEET_DATA']
+# ranges = ['cudaly', 'cuwmdaly', 'audaly', 'agdaly']
+# daly_data = get_multiple_named_ranges(service=sheets_service, spreadsheet_id=spreadsheet_id,
+#                                       named_ranges=ranges,
+#                                       value_render_option='UNFORMATTED_VALUE',
+#                                       date_time_render_option='FORMATTED_STRING'
+#                                       ).get('valueRanges')

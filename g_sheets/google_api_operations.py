@@ -144,8 +144,8 @@ def get_last_row_values(service, spreadsheet_id: str,
                         sheet_id: int = 0,
                         start_col: str = 'A', end_col: str = 'D', ):
     last_row: int = get_last_row_num(service=service, spreadsheet_id=spreadsheet_id,
-                                value_input_option=value_input_option,
-                                sheet_id=sheet_id)
+                                     value_input_option=value_input_option,
+                                     sheet_id=sheet_id)
     # get last row data
     try:
         result = service.spreadsheets().values().get(
@@ -158,19 +158,30 @@ def get_last_row_values(service, spreadsheet_id: str,
         return error
 
 
-def get_multiple_ranges():
-    pass
+def get_multiple_named_ranges(service, spreadsheet_id: str, named_ranges: list,
+                              value_render_option: ValueRenderOptionLiterals,
+                              date_time_render_option: DateTimeRenderOptionLiterals):
+    try:
+        result = service.spreadsheets().values().batchGet(
+            spreadsheetId=spreadsheet_id,
+            ranges=named_ranges,
+            valueRenderOption=value_render_option,
+            dateTimeRenderOption=date_time_render_option).execute()
+        goog_logger.info(f'successfully extracted data: {result.get("valueRanges")}')
+        return result
+    except HttpError as error:
+        goog_logger.warning(f"Error: {error.error_details}")
+        return error
 
 
 def update_values_in_sheet(service, values: list, spreadsheet_id: str,
-                           range_name: str, value_input_option: ValueInputOptionLiterals,
-                           sheet_id: int = 0):
+                           range_name: str, value_input_option: ValueInputOptionLiterals):
     try:
         body = {
             'values': values
         }
         result = service.spreadsheets().values().update(
-            spreadsheetId=spreadsheet_id, sheetId=sheet_id, range=range_name,
+            spreadsheetId=spreadsheet_id, range=range_name,
             valueInputOption=value_input_option,
             body=body).execute()
         goog_logger.info(f"{result.get('updatedCells')} cells updated.")
@@ -180,7 +191,8 @@ def update_values_in_sheet(service, values: list, spreadsheet_id: str,
         return error
 
 
-def delete_row(service, spreadsheet_id: str, row_to_delete: int, sheet_id: int = 0):
+def delete_row(service, spreadsheet_id: str,
+               row_to_delete: int, sheet_id: int = 0):
     request_body = {
         "requests": [
             {
@@ -199,7 +211,6 @@ def delete_row(service, spreadsheet_id: str, row_to_delete: int, sheet_id: int =
     try:
         result = service.spreadsheets().batchUpdate(
             spreadsheetId=spreadsheet_id,
-            sheetId=sheet_id,
             body=request_body
         ).execute()
         goog_logger.info(f"removed row {row_to_delete}.")

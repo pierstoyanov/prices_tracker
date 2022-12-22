@@ -29,9 +29,9 @@ def build_daly_info():
     chart, dollar, callendar = '\U0001F4C8', '\U0001F4B2', '\U0001F4C5'
     date = c['Date']
     text = f'{date_status}{callendar} Date: {date} \n'
-    text += f'{chart}Cu\nBid: *{c["Bid"]:,.2f}{dollar}*\nOffer: *{c["Offer"]:,.2f}{dollar}*\nStock: *{c["Stock"]:,}*\n'
+    text += f'{chart}Cu\nBid: *{c["Bid"]:,.2f}{dollar}*\nOffer: *{c["Offer"]:,.2f}{dollar}*\nStock: *{c["Stock"]:}*\n'
     text += f'{chart}Au\nAM: *{au["Gold AM"]:,.3F}{dollar}*\nPM *{au["Gold PM"]:,.3F}{dollar}*\n' \
-            f'Average: *{au["Average"]:,.3F}{dollar}*\n'
+            f'Average: *{au["Average"]:.3F}{dollar}*\n'
     text += f'{chart}Ag\n*{ag["Silver"]:.4F}{dollar}*'
 
     # for i in daly_data:

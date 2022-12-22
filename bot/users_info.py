@@ -10,10 +10,11 @@ def get_users_id(service=sheets_service):
     try:
         result = service.spreadsheets().values().get(
             spreadsheetId=spreadsheet_id,
-            range='A:A'
+
+            range='C2:C'
         ).execute()
         bot_logger.info("Retrieved user id data")
-        return result.get('values', [])
+        return [item for sublist in result.get('values') for item in sublist]
 
     except HttpError as error:
         bot_logger.error(f"An error occurred: {error}")

@@ -5,13 +5,14 @@ from flask import Flask, request, Response
 from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequest, ViberFailedRequest, \
     ViberConversationStartedRequest, ViberUnsubscribedRequest
 
+import data_collection
 from bot import bot
 from bot.daly_data import build_daly_info
 from bot.messages import msg_wellcome, msg_subbed, msg_welcome_keyboard, msg_user_keyboard, msg_text
 from bot.users_info import add_new_user, remove_user, get_users_id
 from logger.logger import logging
 
-# from scheduler import scheduler
+from scheduler import scheduler
 
 # logger
 from scheduler.scheduler import send_daly_msg
@@ -25,16 +26,20 @@ app = Flask(__name__)
 viber = bot.viber
 
 # daly data
-# daly = build_daly_info()
+daly = build_daly_info()
 
 # users
-# users = get_users_id()
-# print(users)
+users = get_users_id()
+print(users)
 
 # scheduler
+scheduler.scheduler.add_job(lambda: data_collection.actions,
+                            scheduler.trigger)
+
+
 # scheduler.scheduler.add_job(lambda: send_daly_msg(
 #     viber, users, msg_text(daly)),
-#     scheduler.trigger_one)
+#     scheduler.trigger)
 
 
 # TODO apply gettext for localisation
@@ -96,4 +101,4 @@ if __name__ == '__main__':
     # users = viber.get_online()
     # viber.send_messages(to=users, messages=[TextMessage(text='sample')])
     app.run(debug=True, host='localhost', port=8080)
-    viber.set_webhook('')
+    # viber.set_webhook('')

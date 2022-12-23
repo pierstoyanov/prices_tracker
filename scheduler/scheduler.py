@@ -23,11 +23,11 @@ def send_daly_msg(viber, users, msg):
 
 
 scheduler = BackgroundScheduler()
-trigger = CronTrigger(day_of_week='mon-fri')
+trigger = CronTrigger(hour=10, second='40', day_of_week='mon-fri')
 trigger_one = CronTrigger(second='30')
 scheduler.start()
 scheduler.add_job(print_time,
-                  trigger=trigger_one)
+                  trigger=trigger)
 atexit.register(lambda: scheduler.shutdown())
 
 

@@ -13,10 +13,9 @@ from data_collection.actions import data_management
 from logger.logger import logging
 
 from scheduler import scheduler
-
-# logger
 from scheduler.scheduler import send_daly_msg
 
+# logger
 app_logger = logging.getLogger(__name__)
 
 # Flask
@@ -37,9 +36,9 @@ scheduler.scheduler.add_job(lambda: data_management(),
                             scheduler.trigger)
 
 
-# scheduler.scheduler.add_job(lambda: send_daly_msg(
-#     viber, users, msg_text(daly)),
-#     scheduler.trigger)
+scheduler.scheduler.add_job(lambda: send_daly_msg(
+    viber, users, msg_text(daly)),
+    scheduler.trigger)
 
 
 # TODO apply gettext for localisation
@@ -95,10 +94,8 @@ def incoming():
     return Response(status=200)
 
 
-if __name__ == '__main__':
-    # contex = ()
-    # ssl_context = context
-    # users = viber.get_online()
-    # viber.send_messages(to=users, messages=[TextMessage(text='sample')])
-    app.run(debug=True, host='localhost', port=8080)
-    # viber.set_webhook('')
+# if __name__ == '__main__':
+#     # contex = ()
+#     # ssl_context = context
+#     app.run(debug=True, host='localhost', port=8080)
+#     # viber.set_webhook('')

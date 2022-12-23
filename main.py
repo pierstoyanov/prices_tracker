@@ -5,11 +5,11 @@ from flask import Flask, request, Response
 from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequest, ViberFailedRequest, \
     ViberConversationStartedRequest, ViberUnsubscribedRequest
 
-import data_collection
 from bot import bot
 from bot.daly_data import build_daly_info
 from bot.messages import msg_wellcome, msg_subbed, msg_welcome_keyboard, msg_user_keyboard, msg_text
 from bot.users_info import add_new_user, remove_user, get_users_id
+from data_collection.actions import data_management
 from logger.logger import logging
 
 from scheduler import scheduler
@@ -33,7 +33,7 @@ users = get_users_id()
 print(users)
 
 # scheduler
-scheduler.scheduler.add_job(lambda: data_collection.actions,
+scheduler.scheduler.add_job(lambda: data_management(),
                             scheduler.trigger)
 
 

@@ -1,5 +1,4 @@
 import logging
-
 from logger.CustomFormatter import CustomFormatter
 
 # logger
@@ -9,8 +8,8 @@ console_format = '[%(levelname)s-%(name)s]: %(message)s'
 logging.basicConfig(
     level=logging.DEBUG,
     format=log_format,
-    filename='./log/debug.log',
-    filemode='a'
+    # filename='./log/debug.log',
+    # filemode='a'
 )
 
 console_logger = logging.StreamHandler()
@@ -27,6 +26,6 @@ client = google.cloud.logging.Client()
 
 # Retrieves a Cloud Logging handler based on the environment
 # you're running in and integrates the handler with the
-# Python logging module. By default this captures all logs
+# Python logging module. By default, this captures all logs
 # at INFO level and higher
 client.setup_logging()

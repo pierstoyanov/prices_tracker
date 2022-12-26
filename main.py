@@ -1,6 +1,3 @@
-import os
-
-# import bot
 from flask import Flask, request, Response
 from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequest, ViberFailedRequest, \
     ViberConversationStartedRequest, ViberUnsubscribedRequest
@@ -94,8 +91,9 @@ def incoming():
     return Response(status=200)
 
 
-# if __name__ == '__main__':
-#     # contex = ()
-#     # ssl_context = context
-#     app.run(debug=True, host='localhost', port=8080)
-#     # viber.set_webhook('')
+if __name__ == '__main__':
+    # contex = ()
+    # ssl_context = context
+    # app.run(debug=True, host='localhost', port=8080)
+    app.run()
+    # viber.set_webhook('https://metals-prices.lm.r.appspot.com/')

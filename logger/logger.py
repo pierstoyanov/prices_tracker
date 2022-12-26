@@ -2,7 +2,6 @@ import logging
 
 from logger.CustomFormatter import CustomFormatter
 
-
 # logger
 log_format = '[%(asctime)s-%(levelname)s-%(name)s]: %(message)s'
 console_format = '[%(levelname)s-%(name)s]: %(message)s'

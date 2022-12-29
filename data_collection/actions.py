@@ -73,7 +73,12 @@ def data_management():
                           load_state=load_states[2], click=ag_click,
                           soup_to_data=ag_soup_to_data, store_to_page='silver')
 
+    # # power
+    # scrape_data_and_store(client=client, url=os.environ["URL_FOUR"],
+    #                       load_state=load_states[2], soup_to_data=power_soup_to_data,
+    #                       store_to_page='power')
 
+# data_management()
 # Press the green button in the gutter to run the script.
 if __name__ == 'actions':
     data_management()

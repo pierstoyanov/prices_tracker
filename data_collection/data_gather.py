@@ -131,3 +131,7 @@ def ag_soup_to_data(soup: BeautifulSoup):
     date = datetime.strptime(row[0].text, '%d-%m-%Y').date().strftime('%d.%m.%Y')
     ag_price = repl_comma_dot(row[1].text)
     return date.__str__(), ag_price
+
+
+def power_soup_to_data(soup: BeautifulSoup):
+    value = soup.find('td', attrs={'data-cell-id': "H2"})

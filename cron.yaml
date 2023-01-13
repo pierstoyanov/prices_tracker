@@ -1,0 +1,6 @@
+cron:
+  - description: "send data to users"
+    url: /sendmsg
+    schedule: every mon, tue, wed, thu, fri 9:00
+    retry_parameters:
+      job_retry_limit: 0

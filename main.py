@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, request, Response
 from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequest, ViberFailedRequest, \
     ViberConversationStartedRequest, ViberUnsubscribedRequest
@@ -91,9 +93,33 @@ def incoming():
     return Response(status=200)
 
 
+@app.route('/collectdata', methods=['GET'])
+def get_data():
+    # check request header from GAE scheduler
+    job_name = os.environ['GATHER_JOB']
+    header_name = f'X-CloudScheduler-{job_name}'
+
+    if request.headers.get(header_name):
+        data_management()
+    else:
+        return Response(status=403)
+
+
+@app.route('/sendmsg', methods=['GET'])
+async def send_msg():
+    if request.headers.get('X-Appengine-Cron'):
+        count = len(users)
+        for u in users:
+            tokens = await viber.send_messages(u, [
+                msg_text(daly),
+                msg_user_keyboard()
+            ])
+            if tokens:
+                count -= 1
+        return Response(status=200)
+    return Response(status=400)
+
+
 if __name__ == '__main__':
-    # contex = ()
-    # ssl_context = context
     # app.run(debug=True, host='localhost', port=8080)
     app.run()
-    # viber.set_webhook('https://metals-prices.lm.r.appspot.com/')

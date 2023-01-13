@@ -11,7 +11,7 @@ from logger.logger import logging
 # playwright load states
 load_states = ['load', 'domcontentloaded', 'networkidle']
 
-# crate local log
+# create local log
 data_logger = logging.getLogger('data_collection.actions')
 
 
@@ -78,7 +78,7 @@ def data_management():
     #                       load_state=load_states[2], soup_to_data=power_soup_to_data,
     #                       store_to_page='power')
 
-# data_management()
+
 # Press the green button in the gutter to run the script.
-if __name__ == 'actions':
+if __name__ == '__main__':
     data_management()

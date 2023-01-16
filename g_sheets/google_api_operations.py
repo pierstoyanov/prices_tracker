@@ -19,8 +19,7 @@ InsertDataOptionLiterals = Literal['OVERWRITE', 'INSERT_ROWS']
 def append_values(service, spreadsheet_id: str, range_name: str,
                   value_input_option: ValueInputOptionLiterals,
                   values: list,
-                  insert_data_option: InsertDataOptionLiterals = 'INSERT_ROWS',
-                  sheet_id: int = 0):
+                  insert_data_option: InsertDataOptionLiterals = 'INSERT_ROWS'):
     try:
         body = {
             'values': values
@@ -126,8 +125,7 @@ def get_last_row_num(service, spreadsheet_id: str,
             service=service, spreadsheet_id=spreadsheet_id,
             range_name=f'{sheet_name}!{start_col}:{end_col}',
             value_input_option=value_input_option,
-            values=values,
-            sheet_id=sheet_id)
+            values=values)
         goog_logger.info(f"added empty row to table {sheet_name}.")
 
         # get last row num from result
@@ -145,7 +143,7 @@ def get_last_row_values(service, spreadsheet_id: str,
                         start_col: str = 'A', end_col: str = 'D', ):
     last_row: int = get_last_row_num(service=service, spreadsheet_id=spreadsheet_id,
                                      value_input_option=value_input_option,
-                                     sheet_id=sheet_id)
+                                     sheet_id=sheet_id, sheet_name=sheet_name)
     # get last row data
     try:
         result = service.spreadsheets().values().get(

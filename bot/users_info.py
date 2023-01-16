@@ -29,11 +29,12 @@ def add_new_user(new_user, service=sheets_service):
             'values': vals
         }
         try:
-            service.spreadsheets().values().append(spreadsheetId=spreadsheet_id,
-                                                   valueInputOption="USER_ENTERED",
-                                                   range="A1:L1",
-                                                   body=body).execute()
+            result = service.spreadsheets().values().append(spreadsheetId=spreadsheet_id,
+                                                            valueInputOption="USER_ENTERED",
+                                                            range="A1:L1",
+                                                            body=body).execute()
             bot_logger.info(f"User {new_user.name} with id {new_user.id} added.")
+            return result
         except HttpError as error:
             bot_logger.error(f"An error occurred: {error}")
             return error
@@ -46,7 +47,12 @@ def remove_user(u_id, s=sheets_service):
         item=u_id, col="C", service=s, spreadsheet_id=spreadsheet_id)
     print(user_row)
     if user_row:
-        result = delete_row(row_to_delete=user_row,
-                            service=s,
-                            spreadsheet_id=spreadsheet_id)
-        bot_logger.info(f'Removed user with id{u_id} at row {user_row}')
+        try:
+            result = delete_row(row_to_delete=user_row,
+                                service=s,
+                                spreadsheet_id=spreadsheet_id)
+            bot_logger.info(f'Removed user with id{u_id} at row {user_row}')
+            return result
+        except HttpError as error:
+            bot_logger.error(f"An error occurred: {error}")
+            return error

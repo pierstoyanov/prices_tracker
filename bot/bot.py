@@ -1,9 +1,8 @@
 import os
 from viberbot import Api
 from viberbot.api.bot_configuration import BotConfiguration
-from viberbot.api.messages import TextMessage, RichMediaMessage
+from viberbot.api.messages import TextMessage
 
-from g_sheets.google_api_operations import get_last_row_values, get_multiple_named_ranges
 from logger.logger import logging
 from g_sheets.google_service import build_google_service
 

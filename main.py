@@ -6,13 +6,13 @@ from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequ
 
 from bot import bot
 from bot.daly_data import build_daly_info
-from bot.messages import msg_wellcome, msg_subbed, msg_welcome_keyboard, msg_user_keyboard, msg_text
+from bot.messages import msg_subbed, msg_welcome_keyboard, msg_user_keyboard, msg_text
 from bot.users_info import add_new_user, remove_user, get_users_id
 from data_collection.actions import data_management
 from logger.logger import logging
 
-from scheduler import scheduler
-from scheduler.scheduler import send_daly_msg
+# from scheduler import scheduler
+# from scheduler.scheduler import send_daly_msg
 
 # logger
 app_logger = logging.getLogger(__name__)
@@ -30,14 +30,14 @@ daly = build_daly_info()
 users = get_users_id()
 print(users)
 
-# scheduler
-scheduler.scheduler.add_job(lambda: data_management(),
-                            scheduler.trigger)
-
-
-scheduler.scheduler.add_job(lambda: send_daly_msg(
-    viber, users, msg_text(daly)),
-    scheduler.trigger)
+# # scheduler
+# scheduler.scheduler.add_job(lambda: data_management(),
+#                             scheduler.trigger)
+#
+#
+# scheduler.scheduler.add_job(lambda: send_daly_msg(
+#     viber, users, msg_text(daly)),
+#     scheduler.trigger)
 
 
 # TODO apply gettext for localisation
@@ -97,10 +97,11 @@ def incoming():
 def get_data():
     # check request header from GAE scheduler
     job_name = os.environ['GATHER_JOB']
-    header_name = f'X-CloudScheduler-{job_name}'
+    header_name = f'X-CloudScheduler-JobName'
 
-    if request.headers.get(header_name):
+    if request.headers.get('X-CloudScheduler-JobName') == job_name:
         data_management()
+        return Response(status=200)
     else:
         return Response(status=403)
 

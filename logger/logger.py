@@ -1,6 +1,9 @@
 import logging
 from logger.CustomFormatter import CustomFormatter
 
+# Imports the Cloud Logging client library
+import google.cloud.logging
+
 # logger
 log_format = '[%(asctime)s-%(levelname)s-%(name)s]: %(message)s'
 console_format = '[%(levelname)s-%(name)s]: %(message)s'
@@ -17,9 +20,6 @@ console_logger.setLevel(logging.DEBUG)
 console_logger.setFormatter(CustomFormatter())
 logging.getLogger('').addHandler(console_logger)
 
-
-# Imports the Cloud Logging client library
-import google.cloud.logging
 
 # Instantiates a client
 client = google.cloud.logging.Client()

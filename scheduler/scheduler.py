@@ -1,10 +1,10 @@
 import time
-import atexit
-
-import schedule
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
-from apscheduler.triggers.interval import IntervalTrigger
+# import atexit
+#
+# import schedule
+# from apscheduler.schedulers.background import BackgroundScheduler
+# from apscheduler.triggers.cron import CronTrigger
+# from apscheduler.triggers.interval import IntervalTrigger
 from logger.logger import logging
 
 # looger
@@ -22,8 +22,8 @@ def send_daly_msg(viber, users, msg):
         sch_log.info(token)
 
 
-scheduler = BackgroundScheduler()
-trigger = CronTrigger(hour=16, minute=30, day_of_week='mon-fri')
-trigger_one = CronTrigger(second='30')
-scheduler.start()
-atexit.register(lambda: scheduler.shutdown())
+# scheduler = BackgroundScheduler()
+# trigger = CronTrigger(hour=16, minute=30, day_of_week='mon-fri')
+# trigger_one = CronTrigger(second='30')
+# scheduler.start()
+# atexit.register(lambda: scheduler.shutdown())

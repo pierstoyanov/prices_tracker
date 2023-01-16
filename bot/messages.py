@@ -1,5 +1,3 @@
-import os
-
 from viberbot.api.messages import TextMessage, KeyboardMessage
 from bot.keyboards import keyboard, welcome_keyboard
 

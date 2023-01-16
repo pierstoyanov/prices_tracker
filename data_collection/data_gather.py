@@ -1,12 +1,10 @@
-import os
-
 from datetime import datetime
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright, Page
 
 
 def new_page_browser(p):
-    browser = p.chromium.launch()
+    browser = p.chromium.launch(headless=True)
     page = browser.new_page()
     return browser, page
 
@@ -41,7 +39,10 @@ def get_url_contents(url: str, load_state=None, wait_selector=None, screenshot=F
     return soup
 
 
-def get_click_url_contents(url: str, load_state=None, wait_selector=None, click_locators=list(), screenshot=False, pdf=False):
+def get_click_url_contents(url: str, load_state=None, wait_selector=None, click_locators=None,
+                           screenshot=False, pdf=False):
+    if click_locators is None:
+        click_locators = list()
     with sync_playwright() as p:
         browser, page = new_page_browser(p)
         page.goto(url)

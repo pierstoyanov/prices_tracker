@@ -81,30 +81,7 @@ def data_management():
     #                       store_to_page='power')
 
 
-def data_management_with_requests():
-    # gold_am_url = 'https://prices.lbma.org.uk/json/gold_am.json'
-    # gold_am = get_url_request_with_headers(gold_am_url, lbma_headers)
-
-    # gold_pm_url = 'https://prices.lbma.org.uk/json/gold_pm.json'
-    # gold_pm = get_url_request_with_headers(gold_pm_url, lbma_headers)
-
-    # silver_url = 'https://prices.lbma.org.uk/json/silver.json'
-    # silver = get_url_request_with_headers(silver_url, lbma_headers)
-
-    copper_url = 'https://www.lme.com/api/trading-data/day-delayed?datasourceId=762a3883-b0e1-4c18-b34b-fe97a1f2d3a5'
-
-
-    # print(gold_am)
-
-    # print(max(silver.json(), key=lambda k: k['d']))
-
-    copper = get_url_request_with_headers(copper_url, copper_headers)
-    cu_cash = copper.json().get('Rows')[0]
-    print(copper.json())
-
-
 # data_management_with_requests()
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    # data_management()
-    data_management_with_requests()
+    data_management()

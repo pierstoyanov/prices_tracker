@@ -40,10 +40,9 @@ app_logger.info(f'Users id\'s are: {users}')
 #     scheduler.trigger)
 
 
-# TODO apply gettext for localisation
 @app.route('/', methods=['POST'])
 def incoming():
-    app_logger.debug(f"received request. post data: {request}")
+    app_logger.debug(f"received request. headers: {request.headers} body: {request.get_data()}")
 
     # handle the request here
     if not viber.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')):
@@ -95,7 +94,7 @@ def incoming():
 
 @app.route('/collectdata', methods=['GET'])
 def get_data():
-    # check request header from GAE scheduler
+    # check GAE scheduler header
     job_name = os.environ['GATHER_JOB']
     header_name = f'X-CloudScheduler-JobName'
 
@@ -107,17 +106,20 @@ def get_data():
 
 
 @app.route('/sendmsg', methods=['GET'])
-async def send_msg():
+def send_msg():
+    # check GAE cron header
     if request.headers.get('X-Appengine-Cron'):
         count = len(users)
         for u in users:
-            tokens = await viber.send_messages(u, [
+            tokens = viber.send_messages(u, [
                 msg_text(daly),
                 msg_user_keyboard()
             ])
             if tokens:
                 count -= 1
-        return Response(status=200)
+
+        if count == 0:
+            return Response(status=200)
     return Response(status=400)
 
 

@@ -28,7 +28,7 @@ daly = build_daly_info()
 
 # users
 users = get_users_id()
-print(users)
+app_logger.info(f'Users id\'s are: {users}')
 
 # # scheduler
 # scheduler.scheduler.add_job(lambda: data_management(),

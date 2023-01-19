@@ -1,11 +1,13 @@
 import os
+from datetime import datetime
 from typing import Callable
 
+import requests
 from gspread import Client
 
 from data_collection.data_gather import get_url_contents, get_click_url_contents,\
     cu_soup_to_data, au_soup_to_data, ag_soup_to_data, wm_soup_to_data
-from data_collection.headers import lbma_headers, copper_headers
+from data_collection.headers import lmba_headers, lme_headers
 from data_collection.request_gather import get_url_request_with_headers
 from g_sheets.gspread import get_client, add_row_to_page
 from logger.logger import logging
@@ -29,8 +31,8 @@ def log_result(res):
         data_logger.info(f'Added row: {res}')
 
 
-def scrape_data_and_store(client: Client, url: str, soup_to_data: Callable, store_to_page: str,
-                          average_cols: str = None, click: list = None, wait: str = None, load_state: str = None):
+def playwright_scrape_and_store(client: Client, url: str, soup_to_data: Callable, store_to_page: str,
+                                average_cols: str = None, click: list = None, wait: str = None, load_state: str = None):
     try:
         if click:
             item_soup = get_click_url_contents(
@@ -49,31 +51,48 @@ def scrape_data_and_store(client: Client, url: str, soup_to_data: Callable, stor
         return e
 
 
+def request_json_scrape_and_store(client: Client, urls: list, headers: dict, json_to_input_data: Callable,
+                                  store_to_page: str, average_cols: str = None, ):
+    try:
+        data = []
+        for i in urls:
+            data.append(requests.get(url=i, headers=headers).json())
+
+        input_data = json_to_input_data
+
+        result = add_row_to_page(client=client, page=store_to_page, data=input_data, average_cols=average_cols)
+        log_result(result)
+
+    except Exception as e:
+        data_logger.info(f"Error occurred! {e}")
+        return e
+
+
 def data_management():
     # gspread client for data sheet
     client = get_client(os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
 
     # cu
     # cu_wait = 'td[class=data-set-table__main]'
-    scrape_data_and_store(client=client, url=os.environ["URL_ONE"], load_state=load_states[2],
-                          soup_to_data=cu_soup_to_data, store_to_page='copper')
+    playwright_scrape_and_store(client=client, url=os.environ["URL_ONE"], load_state=load_states[2],
+                                soup_to_data=cu_soup_to_data, store_to_page='copper')
 
     # wm
     # wm_wait = "div[class=year]"
-    scrape_data_and_store(client=client, url=os.environ["URL_THREE"], load_state=load_states[2],
-                          soup_to_data=wm_soup_to_data, store_to_page='copperwm')
+    playwright_scrape_and_store(client=client, url=os.environ["URL_THREE"], load_state=load_states[2],
+                                soup_to_data=wm_soup_to_data, store_to_page='copperwm')
 
     # au
     au_wait = "td[class=-index0]"
-    scrape_data_and_store(client=client, url=os.environ["URL_TWO"], wait=au_wait, load_state=load_states[2],
-                          soup_to_data=au_soup_to_data, store_to_page='gold', average_cols='B:C')
+    playwright_scrape_and_store(client=client, url=os.environ["URL_TWO"], wait=au_wait, load_state=load_states[2],
+                                soup_to_data=au_soup_to_data, store_to_page='gold', average_cols='B:C')
 
     # ag
     # ag_wait = "td[class=-index0]"
     ag_click = ['div.metals-dropdown li', 'ul.dropdown-menu >> text=Silver']
-    scrape_data_and_store(client=client, url=os.environ["URL_TWO"],
-                          load_state=load_states[2], click=ag_click,
-                          soup_to_data=ag_soup_to_data, store_to_page='silver')
+    playwright_scrape_and_store(client=client, url=os.environ["URL_TWO"],
+                                load_state=load_states[2], click=ag_click,
+                                soup_to_data=ag_soup_to_data, store_to_page='silver')
 
     # # power
     # scrape_data_and_store(client=client, url=os.environ["URL_FOUR"],
@@ -81,7 +100,34 @@ def data_management():
     #                       store_to_page='power')
 
 
+# TODO compare dates
+def cu_jsons_to_input(jsons: list):
+    c, stocks = jsons[0].get('Rows')
+    raw_date = c.get('BusinessDateTime').split('T')[0]
+    date = datetime.strptime(raw_date, "%Y-%b-%d").strftime('%d.%m.%Y')
+    bid, offer = c.get('Values')
+
+    stocks_date = stocks.c.get('BusinessDateTime').split('T')[0]
+
+    stock = stocks.get('Values')
+
+    return date, bid, offer, stock
+
+
 def data_management_with_requests():
+    # gspread client for data sheet
+    client = get_client(os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
+
+    # # Cu
+    # request_json_scrape_and_store(
+    #     client=client,
+    #     urls=[os.environ.get('CU_JSON_URL'), os.environ.get('CU_JSON_STOCK')],
+    #     headers=lme_headers,
+    #     json_to_input_data=cu_jsons_to_input,
+    #     store_to_page='copper'
+    #
+    # )
+
     # gold_am_url = 'https://prices.lbma.org.uk/json/gold_am.json'
     # gold_am = get_url_request_with_headers(gold_am_url, lbma_headers)
 
@@ -98,7 +144,7 @@ def data_management_with_requests():
 
     # print(max(silver.json(), key=lambda k: k['d']))
 
-    copper = get_url_request_with_headers(copper_url, copper_headers)
+    copper = get_url_request_with_headers(copper_url, lme_headers)
     cu_cash = copper.json().get('Rows')[0]
     print(copper.json())
 

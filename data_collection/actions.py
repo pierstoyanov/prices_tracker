@@ -8,7 +8,8 @@ from gspread import Client
 from data_collection.data_gather import get_url_contents, get_click_url_contents,\
     cu_soup_to_data, au_soup_to_data, ag_soup_to_data, wm_soup_to_data
 from data_collection.headers import lmba_headers, lme_headers
-from data_collection.request_gather import get_url_request_with_headers
+from data_collection.request_gather import cu_jsons_to_input, au_json_to_input, \
+    ag_json_to_input
 from g_sheets.gspread import get_client, add_row_to_page
 from logger.logger import logging
 
@@ -31,8 +32,11 @@ def log_result(res):
         data_logger.info(f'Added row: {res}')
 
 
-def playwright_scrape_and_store(client: Client, url: str, soup_to_data: Callable, store_to_page: str,
-                                average_cols: str = None, click: list = None, wait: str = None, load_state: str = None):
+def playwright_scrape_and_store(client: Client, url: str, soup_to_data: Callable,
+                                store_to_page: str, average_cols: str = None,
+                                click: list = None, wait: str = None, load_state: str = None):
+    """ Function to open url with playwright, execute actions on the page, use data gathering fn
+     and send the result to the store"""
     try:
         if click:
             item_soup = get_click_url_contents(
@@ -51,14 +55,18 @@ def playwright_scrape_and_store(client: Client, url: str, soup_to_data: Callable
         return e
 
 
-def request_json_scrape_and_store(client: Client, urls: list, headers: dict, json_to_input_data: Callable,
-                                  store_to_page: str, average_cols: str = None, ):
+def request_json_and_store(client: Client, urls: list, headers: dict, json_to_input_fn: Callable,
+                           store_to_page: str, average_cols: str = None, ):
+    """ Function to call requests to listed urls, execute data gathering fn on response
+     and send the data to the store"""
     try:
         data = []
         for i in urls:
-            data.append(requests.get(url=i, headers=headers).json())
+            response = requests.get(url=i, headers=headers)
+            log_data(response, i)
+            data.append(response.json())
 
-        input_data = json_to_input_data
+        input_data = json_to_input_fn(data)
 
         result = add_row_to_page(client=client, page=store_to_page, data=input_data, average_cols=average_cols)
         log_result(result)
@@ -69,6 +77,7 @@ def request_json_scrape_and_store(client: Client, urls: list, headers: dict, jso
 
 
 def data_management():
+    """Main fn that executes all data collection with playwright"""
     # gspread client for data sheet
     client = get_client(os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
 
@@ -100,56 +109,39 @@ def data_management():
     #                       store_to_page='power')
 
 
-# TODO compare dates
-def cu_jsons_to_input(jsons: list):
-    c, stocks = jsons[0].get('Rows')
-    raw_date = c.get('BusinessDateTime').split('T')[0]
-    date = datetime.strptime(raw_date, "%Y-%b-%d").strftime('%d.%m.%Y')
-    bid, offer = c.get('Values')
-
-    stocks_date = stocks.c.get('BusinessDateTime').split('T')[0]
-
-    stock = stocks.get('Values')
-
-    return date, bid, offer, stock
-
-
 def data_management_with_requests():
+    """Main fn that executes all data gather with requests"""
     # gspread client for data sheet
     client = get_client(os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
 
-    # # Cu
-    # request_json_scrape_and_store(
-    #     client=client,
-    #     urls=[os.environ.get('CU_JSON_URL'), os.environ.get('CU_JSON_STOCK')],
-    #     headers=lme_headers,
-    #     json_to_input_data=cu_jsons_to_input,
-    #     store_to_page='copper'
-    #
-    # )
+    # Cu
+    request_json_and_store(
+        client=client,
+        urls=[os.environ.get('CU_JSON_URL'), os.environ.get('CU_JSON_STOCK')],
+        headers=lme_headers,
+        json_to_input_fn=cu_jsons_to_input,
+        store_to_page='copper'
+    )
 
-    # gold_am_url = 'https://prices.lbma.org.uk/json/gold_am.json'
-    # gold_am = get_url_request_with_headers(gold_am_url, lbma_headers)
+    # Au
+    request_json_and_store(
+        client=client,
+        urls=[os.environ.get('AU_AM_JSON'), os.environ.get('AU_PM_JSON')],
+        headers=lmba_headers,
+        json_to_input_fn=au_json_to_input,
+        store_to_page='gold'
+    )
 
-    # gold_pm_url = 'https://prices.lbma.org.uk/json/gold_pm.json'
-    # gold_pm = get_url_request_with_headers(gold_pm_url, lbma_headers)
-
-    # silver_url = 'https://prices.lbma.org.uk/json/silver.json'
-    # silver = get_url_request_with_headers(silver_url, lbma_headers)
-
-    copper_url = 'https://www.lme.com/api/trading-data/day-delayed?datasourceId=762a3883-b0e1-4c18-b34b-fe97a1f2d3a5'
-
-
-    # print(gold_am)
-
-    # print(max(silver.json(), key=lambda k: k['d']))
-
-    copper = get_url_request_with_headers(copper_url, lme_headers)
-    cu_cash = copper.json().get('Rows')[0]
-    print(copper.json())
+    # Ag
+    request_json_and_store(
+        client=client,
+        urls=[os.environ.get('AG_JSON')],
+        headers=lmba_headers,
+        json_to_input_fn=ag_json_to_input,
+        store_to_page='silver'
+    )
 
 
-# data_management_with_requests()
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     # data_management()

@@ -8,7 +8,7 @@ from bot import bot
 from bot.daly_data import build_daly_info
 from bot.messages import msg_subbed, msg_welcome_keyboard, msg_user_keyboard, msg_text
 from bot.users_info import add_new_user, remove_user, get_users_id
-from data_collection.actions import data_management
+from data_collection.actions import data_management, data_management_with_requests
 from logger.logger import logging
 
 # from scheduler import scheduler
@@ -99,7 +99,7 @@ def get_data():
     header_name = f'X-CloudScheduler-JobName'
 
     if request.headers.get('X-CloudScheduler-JobName') == job_name:
-        data_management()
+        data_management_with_requests()
         return Response(status=200)
     else:
         return Response(status=403)
@@ -117,7 +117,6 @@ def send_msg():
             ])
             if tokens:
                 count -= 1
-
         if count == 0:
             return Response(status=200)
     return Response(status=400)

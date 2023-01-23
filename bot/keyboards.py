@@ -16,7 +16,7 @@ keyboard = {
             "TextSize": "regular"
         },
         {
-            "Columns": 3,
+            "Columns": 2,
             "Rows": 1,
             "Text": "<font color=#323232><b>LMA</b></font>",
             "ActionType": "open-url",
@@ -26,11 +26,41 @@ keyboard = {
             "TextHAlign": "left"
         },
         {
-            "Columns": 3,
+            "Columns": 2,
             "Rows": 1,
             "Text": "<font color=#323232><b>LBMA</b></font>",
             "ActionType": "open-url",
             "ActionBody": os.environ.get('URL_TWO'),
+            "TextSize": "medium",
+            "TextVAlign": "middle",
+            "TextHAlign": "left"
+        },
+        {
+            "Columns": 2,
+            "Rows": 1,
+            "Text": "<font color=#323232><b>Westmetal</b></font>",
+            "ActionType": "open-url",
+            "ActionBody": os.environ.get('URL_THREE'),
+            "TextSize": "medium",
+            "TextVAlign": "middle",
+            "TextHAlign": "left"
+        },
+        {
+            "Columns": 3,
+            "Rows": 1,
+            "Text": "<font color=#323232><b>BNB</b></font>",
+            "ActionType": "open-url",
+            "ActionBody": os.environ.get('URL_FOUR'),
+            "TextSize": "medium",
+            "TextVAlign": "middle",
+            "TextHAlign": "left"
+        },
+        {
+            "Columns": 3,
+            "Rows": 1,
+            "Text": "<font color=#323232><b>IBEX</b></font>",
+            "ActionType": "open-url",
+            "ActionBody": os.environ.get('URL_FIVE'),
             "TextSize": "medium",
             "TextVAlign": "middle",
             "TextHAlign": "left"

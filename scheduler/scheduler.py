@@ -25,4 +25,13 @@
 # trigger = CronTrigger(hour=16, minute=30, day_of_week='mon-fri')
 # trigger_one = CronTrigger(second='30')
 # scheduler.start()
+
+# # scheduler
+# scheduler.add_job(lambda: data_management(),
+#                             scheduler.trigger)
+#
+# scheduler.add_job(lambda: send_daly_msg(
+#     viber, users, msg_text(daly)),
+#     scheduler.trigger)
+
 # atexit.register(lambda: scheduler.shutdown())

@@ -8,11 +8,8 @@ from bot import bot
 from bot.daly_data import build_daly_info
 from bot.messages import msg_subbed, msg_welcome_keyboard, msg_user_keyboard, msg_text
 from bot.users_info import add_new_user, remove_user, get_users_id
-from data_collection.actions import data_management, data_management_with_requests
+from data_collection.actions import data_management_with_requests
 from logger.logger import logging
-
-# from scheduler import scheduler
-# from scheduler.scheduler import send_daly_msg
 
 # logger
 app_logger = logging.getLogger(__name__)
@@ -23,26 +20,10 @@ app = Flask(__name__)
 # viber bot
 viber = bot.viber
 
-# daly data
-daly = build_daly_info()
-
-# users
-users = get_users_id()
-app_logger.info(f'Users id\'s are: {users}')
-
-# # scheduler
-# scheduler.scheduler.add_job(lambda: data_management(),
-#                             scheduler.trigger)
-#
-#
-# scheduler.scheduler.add_job(lambda: send_daly_msg(
-#     viber, users, msg_text(daly)),
-#     scheduler.trigger)
-
 
 @app.route('/', methods=['POST'])
 def incoming():
-    app_logger.debug(f"received request. headers: {request.headers} body: {request.get_data()}")
+    app_logger.debug(f"received request. {request}")
 
     # handle the request here
     if not viber.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')):
@@ -51,7 +32,6 @@ def incoming():
     viber_request = viber.parse_request(request.get_data())
 
     if isinstance(viber_request, ViberMessageRequest):
-        # print(viber_request)
         message = viber_request.message.text
         if message == 'Абониране':
             add_new_user(viber_request.user)
@@ -61,6 +41,9 @@ def incoming():
                 msg_user_keyboard()
             ])
         elif message == "dalydata":
+            # daly data
+            daly = build_daly_info()
+
             viber.send_messages(viber_request.sender.id, [
                 msg_text(daly),
                 msg_user_keyboard()
@@ -107,6 +90,13 @@ def get_data():
 
 @app.route('/sendmsg', methods=['GET'])
 def send_msg():
+    # users
+    users = get_users_id()
+    app_logger.info(f'Users id\'s are: {users}')
+
+    # daly data
+    daly = build_daly_info()
+
     # check GAE cron header
     if request.headers.get('X-Appengine-Cron'):
         count = len(users)

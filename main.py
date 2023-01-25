@@ -8,7 +8,8 @@ from bot import bot
 from bot.daly_data import build_daly_info
 from bot.messages import msg_subbed, msg_welcome_keyboard, msg_user_keyboard, msg_text
 from bot.users_info import add_new_user, remove_user, get_users_id
-from data_collection.actions import data_management_with_requests
+from data_collection.act_requests import data_management_with_requests
+
 from logger.logger import logging
 
 # logger
@@ -113,5 +114,5 @@ def send_msg():
 
 
 if __name__ == '__main__':
-    # app.run(debug=True, host='localhost', port=8080)
+    app.run(debug=True, host='localhost', port=8080)
     app.run()

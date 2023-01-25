@@ -26,12 +26,3 @@ viber = Api(bot_configuration)
 
 # messages
 text_message = TextMessage(text='Sample msg!')
-
-# daily_data
-# spreadsheet_id = os.environ['SPREADSHEET_DATA']
-# ranges = ['cudaly', 'cuwmdaly', 'audaly', 'agdaly']
-# daly_data = get_multiple_named_ranges(service=sheets_service, spreadsheet_id=spreadsheet_id,
-#                                       named_ranges=ranges,
-#                                       value_render_option='UNFORMATTED_VALUE',
-#                                       date_time_render_option='FORMATTED_STRING'
-#                                       ).get('valueRanges')

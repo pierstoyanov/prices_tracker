@@ -20,10 +20,11 @@ logging.basicConfig(
 
 # if not app engine environment add console logger, else add goog logger
 if not os.environ.get('IS_APPENGINE') == 'True':
-    console_logger = logging.StreamHandler()
-    console_logger.setLevel(logging.DEBUG)
-    console_logger.setFormatter(CustomFormatter())
-    logging.getLogger('').addHandler(console_logger)
+    # console_logger = logging.StreamHandler()
+    # console_logger.setLevel(logging.DEBUG)
+    # console_logger.setFormatter(CustomFormatter())
+    # logging.getLogger('').addHandler(console_logger)
+    pass
 else:
     # Instantiates a client
     client = google.cloud.logging.Client()

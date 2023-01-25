@@ -1,4 +1,5 @@
 from datetime import datetime
+from functools import wraps
 
 import requests
 
@@ -7,8 +8,7 @@ def cu_jsons_to_input(jsons: list):
     prices, three_mo = jsons[0].get('Rows')[0], jsons[0].get('Rows')[1],
     raw_date = prices.get('BusinessDateTime').split('T')[0]
     date = datetime.strptime(raw_date, "%Y-%m-%d").strftime('%d.%m.%Y')
-    bid, offer = prices.get('Values')
-    bid_tmo, offer_tmo = three_mo.get('Values')
+    offer, offer_tmo = prices.get('Values')[1], three_mo.get('Values')[1]
 
     stocks = jsons[1].get('Rows')[0]
     stocks_date = stocks.get('BusinessDateTime').split('T')[0]
@@ -16,7 +16,7 @@ def cu_jsons_to_input(jsons: list):
 
     if raw_date != stocks_date:
         raise AttributeError('Date match error')
-    return date, offer.replce('.', ','), offer_tmo, stock_value
+    return date, offer.replace('.', ','), offer_tmo.replace('.', ','), stock_value
 
 
 def au_json_to_input(jsons: list):

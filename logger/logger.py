@@ -1,7 +1,7 @@
 import logging
 import os
 
-from logger.CustomFormatter import CustomFormatter
+# from logger.CustomFormatter import CustomFormatter
 
 # Imports the Cloud Logging client library
 import google.cloud.logging

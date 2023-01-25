@@ -1,7 +1,5 @@
 from datetime import datetime
-from functools import wraps
 
-import requests
 
 
 def cu_jsons_to_input(jsons: list):

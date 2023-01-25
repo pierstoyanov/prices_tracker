@@ -80,7 +80,7 @@ def incoming():
 def get_data():
     # check GAE scheduler header
     job_name = os.environ['GATHER_JOB']
-    header_name = f'X-CloudScheduler-JobName'
+    # header_name = f'X-CloudScheduler-JobName'
 
     if request.headers.get('X-CloudScheduler-JobName') == job_name:
         data_management_with_requests()

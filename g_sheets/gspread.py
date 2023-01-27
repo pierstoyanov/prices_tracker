@@ -52,3 +52,15 @@ def add_row_to_page(client: Client, page: str, data: tuple, average_cols: object
     except GSpreadException as error:
         gspread_logger.error(error)
         return error
+
+
+def get_named_range_gspread(client: Client, r: str):
+    """Using gspread return a single named range"""
+    try:
+        sheet = client.open(os.environ['DATA_SHEET'])
+        result = sheet.named_range(r)
+        return result
+    except GSpreadException as error:
+        gspread_logger.error(error)
+        return error
+

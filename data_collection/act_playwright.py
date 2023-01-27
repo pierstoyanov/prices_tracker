@@ -23,8 +23,10 @@ def log_data(data, url):
 
 
 def log_result(res):
-    if res:
-        data_logger.info(f'Added row: {res}')
+    if res.status_code == 200:
+        data_logger.info(f'Added row: {res.get("updatedRange")}')
+    else:
+        data_logger.info(f'Failed to add rows {res.status_code}')
 
 
 def playwright_scrape_and_store(client: Client, url: str, soup_to_data: Callable,

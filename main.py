@@ -1,8 +1,9 @@
 import os
+from aifc import Error
 
 from flask import Flask, request, Response
 from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequest, ViberFailedRequest, \
-    ViberConversationStartedRequest, ViberUnsubscribedRequest
+    ViberConversationStartedRequest, ViberUnsubscribedRequest, ViberDeliveredRequest, ViberSeenRequest
 
 from bot import bot
 from bot.daly_data import build_daly_info
@@ -32,7 +33,11 @@ def incoming():
 
     viber_request = viber.parse_request(request.get_data())
 
-    if isinstance(viber_request, ViberMessageRequest):
+    if isinstance(viber_request, ViberDeliveredRequest):
+        app_logger.info(f'User {viber_request.user_id} received {viber_request.message_token}')
+    elif isinstance(viber_request, ViberSeenRequest):
+        app_logger.info(f'User {viber_request.user_id} seen {viber_request.message_token}')
+    elif isinstance(viber_request, ViberMessageRequest):
         message = viber_request.message.text
         if message == 'Абониране':
             add_new_user(viber_request.user)
@@ -58,14 +63,15 @@ def incoming():
     elif isinstance(viber_request, ViberConversationStartedRequest):
         u = viber_request.user
         viber.send_messages(u.id, [
-            # msg_wellcome(u),
             msg_welcome_keyboard()
         ])
     elif isinstance(viber_request, ViberSubscribedRequest):
         # register user
         add_new_user(viber_request.user)
+        # reply
         viber.send_messages(viber_request.user.id, [
-            msg_subbed(viber_request.user)
+            msg_subbed(viber_request.user),
+            msg_user_keyboard()
         ])
     elif isinstance(viber_request, ViberUnsubscribedRequest):
         # de-register user
@@ -80,11 +86,14 @@ def incoming():
 def get_data():
     # check GAE scheduler header
     job_name = os.environ['GATHER_JOB']
-    # header_name = f'X-CloudScheduler-JobName'
+    gc_scheduler = f'X-CloudScheduler-JobName'
 
-    if request.headers.get('X-CloudScheduler-JobName') == job_name:
-        data_management_with_requests()
-        return Response(status=200)
+    if request.headers.get(gc_scheduler) == job_name:
+        try:
+            data_management_with_requests()
+            return Response(status=200)
+        except Error:
+            return Response(status=400)
     else:
         return Response(status=403)
 
@@ -99,7 +108,8 @@ def send_msg():
     daly = build_daly_info()
 
     # check GAE cron header
-    if request.headers.get('X-Appengine-Cron'):
+    gae_cron = 'X-Appengine-Cron'
+    if request.headers.get(gae_cron):
         count = len(users)
         for u in users:
             tokens = viber.send_messages(u, [

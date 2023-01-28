@@ -43,11 +43,11 @@ def build_daly_info():
                f'{s_chart} Сребро *{ag["Silver"]:.4F}{s_dollar}*\n' \
                f'{s_usd} BGN/USD: *{rates["USD"]}*\n' \
                f'{s_pound} BGN/GBP: *{rates["GBP"]}*\n' \
-               f'{s_usd} BGN/CHF: *{rates["CHF"]}\n*' \
+               f'{s_usd} BGN/CHF: *{rates["CHF"]}*\n' \
                f'{s_hv} Ел. енергия\n' \
-               f'BGN: {pow["BGN"]}\n' \
-               f'EUR: {pow["EUR"]}\n' \
-               f'Volume {pow["Volume"]}'
+               f'BGN: {pow["BGN"]:.2F}\n' \
+               f'EUR: {pow["EUR"]:.2F}\n' \
+               f'Volume {pow["Volume"]:.2F}'
 
         return text
     except KeyError as e:

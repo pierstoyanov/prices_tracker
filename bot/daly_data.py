@@ -13,7 +13,7 @@ def test_date(c, cw, au, ag):
 
 def get_daly():
     spreadsheet_id = os.environ['SPREADSHEET_DATA']
-    ranges = ['cudaly', 'cuwmdaly', 'audaly', 'agdaly']
+    ranges = ['cudaly', 'cuwmdaly', 'audaly', 'agdaly', 'rates', 'power']
     result = get_multiple_named_ranges(service=sheets_service, spreadsheet_id=spreadsheet_id,
                                        named_ranges=ranges,
                                        value_render_option='UNFORMATTED_VALUE',
@@ -25,21 +25,30 @@ def get_daly():
 
 def build_daly_info():
     try:
-        c, cw, au, ag = [dict(zip(x['values'][0], x['values'][1])) for x in get_daly()]
+        c, cw, au, ag, rates, pow = [dict(zip(x['values'][0], x['values'][1])) for x in get_daly()]
         date_status = test_date(c, cw, au, ag)
-        chart, dollar, callendar = '\U0001F4C8', '\U0001F4B2', '\U0001F4C5'
-        date = c['Date']
-        text = f'{date_status}{callendar} Date: {date} \n'
-        text += f'{chart}Cu\nOffer: *{c["Offer"]:,.2f}{dollar}*' \
-                f'\n3 month: *{c["3mo"]:,.2f}{dollar}*\nStock: *{c["Stock"]:}*\n'
-        text += f'{chart}Au\nAM: *{au["Gold AM"]:,.3F}{dollar}*\nPM *{au["Gold PM"]:,.3F}{dollar}*\n' \
-                f'Average: *{au["Average"]:.3F}{dollar}*\n'
-        text += f'{chart}Ag\n*{ag["Silver"]:.4F}{dollar}*'
+        s_chart, s_dollar, s_calendar, s_usd, s_pound, s_hv \
+            = '\U0001F4C8', '\U0001F4B2', '\U0001F4C5', '\U0001F4B5', '\U0001F4B7', '\U000026A1'
 
-        # for i in daly_data:
-        #     v = i.get('values')
-        #     # values = dict(zip(v[0], v[1]))
-        #     text += '\n'.join(f'{k}: {v:.3F}' for k, v in dict(zip(v[0], v[1])).items()) + '\n'
+        text = f'' \
+               f'{s_calendar} Дата: {c["Date"]}\n {date_status}\n' \
+               f'{s_chart}Мед\n' \
+               f'Offer: *{c["Offer"]:,.2f}{s_dollar}*\n' \
+               f'3 month: *{c["3mo"]:,.2f}{s_dollar}*\n' \
+               f'Stock: *{c["Stock"]:}*\n'\
+               f'{s_chart} Злато\n' \
+               f'AM: *{au["Gold AM"]:,.3F}{s_dollar}*\n' \
+               f'PM *{au["Gold PM"]:,.3F}{s_dollar}*\n' \
+               f'Average: *{au["Average"]:.3F}{s_dollar}*\n' \
+               f'{s_chart} Сребро *{ag["Silver"]:.4F}{s_dollar}*\n' \
+               f'{s_usd} BGN/USD: *{rates["USD"]}*\n' \
+               f'{s_pound} BGN/GBP: *{rates["GBP"]}*\n' \
+               f'{s_usd} BGN/CHF: *{rates["CHF"]}\n*' \
+               f'{s_hv} Ел. енергия\n' \
+               f'BGN: {pow["BGN"]}\n' \
+               f'EUR: {pow["EUR"]}\n' \
+               f'Volume {pow["Volume"]}'
+
         return text
     except KeyError as e:
         bot_logger.info("Failed to build daly msg.")

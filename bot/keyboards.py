@@ -16,7 +16,7 @@ keyboard = {
             "TextSize": "regular"
         },
         {
-            "Columns": 2,
+            "Columns": 1,
             "Rows": 1,
             "Text": "<font color=#323232><b>LMA</b></font>",
             "ActionType": "open-url",
@@ -36,7 +36,7 @@ keyboard = {
             "TextHAlign": "left"
         },
         {
-            "Columns": 2,
+            "Columns": 1,
             "Rows": 1,
             "Text": "<font color=#323232><b>Westmetal</b></font>",
             "ActionType": "open-url",
@@ -46,7 +46,7 @@ keyboard = {
             "TextHAlign": "left"
         },
         {
-            "Columns": 3,
+            "Columns": 1,
             "Rows": 1,
             "Text": "<font color=#323232><b>BNB</b></font>",
             "ActionType": "open-url",
@@ -56,7 +56,7 @@ keyboard = {
             "TextHAlign": "left"
         },
         {
-            "Columns": 3,
+            "Columns": 1,
             "Rows": 1,
             "Text": "<font color=#323232><b>IBEX</b></font>",
             "ActionType": "open-url",
@@ -73,7 +73,7 @@ welcome_keyboard = {
     "Buttons": [{
         "Columns": 6,
         "Rows": 1,
-        "BgColor": "#2db9b9",
+        "BgColor": "#00FF00",
         "ActionType": "reply",
         "ActionBody": "Aбониране",
         "Text": "Абониране",

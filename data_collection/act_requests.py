@@ -26,17 +26,6 @@ def log_data(data, url):
         data_logger.warning('No data')
 
 
-def log_result(res):
-    if res is None:
-        data_logger.info(f'Failed to add rows.')
-    elif isinstance(res, list):
-        data_logger.info(f'Added rows {res}')
-    elif res.status_code == 200:
-        data_logger.info(f'Added row: {res.get("updatedRange")}')
-    else:
-        data_logger.info(f'Error adding rows')
-
-
 def request_to_pandas_store(service, sh_id: str, url: str, headers: dict,
                             to_data_fn: Callable, store_to_page: str, average_cols: str = None):
     """ Call requests url, send content to pandas df, store with store_fn and google sheets api"""
@@ -49,9 +38,8 @@ def request_to_pandas_store(service, sh_id: str, url: str, headers: dict,
 
         input_data = to_data_fn(response, service, sh_id)
 
-        if len(input_data) < 0:
-            log_result(None)
-            return
+        if len(input_data) <= 0:
+            raise Exception('No data collected')
 
         result = append_values(
             service=service,
@@ -60,7 +48,7 @@ def request_to_pandas_store(service, sh_id: str, url: str, headers: dict,
             values=input_data,
             value_input_option='USER_ENTERED',
         )
-        log_result(result)
+        data_logger.info(result)
 
     except Exception as e:
         data_logger.info(f"Error occurred! {e}")
@@ -78,7 +66,7 @@ def request_to_soup_store(client: Client, urls: list, headers: dict,
         input_data = to_data_fn(soup)
 
         result = add_row_to_page(client=client, page=store_to_page, data=input_data, average_cols=average_cols)
-        log_result(result)
+        data_logger.info(result)
 
     except Exception as e:
         data_logger.info(f"Error occurred! {e}")
@@ -99,7 +87,7 @@ def request_json_and_store(client: Client, urls: list, headers: dict, json_to_in
         input_data = json_to_input_fn(data)
 
         result = add_row_to_page(client=client, page=store_to_page, data=input_data, average_cols=average_cols)
-        log_result(result)
+        data_logger.info(result)
 
     except Exception as e:
         data_logger.info(f"Error occurred! {e}")

@@ -7,7 +7,7 @@ from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequ
 
 from bot import bot
 from bot.daly_data import build_daly_info
-from bot.messages import msg_subbed, msg_welcome_keyboard, msg_user_keyboard, msg_text
+from bot.messages import msg_subbed, msg_welcome_keyboard, msg_user_keyboard, msg_text_w_keyboard
 from bot.users_info import add_new_user, remove_user, get_users_id
 from data_collection.act_requests import data_management_with_requests
 
@@ -39,20 +39,17 @@ def incoming():
         app_logger.info(f'User {viber_request.user_id} seen {viber_request.message_token}')
     elif isinstance(viber_request, ViberMessageRequest):
         message = viber_request.message.text
-        if message == 'Абониране':
-            add_new_user(viber_request.user)
+        if message == 'subscribe':
+            add_new_user(viber_request.sender)
 
-            viber.send_messages(viber_request.user.id, [
-                msg_subbed(viber_request.user),
-                msg_user_keyboard()
+            viber.send_messages(viber_request.sender.id, [
+                msg_subbed(viber_request.sender),
             ])
         elif message == "dalydata":
             # daly data
             daly = build_daly_info()
-
             viber.send_messages(viber_request.sender.id, [
-                msg_text(daly),
-                msg_user_keyboard()
+                msg_text_w_keyboard(daly),
             ])
         else:
             viber.send_messages(
@@ -61,8 +58,7 @@ def incoming():
                 ]
             )
     elif isinstance(viber_request, ViberConversationStartedRequest):
-        u = viber_request.user
-        viber.send_messages(u.id, [
+        viber.send_messages(viber_request.user.id, [
             msg_welcome_keyboard()
         ])
     elif isinstance(viber_request, ViberSubscribedRequest):
@@ -113,8 +109,7 @@ def send_msg():
         count = len(users)
         for u in users:
             tokens = viber.send_messages(u, [
-                msg_text(daly),
-                msg_user_keyboard()
+                msg_text_w_keyboard(daly),
             ])
             if tokens:
                 count -= 1
@@ -125,4 +120,5 @@ def send_msg():
 
 if __name__ == '__main__':
     # app.run(debug=True, host='localhost', port=8080)
+    # viber.set_webhook("")
     app.run()

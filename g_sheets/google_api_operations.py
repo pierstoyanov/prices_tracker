@@ -111,7 +111,7 @@ def get_values_from_sheet(service, spreadsheet_id: str,
             spreadsheetId=spreadsheet_id, range=range_name,
             valueRenderOption=value_render_option,
             dateTimeRenderOption=date_time_render_option).execute()
-        goog_logger.info(f"{result.get('updatedCells')} cells extracted.")
+        goog_logger.info(f"{result.get('values')} cells extracted.")
         return result
     except HttpError as error:
         goog_logger.warning(f"An error occurred {error.error_details}")
@@ -203,8 +203,8 @@ def delete_row(service, spreadsheet_id: str,
                     "range": {
                         "sheetId": sheet_id,
                         "dimension": "ROWS",
-                        "startIndex": row_to_delete,
-                        "endIndex": row_to_delete + 1
+                        "startIndex": row_to_delete - 1,
+                        "endIndex": row_to_delete
                     }
                 }
             }

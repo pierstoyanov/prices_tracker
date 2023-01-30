@@ -16,13 +16,12 @@ def msg_user_keyboard():
 
 
 def msg_subbed(u):
-    return TextMessage(
-        text=f"{u.name},\nБлагодаря за абонамента!")
+    return TextMessage(keyboard=keyboard,
+                       text=f"{u.name},\nБлагодаря за абонамента!", )
 
 
-def msg_unsubbed():
-    return TextMessage(
-        text=f"Успешно отписване!")
+def msg_text_w_keyboard(text: str):
+    return TextMessage(text=text, keyboard=keyboard)
 
 
 def msg_text(text: str):

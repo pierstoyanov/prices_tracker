@@ -149,67 +149,67 @@ def data_management_with_requests():
     spreadsheet_id = os.environ['SPREADSHEET_DATA']
     # last data
     c, cw, au, ag, rates, pow = [dict(zip(x['values'][0], x['values'][1])) for x in get_daly(sheets_service)]
-
-    # Cu
-    request_json_and_store(
-        service=sheets_service,
-        sh_id=spreadsheet_id,
-        urls=[os.environ.get('CU_JSON_URL'), os.environ.get('CU_JSON_STOCK')],
-        headers=lme_headers,
-        json_to_input_fn=cu_jsons_to_input,
-        store_to_page='copper',
-        store_range='A2:D',
-        last_data=c
-    )
-
-    # Westmetal
-    request_to_soup_store(
-        service=sheets_service,
-        sh_id=spreadsheet_id,
-        urls=[os.environ.get('URL_THREE')],
-        headers={},
-        to_data_fn=wm_soup_to_data,
-        store_to_page='copperwm',
-        store_range='A2:D',
-        last_data=cw
-    )
-
-    # Au
-    request_json_and_store(
-        service=sheets_service,
-        sh_id=spreadsheet_id,
-        urls=[os.environ.get('AU_AM_JSON'), os.environ.get('AU_PM_JSON')],
-        headers=lmba_headers,
-        json_to_input_fn=au_json_to_input,
-        store_to_page='gold',
-        store_range='A2:D',
-        last_data=au,
-        average_cols='B:C'
-    )
-
-    # Ag
-    request_json_and_store(
-        service=sheets_service,
-        sh_id=spreadsheet_id,
-        urls=[os.environ.get('AG_JSON')],
-        headers=lmba_headers,
-        json_to_input_fn=ag_json_to_input,
-        store_to_page='silver',
-        store_range='A2:B',
-        last_data=ag
-    )
-
-    # Exchange rates
-    request_to_soup_store(
-        service=sheets_service,
-        sh_id=spreadsheet_id,
-        urls=[os.environ.get('URL_FOUR')],
-        headers={},
-        to_data_fn=bnb_soup_to_data,
-        store_to_page='rates',
-        store_range='A2:D',
-        last_data=rates
-    )
+    #
+    # # Cu
+    # request_json_and_store(
+    #     service=sheets_service,
+    #     sh_id=spreadsheet_id,
+    #     urls=[os.environ.get('CU_JSON_URL'), os.environ.get('CU_JSON_STOCK')],
+    #     headers=lme_headers,
+    #     json_to_input_fn=cu_jsons_to_input,
+    #     store_to_page='copper',
+    #     store_range='A2:D',
+    #     last_data=c
+    # )
+    #
+    # # Westmetal
+    # request_to_soup_store(
+    #     service=sheets_service,
+    #     sh_id=spreadsheet_id,
+    #     urls=[os.environ.get('URL_THREE')],
+    #     headers={},
+    #     to_data_fn=wm_soup_to_data,
+    #     store_to_page='copperwm',
+    #     store_range='A2:D',
+    #     last_data=cw
+    # )
+    #
+    # # Au
+    # request_json_and_store(
+    #     service=sheets_service,
+    #     sh_id=spreadsheet_id,
+    #     urls=[os.environ.get('AU_AM_JSON'), os.environ.get('AU_PM_JSON')],
+    #     headers=lmba_headers,
+    #     json_to_input_fn=au_json_to_input,
+    #     store_to_page='gold',
+    #     store_range='A2:D',
+    #     last_data=au,
+    #     average_cols='B:C'
+    # )
+    #
+    # # Ag
+    # request_json_and_store(
+    #     service=sheets_service,
+    #     sh_id=spreadsheet_id,
+    #     urls=[os.environ.get('AG_JSON')],
+    #     headers=lmba_headers,
+    #     json_to_input_fn=ag_json_to_input,
+    #     store_to_page='silver',
+    #     store_range='A2:B',
+    #     last_data=ag
+    # )
+    #
+    # # Exchange rates
+    # request_to_soup_store(
+    #     service=sheets_service,
+    #     sh_id=spreadsheet_id,
+    #     urls=[os.environ.get('URL_FOUR')],
+    #     headers={},
+    #     to_data_fn=bnb_soup_to_data,
+    #     store_to_page='rates',
+    #     store_range='A2:D',
+    #     last_data=rates
+    # )
 
     # Power
     request_to_pandas_store(

@@ -49,20 +49,20 @@ def build_requested_day_info(rq_day: str):
             '\U0001F4C8', '\U0001F4B2', '\U0001F4C5', '\U0001F4B5', '\U0001F4B7', '\U000026A1'
 
         text = f'' \
-               f'{s_calendar} Данни за дата: \n' \
-               f'{s_chart} {cw["Date"]} Мед\n' \
+               f'{s_calendar} Данни за дата \n' \
+               f'{s_chart} Мед {cw["Date"]}: \n' \
                f'Offer: *{cw["Offer"]:,.2f}{s_dollar}*\n' \
                f'3 month: *{cw["3mo"]:,.2f}{s_dollar}*\n' \
                f'Stock: *{cw["Stock"]:}*\n' \
-               f'{s_chart} {au["Date"]} Злато\n' \
+               f'{s_chart} Злато {au["Date"]}: \n' \
                f'AM: *{au["Gold AM"]:,.3F}{s_dollar}*\n' \
                f'PM *{au["Gold PM"]:,.3F}{s_dollar}*\n' \
                f'Average: *{au["Average"]:.3F}{s_dollar}*\n' \
-               f'{s_chart} {ag["Date"]} Сребро \n *{ag["Silver"]:.4F}{s_dollar}*\n' \
-               f'{s_usd} {rates["Date"]} BGN/USD: *{rates["USD"]}*\n' \
-               f'{s_pound} {rates["Date"]} BGN/GBP: *{rates["GBP"]}*\n' \
-               f'{s_usd} {rates["Date"]} BGN/CHF: *{rates["CHF"]}*\n' \
-               f'{s_hv} {rates["Date"]}  Ел. енергия \n' \
+               f'{s_chart} Сребро {ag["Date"]}: \n *{ag["Silver"]:.4F}{s_dollar}*\n' \
+               f'{s_usd} BGN/USD {rates["Date"]}: *{rates["USD"]}*\n' \
+               f'{s_pound} BGN/GBP {rates["Date"]}: *{rates["GBP"]}*\n' \
+               f'{s_usd} BGN/CHF {rates["Date"]}: *{rates["CHF"]}*\n' \
+               f'{s_hv} Ел. енергия {rates["Date"]}:\n' \
                f'BGN: *{pow["BGN"]:.2F}*\n' \
                f'EUR: *{pow["EUR"]:.2F}*\n' \
                f'Volume *{pow["Volume"]:.2F}*'

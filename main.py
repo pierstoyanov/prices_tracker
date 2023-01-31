@@ -8,7 +8,7 @@ from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequ
 
 from bot import bot
 from bot.daly_data import build_daly_info
-from bot.messages import msg_subbed, msg_welcome_keyboard, msg_user_keyboard, msg_text_w_keyboard
+from bot.messages import msg_subbed, msg_welcome_keyboard, msg_user_keyboard, msg_text_w_keyboard, msg_info
 from bot.request_data import build_requested_day_info
 from bot.users_info import add_new_user, remove_user, get_users_id
 from data_collection.act_requests import data_management_with_requests
@@ -63,6 +63,12 @@ def incoming():
             viber.send_messages(
                 viber_request.sender.id, [
                     msg_text_w_keyboard(day_data)
+                ]
+            )
+        elif message == "info":
+            viber.send_messages(
+                viber_request.sender.id, [
+                    msg_info()
                 ]
             )
         else:

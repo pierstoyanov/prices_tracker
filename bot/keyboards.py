@@ -25,7 +25,7 @@ keyboard = {
             "TextSize": "regular",
         },
         {
-            "Columns": 2,
+            "Columns": 1,
             "Rows": 1,
             "BgColor": "#E0FFFF",
             "Text": "<b>LBMA</b>",
@@ -69,12 +69,12 @@ keyboard = {
             "TextSize": "regular",
         },
         {
-            "Columns": 6,
+            "Columns": 1,
             "Rows": 1,
-            "BgColor": "#F0FFF0",
-            "ActionType": "none",
-            "ActionBody": "За конкретна дата въведете деня във формат 'дд-мм-гггг'",
-            "TextOpacity": 90,
+            "BgColor": "#90EE90",
+            "ActionType": "info",
+            "ActionBody": "info",
+            "Text": "&#128712",
             "TextSize": "large"
         },
     ]

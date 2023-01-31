@@ -59,7 +59,7 @@ def wm_soup_to_data(wm: BeautifulSoup):
     row = wm.find('tbody').find('tr').find_all('td')
     date = datetime.strptime(row[0].text, '%d. %B %Y').date().strftime('%d.%m.%Y')
     cash, three_mt, stock = repl_comma_dot(row[1].text), repl_comma_dot(row[2].text), repl_comma_dot(row[3].text)
-    return date.__str__(), cash, three_mt, stock
+    return [date.__str__(), cash, three_mt, stock]
 
 
 def td_tag_selector(tag):

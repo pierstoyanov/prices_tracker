@@ -11,10 +11,12 @@ def test_date(c, cw, au, ag):
         return '\u274C'
 
 
-def get_daly():
+def get_daly(service):
+    """ Returns raw daly info. Param: google sheets service"""
     spreadsheet_id = os.environ['SPREADSHEET_DATA']
     ranges = ['cudaly', 'cuwmdaly', 'audaly', 'agdaly', 'rates', 'power']
-    result = get_multiple_named_ranges(service=sheets_service, spreadsheet_id=spreadsheet_id,
+    result = get_multiple_named_ranges(service=service,
+                                       spreadsheet_id=spreadsheet_id,
                                        named_ranges=ranges,
                                        value_render_option='UNFORMATTED_VALUE',
                                        date_time_render_option='FORMATTED_STRING'
@@ -25,7 +27,7 @@ def get_daly():
 
 def build_daly_info():
     try:
-        c, cw, au, ag, rates, pow = [dict(zip(x['values'][0], x['values'][1])) for x in get_daly()]
+        c, cw, au, ag, rates, pow = [dict(zip(x['values'][0], x['values'][1])) for x in get_daly(sheets_service)]
         date_status = test_date(c, cw, au, ag)
         s_chart, s_dollar, s_calendar, s_usd, s_pound, s_hv \
             = '\U0001F4C8', '\U0001F4B2', '\U0001F4C5', '\U0001F4B5', '\U0001F4B7', '\U000026A1'

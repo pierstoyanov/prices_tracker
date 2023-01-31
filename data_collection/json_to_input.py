@@ -13,7 +13,7 @@ def cu_jsons_to_input(jsons: list):
 
     if raw_date != stocks_date:
         raise AttributeError('Date match error')
-    return date, offer.replace('.', ','), offer_tmo.replace('.', ','), stock_value
+    return [date, offer.replace('.', ','), offer_tmo.replace('.', ','), stock_value]
 
 
 def au_json_to_input(jsons: list):
@@ -26,7 +26,7 @@ def au_json_to_input(jsons: list):
     date = datetime.strptime(am_date, "%Y-%m-%d").strftime('%d.%m.%Y')
     am_val, pm_val = am.get('v')[0], pm.get('v')[0]
 
-    return date, am_val, pm_val
+    return [date, am_val, pm_val]
 
 
 def ag_json_to_input(jsons: list):
@@ -34,4 +34,4 @@ def ag_json_to_input(jsons: list):
     date = datetime.strptime(ag.get('d'), "%Y-%m-%d").strftime('%d.%m.%Y')
     ag_val = ag.get('v')[0]
 
-    return date, ag_val
+    return [date, ag_val]

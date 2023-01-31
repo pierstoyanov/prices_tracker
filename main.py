@@ -51,6 +51,9 @@ def incoming():
             viber.send_messages(viber_request.sender.id, [
                 msg_text_w_keyboard(daly),
             ])
+        # TODO data request
+        elif message:
+            pass
         else:
             viber.send_messages(
                 viber_request.sender.id, [

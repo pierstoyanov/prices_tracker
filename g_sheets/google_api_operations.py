@@ -20,13 +20,15 @@ def append_values(service, spreadsheet_id: str, range_name: str,
                   value_input_option: ValueInputOptionLiterals,
                   values: list,
                   insert_data_option: InsertDataOptionLiterals = 'INSERT_ROWS'):
-    """ add values to last row"""
+    """ Append values to last row"""
     try:
         body = {
             'values': values
         }
+
         result = service.spreadsheets().values().append(
-            spreadsheetId=spreadsheet_id, range=range_name,
+            spreadsheetId=spreadsheet_id,
+            range=range_name,
             valueInputOption=value_input_option,
             insertDataOption=insert_data_option,
             body=body).execute()
@@ -170,7 +172,7 @@ def get_multiple_named_ranges(service, spreadsheet_id: str, named_ranges: list,
             ranges=named_ranges,
             valueRenderOption=value_render_option,
             dateTimeRenderOption=date_time_render_option).execute()
-        goog_logger.info(f'successfully extracted data.')
+        goog_logger.info(f'Extracted multiple ranges.')
         return result
     except HttpError as error:
         goog_logger.warning(f"Error: {error.error_details}")

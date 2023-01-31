@@ -1,6 +1,6 @@
 cron:
   - description: "send data to users"
     url: /sendmsg
-    schedule: every mon, tue, wed, thu, fri 08:55
+    schedule: every mon, tue, wed, thu, fri 06:55
     retry_parameters:
       job_retry_limit: 0

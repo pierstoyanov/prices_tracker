@@ -71,13 +71,12 @@ keyboard = {
         {
             "Columns": 6,
             "Rows": 1,
-            "BgColor": "#00FFFF",
+            "BgColor": "#F0FFF0",
             "ActionType": "none",
-            "Text": "За конкретна дата въведете деня във формат 'дд-мм-гггг'",
+            "ActionBody": "За конкретна дата въведете деня във формат 'дд-мм-гггг'",
             "TextOpacity": 90,
             "TextSize": "large"
         },
-
     ]
 }
 

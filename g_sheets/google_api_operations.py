@@ -183,10 +183,11 @@ def update_values_in_sheet(service, values: list, spreadsheet_id: str,
                            range_name: str, value_input_option: ValueInputOptionLiterals):
     try:
         body = {
-            'values': values
+            'values': [values]
         }
         result = service.spreadsheets().values().update(
-            spreadsheetId=spreadsheet_id, range=range_name,
+            spreadsheetId=spreadsheet_id,
+            range=range_name,
             valueInputOption=value_input_option,
             body=body).execute()
         goog_logger.info(f"{result.get('updatedCells')} cells updated.")

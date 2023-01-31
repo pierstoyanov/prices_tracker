@@ -1,4 +1,5 @@
 import os
+import re
 from aifc import Error
 
 from flask import Flask, request, Response
@@ -8,6 +9,7 @@ from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequ
 from bot import bot
 from bot.daly_data import build_daly_info
 from bot.messages import msg_subbed, msg_welcome_keyboard, msg_user_keyboard, msg_text_w_keyboard
+from bot.request_data import build_requested_day_info
 from bot.users_info import add_new_user, remove_user, get_users_id
 from data_collection.act_requests import data_management_with_requests
 
@@ -21,6 +23,11 @@ app = Flask(__name__)
 
 # viber bot
 viber = bot.viber
+
+
+def use_regex(input_text):
+    pattern = re.compile(r"^([0-9]{2}-[0-9]{2}-[1-2][0-9]{3})$", re.IGNORECASE)
+    return pattern.match(input_text)
 
 
 @app.route('/', methods=['POST'])
@@ -51,9 +58,13 @@ def incoming():
             viber.send_messages(viber_request.sender.id, [
                 msg_text_w_keyboard(daly),
             ])
-        # TODO data request
-        elif message:
-            pass
+        elif re.match(r"^([0-9]{2}-[0-9]{2}-[1-2][0-9]{3})$", message):
+            day_data = build_requested_day_info(message)
+            viber.send_messages(
+                viber_request.sender.id, [
+                    msg_text_w_keyboard(day_data)
+                ]
+            )
         else:
             viber.send_messages(
                 viber_request.sender.id, [

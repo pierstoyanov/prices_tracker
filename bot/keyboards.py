@@ -73,7 +73,7 @@ keyboard = {
             "Rows": 1,
             "BgColor": "#00FFFF",
             "ActionType": "none",
-            "Text": "За конкретна дата въведете деня във формат дд-мм-гггг",
+            "Text": "За конкретна дата въведете деня във формат 'дд-мм-гггг'",
             "TextOpacity": 90,
             "TextSize": "large"
         },

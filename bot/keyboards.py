@@ -72,7 +72,7 @@ keyboard = {
             "Columns": 1,
             "Rows": 1,
             "BgColor": "#90EE90",
-            "ActionType": "info",
+            "ActionType": "reply",
             "ActionBody": "info",
             "Text": "&#128712",
             "TextSize": "large"

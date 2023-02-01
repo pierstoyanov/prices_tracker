@@ -74,7 +74,7 @@ keyboard = {
             "BgColor": "#90EE90",
             "ActionType": "reply",
             "ActionBody": "info",
-            "Text": "&#128712",
+            "Text": "\u2139",
             "TextSize": "large"
         },
     ]

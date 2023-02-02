@@ -62,6 +62,21 @@ def wm_soup_to_data(wm: BeautifulSoup):
     return [date.__str__(), cash, three_mt, stock]
 
 
+@attribute_not_found_decorator
+def wm_soup_to_data_no_query(wm: BeautifulSoup):
+    tables = wm.find_all('table')
+    prices, stocks = tables[0], tables[1]
+
+    raw_date = prices.find('thead').find('tr').find('th', class_='number').text.strip()
+    date = datetime.strptime(raw_date, '%d. %B %Y').date().strftime('%d.%m.%Y')
+
+    row = prices.find('tbody').find('tr').find_all('td')
+    cash, three_mt = repl_comma_dot(row[1].text.strip()), repl_comma_dot(row[2].text.strip())
+    stock = repl_comma_dot(stocks.find('tbody').find('tr').find_all('td')[1].text.strip())
+
+    return [date.__str__(), cash, three_mt, stock]
+
+
 def td_tag_selector(tag):
     # custom tag filter
     return tag.name == 'td' and tag.has_attr("class")

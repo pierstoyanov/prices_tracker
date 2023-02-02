@@ -3,13 +3,14 @@ from typing import Callable
 
 import requests
 from bs4 import BeautifulSoup
+# from memory_profiler import profile
 
 from bot.daly_data import get_daly
 from data_collection.headers import lmba_headers, lme_headers, ua_header
 from data_collection.json_to_input import cu_jsons_to_input, au_json_to_input, \
     ag_json_to_input
 from data_collection.pandas_to_input import power_soup_to_data
-from data_collection.soup_to_input import wm_soup_to_data, bnb_soup_to_data
+from data_collection.soup_to_input import wm_soup_to_data, bnb_soup_to_data, wm_soup_to_data_no_query
 from g_sheets.google_api_operations import append_values
 from g_sheets.google_service import build_google_service
 from logger.logger import logging
@@ -47,7 +48,7 @@ def request_to_pandas_store(service, sh_id: str, url: str, headers: dict, to_dat
     """ Call requests url, send content to pandas df, store with store_fn and google sheets api
     Average appends str formula for avrg between cols of the input data cols should be separated by ':'"""
     try:
-        response = requests.get(url, headers=headers, timeout=5)
+        response = requests.get(url, headers=headers)
         log_data(response.status_code, url)
 
         if response.status_code != 200:
@@ -77,11 +78,15 @@ def request_to_pandas_store(service, sh_id: str, url: str, headers: dict, to_dat
 def request_to_soup_store(service, sh_id: str, urls: list, headers: dict,
                           to_data_fn: Callable,
                           store_to_page: str, store_range: str, last_data: dict,
-                          average_cols: str = None):
+                          average_cols: str = None, params: list = None):
     """ Call requests url, convert body to soup, use store_fn
     Average appends str formula for avrg between cols of the input data cols should be separated by ':' """
     try:
-        response = requests.get(urls[0], headers=headers)
+        if params:
+            response = requests.get(urls[0], headers=headers, params=params[0])
+        else:
+            response = requests.get(urls[0], headers=headers)
+
         log_data(response.status_code, urls[0])
 
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -116,7 +121,7 @@ def request_json_and_store(service, sh_id: str, urls: list, headers: dict,
     try:
         data = []
         for i in urls:
-            response = requests.get(url=i, headers=headers)
+            response = requests.get(i, headers=headers)
             log_data(response.status_code, i)
             data.append(response.json())
 
@@ -142,6 +147,7 @@ def request_json_and_store(service, sh_id: str, urls: list, headers: dict,
         return e
 
 
+# @profile
 def data_management_with_requests():
     """Main fn that executes all data gather with requests"""
 
@@ -166,13 +172,24 @@ def data_management_with_requests():
     request_to_soup_store(
         service=sheets_service,
         sh_id=spreadsheet_id,
-        urls=[os.environ.get('URL_THREE')],
+        urls=[os.environ.get('URL_THREE_NQ')],
         headers={},
-        to_data_fn=wm_soup_to_data,
+        to_data_fn=wm_soup_to_data_no_query,
         store_to_page='copperwm',
         store_range='A2:D',
         last_data=cw
     )
+    # params = {'action': 'table', 'field': 'LME_Cu_cash'}
+    # request_to_soup_store(
+    #     service=sheets_service, sh_id=spreadsheet_id,
+    #     urls=[os.environ.get('URL_THREE')],
+    #     params=[params],
+    #     headers={},
+    #     to_data_fn=wm_soup_to_data,
+    #     store_to_page='copperwm',
+    #     store_range='A2:D',
+    #     last_data=cw
+    # )
 
     # Au
     request_json_and_store(

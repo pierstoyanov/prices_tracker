@@ -1,3 +1,4 @@
+import gc
 import os
 import re
 from aifc import Error
@@ -105,13 +106,9 @@ def get_data():
     gc_scheduler = f'X-CloudScheduler-JobName'
 
     if request.headers.get(gc_scheduler) == job_name:
-        try:
-            data_management_with_requests()
-            return Response(status=200)
-        except Error:
-            return Response(status=400)
-    else:
-        return Response(status=403)
+        r = data_management_with_requests()
+        gc.collect()
+        return Response(status=200)
 
 
 @app.route('/sendmsg', methods=['GET'])

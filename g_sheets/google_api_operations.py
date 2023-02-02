@@ -124,7 +124,6 @@ def get_values_from_sheet(service, spreadsheet_id: str,
 def get_last_row_num(service, spreadsheet_id: str,
                      sheet_name: str,
                      value_input_option: ValueInputOptionLiterals = "USER_ENTERED",
-                     sheet_id: int = 0,
                      start_col: str = 'A', end_col: str = 'D', ):
     # append empty row
     try:
@@ -147,11 +146,10 @@ def get_last_row_num(service, spreadsheet_id: str,
 def get_last_row_values(service, spreadsheet_id: str,
                         sheet_name: str,
                         value_input_option: ValueInputOptionLiterals = "USER_ENTERED",
-                        sheet_id: int = 0,
                         start_col: str = 'A', end_col: str = 'D', ):
     last_row: int = get_last_row_num(service=service, spreadsheet_id=spreadsheet_id,
                                      value_input_option=value_input_option,
-                                     sheet_id=sheet_id, sheet_name=sheet_name)
+                                     sheet_name=sheet_name)
     # get last row data
     try:
         result = service.spreadsheets().values().get(

@@ -148,7 +148,7 @@ def data_management_with_requests():
     sheets_service = build_google_service(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'))
     spreadsheet_id = os.environ['SPREADSHEET_DATA']
     # last data
-    c, cw, au, ag, rates, pow = [dict(zip(x['values'][0], x['values'][1])) for x in get_daly(sheets_service)]
+    c, cw, au, ag, rates, power = [dict(zip(x['values'][0], x['values'][1])) for x in get_daly(sheets_service)]
 
     # Cu
     request_json_and_store(
@@ -220,7 +220,7 @@ def data_management_with_requests():
         to_data_fn=power_soup_to_data,
         to_page='power',
         store_range='A2:D',
-        last_data=pow
+        last_data=power
     )
 
 

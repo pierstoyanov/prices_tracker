@@ -1,7 +1,6 @@
 import os
 from googleapiclient.errors import HttpError
 from g_sheets.gspread import get_first_empty_row
-from gspread import Client
 
 # logger
 from data_collection.act_playwright import data_logger

@@ -27,7 +27,7 @@ def get_daly(service):
 
 def build_daly_info():
     try:
-        c, cw, au, ag, rates, pow = [dict(zip(x['values'][0], x['values'][1])) for x in get_daly(sheets_service)]
+        c, cw, au, ag, rates, power = [dict(zip(x['values'][0], x['values'][1])) for x in get_daly(sheets_service)]
         date_status = test_date(c, cw, au, ag)
         s_chart, s_dollar, s_calendar, s_usd, s_pound, s_hv \
             = '\U0001F4C8', '\U0001F4B2', '\U0001F4C5', '\U0001F4B5', '\U0001F4B7', '\U000026A1'
@@ -47,9 +47,9 @@ def build_daly_info():
                f'{s_pound} BGN/GBP: *{rates["GBP"]}*\n' \
                f'{s_usd} BGN/CHF: *{rates["CHF"]}*\n' \
                f'{s_hv} Ел. енергия\n' \
-               f'BGN: *{pow["BGN"]:.2F}*\n' \
-               f'EUR: *{pow["EUR"]:.2F}*\n' \
-               f'Volume *{pow["Volume"]:.2F}*'
+               f'BGN: *{power["BGN"]:.2F}*\n' \
+               f'EUR: *{power["EUR"]:.2F}*\n' \
+               f'Volume *{power["Volume"]:.2F}*'
 
         return text
     except KeyError as e:

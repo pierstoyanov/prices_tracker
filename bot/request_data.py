@@ -24,6 +24,8 @@ def query_day(service, rq_date: str, ranges: list):
         values=[rq_date],
         value_input_option='USER_ENTERED'
     )
+    bot_logger.info("Query date set!")
+    
     # get result
     result = get_multiple_named_ranges(service=service,
                                        spreadsheet_id=spreadsheet_id,
@@ -41,13 +43,13 @@ def build_requested_day_info(rq_day: str):
     try:
         r = datetime.strptime(rq_day.strip(), '%d-%m-%Y')
         day_num = r.weekday()
-        days = {5 : 'събота', 6: 'неделя'}
+        days = {5: 'събота', 6: 'неделя'}
         rq_date = r.strftime('%d.%m.%Y')
 
         if day_num < 5:
             ranges = ['rqwmcu', 'rqau', 'rqag', 'rqrates', 'rqpower']
             cw, au, ag, rates, power = [dict(zip(x['values'][0], x['values'][1]))
-                                      for x in query_day(sheets_service, rq_date, ranges)]
+                                        for x in query_day(sheets_service, rq_date, ranges)]
             text = f'' \
                    f'{s_calendar} Данни за дата \n' \
                    f'{s_chart} Мед {cw["Date"]}: \n' \

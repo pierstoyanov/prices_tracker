@@ -1,6 +1,5 @@
 import os
 from typing import Callable
-from gspread import Client
 
 from data_collection.data_gather import get_url_contents, get_click_url_contents
 from data_collection.soup_to_input import cu_soup_to_data, au_soup_to_data,\

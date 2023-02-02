@@ -89,7 +89,8 @@ def find_row_of_item_in_sheet(item: str, col: str, service, spreadsheet_id: str,
             service=service, spreadsheet_id=spreadsheet_id, range_name=range_name,
             value_input_option=value_input_option, values=values)
 
-        goog_logger.info(f'Added search formula in {search_formula_update.get("updatedCells")} cells.')
+        if not isinstance(search_formula_update, HttpError):
+            goog_logger.info(f'Added search formula in {search_formula_update.get("updatedCells")} cells.')
 
         # get row num from formula
         result = get_values_from_sheet(service=service, spreadsheet_id=spreadsheet_id,

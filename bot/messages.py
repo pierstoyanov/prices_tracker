@@ -16,10 +16,12 @@ info_txt = f"✅ pspricesbot © изпраща дневна информация
            f"✅ Плъзнете наляво ⬅️ за допълнителни настройки" \
            f" от Viber (тихо доставяне, отписване)."
 
-wrong = "\u274C Подадената дата е грешна!"
-wrong_day = f"Денят е невалиден."
-wrong_month = f"Месецът е невалиден."
-wrong_year = f"Годината е невалидна."
+wrong = "Подадената дата е грешна! \u274C \n"
+wrong_day = f"Денят е невалиден.\n"
+wrong_month = f"Месецът е невалиден.\n"
+wrong_year = f"Годината е невалидна.\n"
+
+unknown_txt = "Неразпозната команда. За повече информация натиснете: \u2139."
 
 
 def msg_subbed(u):
@@ -43,3 +45,8 @@ def msg_text(text: str):
 def msg_info():
     return TextMessage(keyboard=keyboard,
                        text=info_txt)
+
+
+def msg_unknown():
+    return TextMessage(keyboard=keyboard,
+                       text=unknown_txt)

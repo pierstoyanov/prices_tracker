@@ -7,9 +7,9 @@ from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequ
     ViberConversationStartedRequest, ViberUnsubscribedRequest, ViberDeliveredRequest, ViberSeenRequest
 
 from bot import bot
-from bot.daly_data import build_daly_info, check_valid_date
-from bot.messages import msg_subbed, msg_welcome_keyboard, msg_user_keyboard, msg_text_w_keyboard, msg_info
-from bot.request_data import build_requested_day_info
+from bot.daly_data import build_daly_info
+from bot.messages import *
+from bot.request_data import build_requested_day_info, check_valid_date
 from bot.users_info import add_new_user, remove_user, get_users_id
 from data_collection.act_requests import data_management_with_requests
 
@@ -82,7 +82,7 @@ def incoming():
         else:
             viber.send_messages(
                 viber_request.sender.id, [
-                    msg_user_keyboard()
+                    msg_unknown()
                 ]
             )
     elif isinstance(viber_request, ViberConversationStartedRequest):

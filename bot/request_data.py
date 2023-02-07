@@ -41,7 +41,7 @@ def build_requested_day_info(rq_day: str):
     s_chart, s_dollar, s_calendar, s_usd, s_pound, s_hv = \
         '\U0001F4C8', '\U0001F4B2', '\U0001F4C5', '\U0001F4B5', '\U0001F4B7', '\U000026A1'
     try:
-        r = datetime.strptime(rq_day.strip(), '%d-%m-%Y')
+        r = datetime.strptime(rq_day.strip(), '%d/%m/%Y')
         day_num = r.weekday()
         days = {5: 'събота', 6: 'неделя'}
         rq_date = r.strftime('%d.%m.%Y')

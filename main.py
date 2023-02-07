@@ -1,14 +1,13 @@
 import gc
 import os
 import re
-from aifc import Error
 
 from flask import Flask, request, Response
 from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequest, ViberFailedRequest, \
     ViberConversationStartedRequest, ViberUnsubscribedRequest, ViberDeliveredRequest, ViberSeenRequest
 
 from bot import bot
-from bot.daly_data import build_daly_info
+from bot.daly_data import build_daly_info, check_valid_date
 from bot.messages import msg_subbed, msg_welcome_keyboard, msg_user_keyboard, msg_text_w_keyboard, msg_info
 from bot.request_data import build_requested_day_info
 from bot.users_info import add_new_user, remove_user, get_users_id
@@ -59,13 +58,21 @@ def incoming():
             viber.send_messages(viber_request.sender.id, [
                 msg_text_w_keyboard(daly),
             ])
-        elif re.match(r"^([0-9]{2}-[0-9]{2}-[1-2][0-9]{3})$", message):
-            day_data = build_requested_day_info(message)
-            viber.send_messages(
-                viber_request.sender.id, [
-                    msg_text_w_keyboard(day_data)
-                ]
-            )
+        elif re.match(r"^([0-9]{2}/[0-9]{2}/[1-2][0-9]{3})$", message):
+            date_check = check_valid_date(message)
+            if date_check:
+                viber.send_messages(
+                    viber_request.sender.id, [
+                        msg_text_w_keyboard(date_check)
+                    ]
+                )
+            else:
+                day_data = build_requested_day_info(message)
+                viber.send_messages(
+                    viber_request.sender.id, [
+                        msg_text_w_keyboard(day_data)
+                    ]
+                )
         elif message == "info":
             viber.send_messages(
                 viber_request.sender.id, [

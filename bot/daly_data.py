@@ -1,7 +1,22 @@
 import os
 
 from bot.bot import sheets_service, bot_logger
+from bot.messages import wrong_day, wrong_month, wrong_year, wrong
 from g_sheets.google_api_operations import get_multiple_named_ranges
+
+
+def check_valid_date(message: str):
+    day, month, year = message.split('/')
+    result = ''
+    if day > 31 or month == 2 and day > 28:
+        result += wrong_day
+    if month > 31:
+        result += wrong_month
+    if 1951 < year > 2050:
+        result += wrong_year
+    if result:
+        return wrong + result
+    return result
 
 
 def test_date(c, cw, au, ag):

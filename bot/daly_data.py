@@ -46,7 +46,7 @@ def build_daly_info():
                f'{s_usd} BGN/USD: *{rates["USD"]}*\n' \
                f'{s_pound} BGN/GBP: *{rates["GBP"]}*\n' \
                f'{s_usd} BGN/CHF: *{rates["CHF"]}*\n' \
-               f'{s_hv} Ел. енергия\n' \
+               f'{s_hv} Ел. енергия: {power["Date"]}\n' \
                f'BGN: *{power["BGN"]:.2F}*\n' \
                f'EUR: *{power["EUR"]:.2F}*\n' \
                f'Volume *{power["Volume"]:.2F}*'

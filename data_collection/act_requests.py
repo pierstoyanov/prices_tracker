@@ -179,17 +179,6 @@ def data_management_with_requests():
         store_range='A2:D',
         last_data=cw
     )
-    # params = {'action': 'table', 'field': 'LME_Cu_cash'}
-    # request_to_soup_store(
-    #     service=sheets_service, sh_id=spreadsheet_id,
-    #     urls=[os.environ.get('URL_THREE')],
-    #     params=[params],
-    #     headers={},
-    #     to_data_fn=wm_soup_to_data,
-    #     store_to_page='copperwm',
-    #     store_range='A2:D',
-    #     last_data=cw
-    # )
 
     # Au
     request_json_and_store(

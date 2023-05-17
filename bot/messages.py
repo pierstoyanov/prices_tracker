@@ -42,11 +42,6 @@ def msg_text(text: str):
     return TextMessage(text=text)
 
 
-def msg_info():
-    return TextMessage(keyboard=keyboard,
-                       text=info_txt)
-
-
 def msg_unknown():
     return TextMessage(keyboard=keyboard,
                        text=unknown_txt)

@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 # from memory_profiler import profile
 
 from bot.daly_data import get_daly
+from data_collection.exceptions import EmptyDataException, SameDayDataException
 from data_collection.headers import lmba_headers, lme_headers, ua_header
 from data_collection.json_to_input import cu_jsons_to_input, au_json_to_input, \
     ag_json_to_input
@@ -21,7 +22,7 @@ data_logger = logging.getLogger('data_collection.act_requests')
 
 def log_data(data, url):
     if data == 200:
-        data_logger.info(f'Gathered api data from {url}')
+        data_logger.info('Gathered api data from %s', url)
     else:
         raise ValueError('No data')
 
@@ -36,10 +37,10 @@ def verify_collected_data(input_data: list, last_data: dict):
     """Test collected data against last data in table"""
     # check data not empty
     if len(input_data) <= 0:
-        raise Exception('No input data or No data collected')
+        raise EmptyDataException
     # check data not same as last day
     if last_data.get('Date') == input_data[0]:
-        raise Exception('Same day data.')
+        raise SameDayDataException
 
 
 def request_to_pandas_store(service, sh_id: str, url: str, headers: dict, to_data_fn: Callable,
@@ -71,8 +72,7 @@ def request_to_pandas_store(service, sh_id: str, url: str, headers: dict, to_dat
         data_logger.info(result)
 
     except Exception as e:
-        data_logger.info(f"Error occurred! {e}")
-        return e
+        data_logger.exception('%s', e)
 
 
 def request_to_soup_store(service, sh_id: str, urls: list, headers: dict,

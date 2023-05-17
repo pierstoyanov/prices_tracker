@@ -25,9 +25,9 @@ def log_data(data, url):
 
 def log_result(res):
     if res.status_code == 200:
-        data_logger.info(f'Added row: {res.get("updatedRange")}')
+        data_logger.info('Added row: %s}', res.get("updatedRange"))
     else:
-        data_logger.info(f'Failed to add rows {res.status_code}')
+        data_logger.info('Failed to add rows %s', res.status_code)
 
 
 def playwright_scrape_and_store(client: Client, url: str, soup_to_data: Callable,
@@ -49,7 +49,7 @@ def playwright_scrape_and_store(client: Client, url: str, soup_to_data: Callable
         log_result(result)
 
     except Exception as e:
-        data_logger.info(f"Error occurred! {e}")
+        data_logger.info("Error occurred! %s", e)
         return e
 
 

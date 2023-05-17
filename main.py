@@ -32,7 +32,7 @@ def use_regex(input_text):
 
 @app.route('/', methods=['POST'])
 def incoming():
-    app_logger.debug(f"received request. {request}")
+    app_logger.debug("received request. %s", request.get_data())
 
     # handle the request here
     if not viber.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')):
@@ -41,9 +41,9 @@ def incoming():
     viber_request = viber.parse_request(request.get_data())
 
     if isinstance(viber_request, ViberDeliveredRequest):
-        app_logger.info(f'User {viber_request.user_id} received {viber_request.message_token}')
+        app_logger.info('User %s received %s', viber_request.user_id, viber_request.message_token)
     elif isinstance(viber_request, ViberSeenRequest):
-        app_logger.info(f'User {viber_request.user_id} seen {viber_request.message_token}')
+        app_logger.info('User %s seen %s',  viber_request.user_id, viber_request.message_token)
     elif isinstance(viber_request, ViberMessageRequest):
         message = viber_request.message.text
         if message == 'subscribe':
@@ -101,7 +101,7 @@ def incoming():
         # de-register user
         remove_user(viber_request.user_id)
     elif isinstance(viber_request, ViberFailedRequest):
-        app_logger.warning(f"client failed receiving message. failure: {viber_request.get_data()}")
+        app_logger.warning("client failed receiving message. failure: %s", viber_request.get_data())
 
     return Response(status=200)
 
@@ -110,10 +110,10 @@ def incoming():
 def get_data():
     # check GAE scheduler header
     job_name = os.environ['GATHER_JOB']
-    gc_scheduler = f'X-CloudScheduler-JobName'
+    gc_scheduler = 'X-CloudScheduler-JobName'
 
     if request.headers.get(gc_scheduler) == job_name:
-        r = data_management_with_requests()
+        data_management_with_requests()
         gc.collect()
         return Response(status=200)
 
@@ -122,7 +122,7 @@ def get_data():
 def send_msg():
     # users
     users = get_users_id()
-    app_logger.info(f'Users id\'s are: {users}')
+    app_logger.info('Users id\'s are: %s', users)
 
     # daly data
     daly = build_daly_info()

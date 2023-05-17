@@ -32,7 +32,7 @@ def add_row_to_page(client: Client, page: str, data: tuple, average_cols: object
 
     try:
         sheet = client.open(os.environ['DATA_SHEET']).worksheet(page)
-        gspread_logger.info(f'Sheet: {sheet}')
+        gspread_logger.info(f'Sheet: %s', sheet)
         new_row = get_first_empty_row(sheet)
         last_row_date = sheet.row_values(new_row - 1)[0]
 

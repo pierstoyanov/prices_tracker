@@ -20,7 +20,7 @@ def get_users_id(service=sheets_service):
             bot_logger.info("Returning list of subs.")
             return [item for sublist in result.get('values') for item in sublist]
     except HttpError as error:
-        bot_logger.error(f"An error occurred: {error}")
+        bot_logger.error(f"An error occurred: %s", error)
         return error
 
 
@@ -36,10 +36,10 @@ def add_new_user(new_user, service=sheets_service):
                                                             valueInputOption="USER_ENTERED",
                                                             range="A1:L1",
                                                             body=body).execute()
-            bot_logger.info(f"User {new_user.name} with id {new_user.id} added.")
+            bot_logger.info(f"User %s with id %s added.", new_user.name, new_user.id)
             return result
         except HttpError as error:
-            bot_logger.error(f"An error occurred: {error}")
+            bot_logger.error(f"An error occurred: %s", error)
             return error
     else:
         bot_logger.info('User already exists')
@@ -53,8 +53,8 @@ def remove_user(u_id, s=sheets_service):
             result = delete_row(row_to_delete=user_row,
                                 service=s,
                                 spreadsheet_id=spreadsheet_id)
-            bot_logger.info(f'Removed user with id {u_id} at row {user_row}')
+            bot_logger.info(f'Removed user with id %s at row %s', u_id, user_row)
             return result
         except HttpError as error:
-            bot_logger.error(f"An error occurred: {error}")
+            bot_logger.error(f"An error occurred: %s", error)
             return error

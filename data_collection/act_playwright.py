@@ -6,7 +6,7 @@ from google.oauth2.sts import Client
 from data_collection.data_gather import get_url_contents, get_click_url_contents
 from data_collection.soup_to_input import cu_soup_to_data, au_soup_to_data,\
     ag_soup_to_data, wm_soup_to_data
-from g_sheets.gspread import get_client, add_row_to_page
+from google_sheets.gspread import get_client, add_row_to_page
 from logger.logger import logging
 
 # playwright load states
@@ -18,7 +18,7 @@ data_logger = logging.getLogger('data_collection.act_playwright')
 
 def log_data(data, url):
     if data:
-        data_logger.info(f'Gathered soup data from {url}')
+        data_logger.info('Gathered soup data from %s', url)
     else:
         data_logger.warning('No data')
 

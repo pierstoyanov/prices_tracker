@@ -2,7 +2,7 @@ from datetime import datetime
 
 
 def cu_jsons_to_input(jsons: list):
-    prices, three_mo = jsons[0].get('Rows')[0], jsons[0].get('Rows')[1],
+    prices, three_mo = jsons[0].get('Rows')[0], jsons[0].get('Rows')[1]
     raw_date = prices.get('BusinessDateTime').split('T')[0]
     date = datetime.strptime(raw_date, "%Y-%m-%d").strftime('%d.%m.%Y')
     offer, offer_tmo = prices.get('Values')[1], three_mo.get('Values')[1]

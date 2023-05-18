@@ -43,6 +43,7 @@ def add_new_user(new_user, service=sheets_service):
             return error
     else:
         bot_logger.info('User already exists')
+        return None
 
 
 def remove_user(u_id, s=sheets_service):
@@ -58,3 +59,4 @@ def remove_user(u_id, s=sheets_service):
         except HttpError as error:
             bot_logger.error("An error occurred: %s", error)
             return error
+    return None

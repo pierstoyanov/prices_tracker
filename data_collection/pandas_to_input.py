@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import datetime
-from g_sheets.google_api_operations import get_multiple_named_ranges
+from google_sheets.google_sheets_api_operations import get_multiple_named_ranges
 
 
 def power_soup_to_data(response, service, sh_id):

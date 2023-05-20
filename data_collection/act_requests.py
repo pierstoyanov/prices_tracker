@@ -12,8 +12,8 @@ from data_collection.json_to_input import cu_jsons_to_input, au_json_to_input, \
     ag_json_to_input
 from data_collection.pandas_to_input import power_soup_to_data
 from data_collection.soup_to_input import wm_soup_to_data, bnb_soup_to_data, wm_soup_to_data_no_query
-from g_sheets.google_api_operations import append_values
-from g_sheets.google_service import build_google_service
+from google_sheets.google_sheets_api_operations import append_values
+from google_sheets.google_service import build_google_service
 from logger.logger import logging
 
 # create local log

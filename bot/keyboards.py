@@ -8,7 +8,7 @@ keyboard = {
             "Rows": 1,
             "BgColor": "#00FFFF",
             "ActionType": "reply",
-            "ActionBody": "dalydata",
+            "ActionBody": "dailydata",
             "Text": "Дневни данни",
             "TextOpacity": 60,
             "TextSize": "large"

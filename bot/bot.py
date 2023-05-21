@@ -4,7 +4,7 @@ from viberbot.api.bot_configuration import BotConfiguration
 from viberbot.api.messages import TextMessage
 
 from logger.logger import logging
-from g_sheets.google_service import build_google_service
+from google_sheets.google_service import build_google_service
 
 
 # logger

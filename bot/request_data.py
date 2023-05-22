@@ -7,7 +7,9 @@ from google_sheets.google_sheets_api_operations import get_multiple_named_ranges
 
 
 def test_date(c, cw, au, ag):
-    if c['Date'] == cw['Date'] and cw['Date'] == au['Date'] and au['Date'] == ag['Date']:
+    if c['Date'] == cw['Date'] \
+            and cw['Date'] == au['Date'] \
+            and au['Date'] == ag['Date']:
         return '\u2705'
     return '\u274C'
 

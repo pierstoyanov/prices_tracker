@@ -1,13 +1,12 @@
 import gc
 import os
-import re
 
 from flask import Flask, request, Response
 
 from bot import bot
 from bot.daly_data import build_daly_info
 from bot.messages import msg_text_w_keyboard
-from bot.users_info import get_users_id
+from bot.users_actions import get_users_id
 from data_collection.act_requests import data_management_with_requests
 from logger.logger import logging
 from meesage_handlers import viber_request_handler
@@ -26,14 +25,17 @@ viber = bot.bot.viber
 def incoming():
     app_logger.debug("received request. %s", request.get_data())
 
-    # handle the request here
-    if not viber.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')):
+    if not viber.verify_signature(
+            request.get_data(),
+            request.headers.get('X-Viber-Content-Signature')):
         return Response(status=403)
 
+    # request to viber request object
     viber_request = viber.parse_request(request.get_data())
-    viber_request_handler(viber_request)
+    # handle the request here
+    response = viber_request_handler(viber_request)
 
-    return Response(status=200)
+    return response
 
 
 @app.route('/collectdata', methods=['GET'])

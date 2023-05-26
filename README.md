@@ -1,8 +1,9 @@
-## PricesTracker
+## Prices Tracker
 
 #### :page_facing_up: Description
-PricesTracker is a Python/Flask app for daily data scraping and delivery to Viber bot.
+Prices Tracker is a Python/Flask app for daily data scraping and delivery to Viber bot.
 
+---
 #### :computer: Technologies and Libraries Used
     
 - ***web framework***: flask
@@ -10,6 +11,7 @@ PricesTracker is a Python/Flask app for daily data scraping and delivery to Vibe
 - ***web scraping***: playwright, requests
 - ***data manipulation***: beautifulsoup4, pandas
 
+---
 #### :bookmark_tabs: Packages and modules in the app
     Modules:
     main.py - flask route entry point
@@ -47,3 +49,4 @@ manages logging with logging module / google cloud logging
 for scheduling tasks in conatinerized environment.
 For GAE deployment scheduling is done with GAE scheduler/cron.yaml
 </details>
+---

@@ -82,13 +82,8 @@ def register():
     events = ['message', 'seen', 'subscribed',
               'unsubscribed', 'conversation_started']
     res = viber.set_webhook(os.environ['WH'], webhook_events=events)
+    app_logger.info('Webhook response: %s', res)
     return Response(status=200)
-
-
-# @app.route('/testday', methods=['GET'])
-# def send_msg():
-#     v = build_requested_day_info("01/01/2021")
-#     print(v)
 
 
 if __name__ == '__main__':

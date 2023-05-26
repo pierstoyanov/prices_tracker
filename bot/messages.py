@@ -3,15 +3,17 @@ from bot.keyboards import keyboard, welcome_keyboard
 
 
 def msg_welcome_keyboard():
-    return KeyboardMessage(tracking_data='tracking_data', keyboard=welcome_keyboard)
+    return KeyboardMessage(tracking_data='tracking_data',
+                           keyboard=welcome_keyboard)
 
 
 def msg_user_keyboard():
-    return KeyboardMessage(tracking_data='tracking_data', keyboard=keyboard)
+    return KeyboardMessage(tracking_data='tracking_data',
+                           keyboard=keyboard)
 
 
 c, chk_mrk, left_arr = '\U000000A9', '\U00002714', '\U00002B05'
-info_txt = "✅ pspricesbot © изпраща дневна информация в 08:55.\n" \
+info_txt = "✅ pspricesbot © изпраща дневна информация в 09:00.\n" \
            "✅ За конкретна дата въведете ден във формат  *'дд/мм/гггг'*.\n" \
            "✅ Плъзнете наляво ⬅️ за допълнителни настройки" \
            " от Viber (тихо доставяне, отписване)."

@@ -24,7 +24,7 @@ def check_valid_date(message: str):
         result += wrong_day
     if month > 12:
         result += wrong_month
-    if 1951 > year > 2050:
+    if 1951 > year or year > 2050:
         result += wrong_year
     if result:
         return wrong + result

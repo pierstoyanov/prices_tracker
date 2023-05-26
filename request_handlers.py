@@ -150,5 +150,5 @@ def viber_request_handler(viber_request):
     if viber_request_type in viber_request_handlers:
         return viber_request_handlers[viber_request_type](viber_request)
     else:
-        handler_logger.error("Unknown request type: {}".format(viber_request_type))
+        handler_logger.error("Unknown request type: %s", viber_request_type)
         return Response(status=500)

@@ -49,7 +49,7 @@ def request_to_pandas_store(service, sh_id: str, url: str, headers: dict, to_dat
     """ Call requests url, send content to pandas df, store with store_fn and google sheets api
     Average appends str formula for avrg between cols of the input data cols should be separated by ':'"""
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         log_data(response.status_code, url)
 
         if response.status_code != 200:
@@ -83,9 +83,9 @@ def request_to_soup_store(service, sh_id: str, urls: list, headers: dict,
     Average appends str formula for avrg between cols of the input data cols should be separated by ':' """
     try:
         if params:
-            response = requests.get(urls[0], headers=headers, params=params[0])
+            response = requests.get(urls[0], headers=headers, params=params[0], timeout=10)
         else:
-            response = requests.get(urls[0], headers=headers)
+            response = requests.get(urls[0], headers=headers, timeout=10)
 
         log_data(response.status_code, urls[0])
 
@@ -108,8 +108,7 @@ def request_to_soup_store(service, sh_id: str, urls: list, headers: dict,
         data_logger.info(result)
 
     except Exception as e:
-        data_logger.info(f"Error occurred! {e}")
-        return e
+        data_logger.info("Error occurred! %s", e)
 
 
 def request_json_and_store(service, sh_id: str, urls: list, headers: dict,
@@ -121,7 +120,7 @@ def request_json_and_store(service, sh_id: str, urls: list, headers: dict,
     try:
         data = []
         for i in urls:
-            response = requests.get(i, headers=headers)
+            response = requests.get(i, headers=headers, timeout=10)
             log_data(response.status_code, i)
             data.append(response.json())
 
@@ -143,8 +142,7 @@ def request_json_and_store(service, sh_id: str, urls: list, headers: dict,
         data_logger.info(result)
 
     except Exception as e:
-        data_logger.info(f"Error occurred! {e}")
-        return e
+        data_logger.info("Error occurred! %s", e)
 
 
 # @profile

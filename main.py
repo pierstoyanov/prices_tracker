@@ -93,6 +93,4 @@ def register():
 
 if __name__ == '__main__':
     # app.run(debug=True, host='localhost', port=8080)
-    # viber.set_webhook("")
-    print(os.environ['WH'])
     app.run()

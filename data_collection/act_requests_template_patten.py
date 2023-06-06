@@ -1,6 +1,4 @@
 import os
-from typing import Callable
-
 import requests
 from bs4 import BeautifulSoup
 # from memory_profiler import profile
@@ -11,7 +9,7 @@ from data_collection.headers import lmba_headers, lme_headers, ua_header
 from data_collection.json_to_input import cu_jsons_to_input, au_json_to_input, \
     ag_json_to_input
 from data_collection.pandas_to_input import power_soup_to_data
-from data_collection.soup_to_input import wm_soup_to_data, bnb_soup_to_data, wm_soup_to_data_no_query
+from data_collection.soup_to_input import bnb_soup_to_data, wm_soup_to_data_no_query
 from google_sheets.google_sheets_api_operations import append_values
 from google_sheets.google_service import build_google_service
 from logger.logger import logging
@@ -44,21 +42,22 @@ def verify_collected_data(input_data: list, last_data: dict):
 
 
 class DataRequestStoreTemplate:
+    """Template for data request and store to google sheets"""
     def __init__(self, service, session, sh_id: str, last_data: dict,
-                 store_to_page: str, store_range: str, average_cols=None):
+                 store_to_page: str, store_range: str, url_headers: tuple,
+                 average_cols=None):
         self.service = service
         self.session = session
         self.sh_id = sh_id
+        self.url_headers = url_headers
         self.last_data = last_data
         self.store_to_page = store_to_page
-        self.store_range = store_range
-        self.average_cols = average_cols
+        self.store_range, self.average_cols = store_range, average_cols
         self.raw_response = []
         self.input_data = []
 
-    def request_data(self, url_headers_tuples: list):
-        """
-        Fetch data from url and store it in instance variable self.raw_response
+    def request_data(self, url_headers_tuples: tuple):
+        """Fetch data from url and store it in instance variable self.raw_response
         :return: void, updates var self.raw_response
         :param url_headers_tuples: list of url and header tuples
         """
@@ -75,13 +74,12 @@ class DataRequestStoreTemplate:
                 data_logger.exception('%s', e)
 
     def process_data(self):
-        """Process data from raw_response and store it
-        in instance variable self.input_data"""
+        """Process data from raw_response and store it in instance variable self.input_data.
+        Implemented in child classes"""
         raise NotImplementedError
 
     def store_data(self):
-        """
-        Stores collected data to google sheets
+        """ Stores collected data to google sheets
         :return: void
         """
         try:
@@ -101,13 +99,11 @@ class DataRequestStoreTemplate:
             data_logger.exception('%s', e)
 
 
-class CuDataManagement(DataRequestStoreTemplate):
-    def __init__(self, list_url_headers_tuples: list):
-        super().__init__(list_url_headers_tuples)
-
+class CuDataRequest(DataRequestStoreTemplate):
+    """ inherits from DataRequestStoreTemplate """
     def process_data(self):
         data = []
-        self.request_data(self.list_url_headers_tuples)
+        self.request_data(self.url_headers)
 
         for response in self.raw_response:
             data.append(response.json())
@@ -117,25 +113,21 @@ class CuDataManagement(DataRequestStoreTemplate):
         self.raw_response = []  # clear raw response
 
 
-class WmDataManagement(DataRequestStoreTemplate):
-    def __init__(self, url_header_tuple: tuple):
-        super().__init__(url_header_tuple)
-
+class WmDataRequest(DataRequestStoreTemplate):
+    """ inherits from DataRequestStoreTemplate """
     def process_data(self):
-        self.request_data([self.url_header_tuple])
-        soup = BeautifulSoup(self.raw_response.content, 'html.parser')
+        self.request_data(self.url_headers)
+        soup = BeautifulSoup(self.raw_response[0].content, 'html.parser')
         self.input_data = wm_soup_to_data_no_query(soup)
         self.store_data()
         self.raw_response = []  # clear raw response
 
 
-class AuDataManagement(DataRequestStoreTemplate):
-    def __init__(self, list_url_header_tuples: list):
-        super.__init__(list_url_header_tuples)
-
+class AuDataRequest(DataRequestStoreTemplate):
+    """ inherits from DataRequestStoreTemplate """
     def process_data(self):
         data = []
-        self.request_data(self.list_url_header_tuples)
+        self.request_data(self.url_headers)
 
         for response in self.raw_response:
             data.append(response.json())
@@ -145,54 +137,50 @@ class AuDataManagement(DataRequestStoreTemplate):
         self.raw_response = []  # clear raw response
 
 
-class AgDataManagement(DataRequestStoreTemplate):
-    def __init__(self, url_header_tuple: tuple):
-        super().__init__(url_header_tuple)
-
+class AgDataRequest(DataRequestStoreTemplate):
+    """ inherits from DataRequestStoreTemplate """
     def process_data(self):
-        self.request_data([self.url_header_tuple])
-        self.input_data = ag_json_to_input(self.raw_response.json())
+        self.request_data(self.url_headers)
+        self.input_data = ag_json_to_input(self.raw_response[0].json())
         self.store_data()
         self.raw_response = []  # clear raw response
 
 
-class ExchangeRatesManagement(DataRequestStoreTemplate):
-    def __init__(self, url_header_tuple: tuple):
-        super().__init__(url_header_tuple)
-
+class ExchangeRatesRequest(DataRequestStoreTemplate):
+    """ inherits from DataRequestStoreTemplate """
     def process_data(self):
-        self.request_data([self.url_header_tuple])
-        soup = BeautifulSoup(self.raw_response.content, 'html.parser')
+        self.request_data(self.url_headers)
+        soup = BeautifulSoup(self.raw_response[0].content, 'html.parser')
         self.input_data = bnb_soup_to_data(soup)
         self.store_data()
         self.raw_response = []  # clear raw response
 
 
-class PowerManagement(DataRequestStoreTemplate):
-    def __init__(self, url_header_tuple: tuple):
-        super().__init__(url_header_tuple)
-
+class PowerRequest(DataRequestStoreTemplate):
+    """ inherits from DataRequestStoreTemplate """
     def process_data(self):
-        self.request_data([self.url_header_tuple])
-        soup = BeautifulSoup(self.raw_response.content, 'html.parser')
-        self.input_data = power_soup_to_data(soup)
+        self.request_data(self.url_headers)
+        soup = BeautifulSoup(self.raw_response[0].content, 'html.parser')
+        self.input_data = power_soup_to_data(response=soup, service=self.service, sh_id=self.sh_id)
         self.store_data()
         self.raw_response = []  # clear raw response
 
 
 class DataManagementWithRequests:
+    """Singleton class for arrange staging and executing data collection and storage"""
     def __init__(self):
         self.sheets_service = build_google_service(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'))
-        self.spreadsheet_id = os.environ['SPREADSHEET_DATA']
         self.session = requests.Session()
-        self.data_requests = [],
+        self.spreadsheet_id: str = os.environ['SPREADSHEET_DATA']
+        self.data_requests: list[DataRequestStoreTemplate] = []
         self.last_data: dict = self.get_last_data()
-
+    #TODO
     def get_last_data(self):
         combined_dict = {k: v for x in get_daly(self.sheets_service) for k, v in zip(x['values'][0], x['values'][1])}
         return combined_dict
 
     def add_data_management(self, request: DataRequestStoreTemplate):
+        """Pools data request objects for processing """
         self.data_requests.append(request)
 
     def execute_data_requests(self):
@@ -200,28 +188,29 @@ class DataManagementWithRequests:
             request.process_data()
 
     def stage_data_requests(self):
-        self.add_data_management(CuDataManagement(
+        """Hardcoded data request objects for processing"""
+        self.add_data_management(CuDataRequest(
             service=self.sheets_service,
             session=self.session,
             sh_id=self.spreadsheet_id,
             last_data=self.last_data["cu"],
             store_to_page='copper',
             store_range='A2:D',
-            list_url_headers_tuples= [(os.environ.get('CU_JSON_URL'), lme_headers)
-                                      (os.environ.get('CU_JSON_STOCK'), lme_headers)]
+            url_headers=((os.environ.get('CU_JSON_URL'), lme_headers),
+                         (os.environ.get('CU_JSON_STOCK'), lme_headers))
         ))
 
-        self.add_data_management(WmDataManagement(
+        self.add_data_management(WmDataRequest(
             service=self.sheets_service,
             session=self.session,
             sh_id=self.spreadsheet_id,
             last_data=self.last_data["cw"],
             store_to_page='copperwm',
             store_range='A2:D',
-            url_header_tuple=(os.environ.get('URL_THREE_NQ'), {})
+            url_headers=((os.environ.get('URL_THREE_NQ'), {}),)
         ))
 
-        self.add_data_management(AuDataManagement(
+        self.add_data_management(AuDataRequest(
             service=self.sheets_service,
             session=self.session,
             sh_id=self.spreadsheet_id,
@@ -229,46 +218,46 @@ class DataManagementWithRequests:
             store_to_page='gold',
             store_range='A2:D',
             average_cols='B:C',
-            list_url_header_tuples=[(os.environ.get('AU_AM_JSON'), lmba_headers),
-                               (os.environ.get('AU_PM_JSON'), lmba_headers)]
+            url_headers=((os.environ.get('AU_AM_JSON'), lmba_headers),
+                         (os.environ.get('AU_PM_JSON'), lmba_headers))
         ))
 
-        self.add_data_management(AgDataManagement(
+        self.add_data_management(AgDataRequest(
             service=self.sheets_service,
             session=self.session,
             sh_id=self.spreadsheet_id,
             last_data=self.last_data["ag"],
             store_to_page='silver',
             store_range='A2:B',
-            url_header_tuple=(os.environ.get('AG_JSON'), lmba_headers)
+            url_headers=((os.environ.get('AG_JSON'), lmba_headers),)
         ))
 
-        self.add_data_management(ExchangeRatesManagement(
+        self.add_data_management(ExchangeRatesRequest(
             service=self.sheets_service,
             session=self.session,
             sh_id=self.spreadsheet_id,
             last_data=self.last_data["ex"],
             store_to_page='rates',
             store_range='A2:D',
-            url_header_tuple=(os.environ.get('URL_FOUR'), {})
+            url_headers=((os.environ.get('URL_FOUR'), {}),)
         ))
 
-        self.add_data_management(PowerManagement(
+        self.add_data_management(PowerRequest(
             service=self.sheets_service,
             session=self.session,
             sh_id=self.spreadsheet_id,
             last_data=self.last_data["pw"],
             store_to_page='power',
             store_range='A2:D',
-            url_header_tuple=(os.environ.get('URL_SIX'), ua_header)
+            url_headers=((os.environ.get('URL_SIX'), ua_header),)
         ))
 
     def run(self):
+        """Main class execution method"""
         self.stage_data_requests()
         self.execute_data_requests()
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    # data_management_with_requests()
-    pass
+    DataManagementWithRequests().run()

@@ -43,10 +43,17 @@ def get_data():
     job_name = os.environ['GATHER_JOB']
     gc_scheduler = 'X-CloudScheduler-JobName'
 
+    # selector variable that chooses between act_requests and act_requests_template_pattern
+    use_requests = True
+
     if request.headers.get(gc_scheduler) == job_name:
-        data_management_with_requests()
-        gc.collect()
-        return Response(status=200)
+        if use_requests:
+            data_management_with_requests()
+            gc.collect()
+            return Response(status=200)
+        else:
+            pass
+            # TODO: implement act_requests_template_pattern
     return Response(status=400)
 
 

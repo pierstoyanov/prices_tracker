@@ -21,8 +21,6 @@ bot_configuration = BotConfiguration(
 
 # viber
 viber = Api(bot_configuration)
-# viber.set_webhook('https://26e0-79-100-153-222.eu.ngrok.io')
-
 
 # messages
 text_message = TextMessage(text='Sample msg!')

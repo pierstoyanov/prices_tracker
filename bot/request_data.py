@@ -7,19 +7,24 @@ from google_sheets.google_sheets_api_operations import get_multiple_named_ranges
 
 
 def test_date(c, cw, au, ag):
-    if c['Date'] == cw['Date'] and cw['Date'] == au['Date'] and au['Date'] == ag['Date']:
+    if c['Date'] == cw['Date'] \
+            and cw['Date'] == au['Date'] \
+            and au['Date'] == ag['Date']:
         return '\u2705'
     return '\u274C'
 
 
 def check_valid_date(message: str):
+    """ Checks if date is valid for query.
+        Param: date string in format 'dd/mm/yyyy'
+        Returns: empty string if date is valid or string with error message."""
     day, month, year = [int(_) for _ in message.split('/')]
     result = ''
     if day > 31 or month == 2 and day > 28:
         result += wrong_day
     if month > 12:
         result += wrong_month
-    if 1951 < year > 2050:
+    if 1951 > year or year > 2050:
         result += wrong_year
     if result:
         return wrong + result

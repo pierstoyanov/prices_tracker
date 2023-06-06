@@ -37,26 +37,31 @@ def add_new_user(new_user, service=sheets_service):
                                                             range="A1:L1",
                                                             body=body).execute()
             bot_logger.info("User %s with id %s added.", new_user.name, new_user.id)
-            return result
+            return True
         except HttpError as error:
             bot_logger.error("An error occurred: %s", error)
-            return error
+            return False
     else:
         bot_logger.info('User already exists')
-        return None
+        return False
 
 
 def remove_user(u_id, s=sheets_service):
+    """Function to remove user by id from sheet.
+    :returns: bool"""
     user_row = find_row_of_item_in_sheet(
         item=u_id, col="C", service=s, spreadsheet_id=spreadsheet_id)
+
     if user_row:
         try:
-            result = delete_row(row_to_delete=user_row,
-                                service=s,
-                                spreadsheet_id=spreadsheet_id)
+            delete_row(row_to_delete=user_row,
+                       service=s,
+                       spreadsheet_id=spreadsheet_id)
             bot_logger.info('Removed user with id %s at row %s', u_id, user_row)
-            return result
+            return True
         except HttpError as error:
             bot_logger.error("An error occurred: %s", error)
-            return error
-    return None
+            return False
+
+    bot_logger.info('User with id %s not found in sheet', u_id)
+    return False

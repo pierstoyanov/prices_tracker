@@ -174,9 +174,9 @@ class DataManagementWithRequests:
         self.spreadsheet_id: str = os.environ['SPREADSHEET_DATA']
         self.data_requests: list[DataRequestStoreTemplate] = []
         self.last_data: dict = self.get_last_data()
-    #TODO
+
     def get_last_data(self):
-        combined_dict = {k: v for x in get_daly(self.sheets_service) for k, v in zip(x['values'][0], x['values'][1])}
+        combined_dict = get_daly(self.sheets_service, return_dict=True)
         return combined_dict
 
     def add_data_management(self, request: DataRequestStoreTemplate):
@@ -189,64 +189,65 @@ class DataManagementWithRequests:
 
     def stage_data_requests(self):
         """Hardcoded data request objects for processing"""
+        # copper
         self.add_data_management(CuDataRequest(
             service=self.sheets_service,
             session=self.session,
             sh_id=self.spreadsheet_id,
-            last_data=self.last_data["cu"],
+            last_data=self.last_data["cudaly"],
             store_to_page='copper',
             store_range='A2:D',
             url_headers=((os.environ.get('CU_JSON_URL'), lme_headers),
                          (os.environ.get('CU_JSON_STOCK'), lme_headers))
         ))
-
+        # copper wm
         self.add_data_management(WmDataRequest(
             service=self.sheets_service,
             session=self.session,
             sh_id=self.spreadsheet_id,
-            last_data=self.last_data["cw"],
+            last_data=self.last_data["cuwmdaly"],
             store_to_page='copperwm',
             store_range='A2:D',
             url_headers=((os.environ.get('URL_THREE_NQ'), {}),)
         ))
-
+        # gold
         self.add_data_management(AuDataRequest(
             service=self.sheets_service,
             session=self.session,
             sh_id=self.spreadsheet_id,
-            last_data=self.last_data["au"],
+            last_data=self.last_data["audaly"],
             store_to_page='gold',
             store_range='A2:D',
             average_cols='B:C',
             url_headers=((os.environ.get('AU_AM_JSON'), lmba_headers),
                          (os.environ.get('AU_PM_JSON'), lmba_headers))
         ))
-
+        # silver
         self.add_data_management(AgDataRequest(
             service=self.sheets_service,
             session=self.session,
             sh_id=self.spreadsheet_id,
-            last_data=self.last_data["ag"],
+            last_data=self.last_data["agdaly"],
             store_to_page='silver',
             store_range='A2:B',
             url_headers=((os.environ.get('AG_JSON'), lmba_headers),)
         ))
-
+        # exchange rates
         self.add_data_management(ExchangeRatesRequest(
             service=self.sheets_service,
             session=self.session,
             sh_id=self.spreadsheet_id,
-            last_data=self.last_data["ex"],
+            last_data=self.last_data["rates"],
             store_to_page='rates',
             store_range='A2:D',
             url_headers=((os.environ.get('URL_FOUR'), {}),)
         ))
-
+        # power
         self.add_data_management(PowerRequest(
             service=self.sheets_service,
             session=self.session,
             sh_id=self.spreadsheet_id,
-            last_data=self.last_data["pw"],
+            last_data=self.last_data["power"],
             store_to_page='power',
             store_range='A2:D',
             url_headers=((os.environ.get('URL_SIX'), ua_header),)

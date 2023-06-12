@@ -11,17 +11,21 @@ def test_date(c, cw, au, ag):
         return '\u274C'
 
 
-def get_daly(service):
+def get_daly(service, return_dict=False):
     """ Returns raw daly info. Param: google sheets service"""
     spreadsheet_id = os.environ['SPREADSHEET_DATA']
     ranges = ['cudaly', 'cuwmdaly', 'audaly', 'agdaly', 'rates', 'power']
-    result = get_multiple_named_ranges(service=service,
-                                       spreadsheet_id=spreadsheet_id,
-                                       named_ranges=ranges,
-                                       value_render_option='UNFORMATTED_VALUE',
-                                       date_time_render_option='FORMATTED_STRING'
-                                       ).get('valueRanges')
+    result = get_multiple_named_ranges(
+        service=service,
+        spreadsheet_id=spreadsheet_id,
+        named_ranges=ranges,
+        value_render_option='UNFORMATTED_VALUE',
+        date_time_render_option='FORMATTED_STRING'
+    ).get('valueRanges')
 
+    if return_dict:
+        return dict(zip(ranges,
+                        [dict(zip(x['values'][0], x['values'][1])) for x in result]))
     return result
 
 
@@ -37,7 +41,7 @@ def build_daly_info():
                f'{s_chart}Мед\n' \
                f'Offer: *{c["Offer"]:,.2f}{s_dollar}*\n' \
                f'3 month: *{c["3mo"]:,.2f}{s_dollar}*\n' \
-               f'Stock: *{c["Stock"]:}*\n'\
+               f'Stock: *{c["Stock"]:}*\n' \
                f'{s_chart} Злато\n' \
                f'AM: *{au["Gold AM"]:,.3F}{s_dollar}*\n' \
                f'PM *{au["Gold PM"]:,.3F}{s_dollar}*\n' \

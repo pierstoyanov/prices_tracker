@@ -55,7 +55,7 @@ def request_to_pandas_store(service, sh_id: str, url: str, headers: dict, to_dat
         if response.status_code != 200:
             raise Exception("Bad request")
 
-        input_data = to_data_fn(response, service, sh_id)
+        input_data = to_data_fn(response, last_data.get("Date"))
 
         verify_collected_data(input_data, last_data)
 

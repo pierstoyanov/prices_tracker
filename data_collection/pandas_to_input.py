@@ -3,20 +3,10 @@ from datetime import datetime
 from google_sheets.google_sheets_api_operations import get_multiple_named_ranges
 
 
-def power_soup_to_data(response, service, sh_id):
+def power_soup_to_data(response, last_date):
     df = pd.read_html(response.content)[0]
     groups = df.groupby(df.Date)
-
-    last = get_multiple_named_ranges(
-        service=service,
-        spreadsheet_id=sh_id,
-        named_ranges=['power'],
-        value_render_option='UNFORMATTED_VALUE',
-        date_time_render_option='FORMATTED_STRING'
-    ).get('valueRanges')[0].get('values')
-
-    last_data = dict(zip(last[0], last[1]))
-    last_date = datetime.strptime(last_data.get('Date'), "%d.%m.%Y")
+    last_date = datetime.strptime(last_date, "%d.%m.%Y")
 
     result = []
     for key in sorted(groups.groups.keys()):

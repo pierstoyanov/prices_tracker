@@ -107,4 +107,4 @@ def bnb_soup_to_data(soup: BeautifulSoup):
     div = soup.find('div', id="more_information")
     date = div.find('h4').text.split('за', 1)[1].strip()
     usd, gbp, chf = [repl_comma_dot(x.text.split(' ')[0]) for x in div.find_all('strong')[:3]]
-    return date, usd, gbp, chf
+    return [date, usd, gbp, chf]

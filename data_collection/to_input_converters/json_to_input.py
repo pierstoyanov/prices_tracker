@@ -1,16 +1,20 @@
 from datetime import datetime
 
+from data_collection.exceptions import EmptyDataException
+
 
 def cu_jsons_to_input(jsons: list):
-    prices, three_mo = jsons[0].get('Rows')[0], jsons[0].get('Rows')[1]
-    raw_date = prices.get('BusinessDateTime').split('T')[0]
-    date = datetime.strptime(raw_date, "%Y-%m-%d").strftime('%d.%m.%Y')
-    offer, offer_tmo = prices.get('Values')[1], three_mo.get('Values')[1]
+    try:
+        prices, three_mo = jsons[0].get('Rows')[0], jsons[0].get('Rows')[1]
+        raw_date = prices.get('BusinessDateTime').split('T')[0]
+        date = datetime.strptime(raw_date, "%Y-%m-%d").strftime('%d.%m.%Y')
+        offer, offer_tmo = prices.get('Values')[1], three_mo.get('Values')[1]
 
-    stocks = jsons[1].get('Rows')[0]
-    stocks_date = stocks.get('BusinessDateTime').split('T')[0]
-    stock_value = stocks.get('Values')[0]
-
+        stocks = jsons[1].get('Rows')[0]
+        stocks_date = stocks.get('BusinessDateTime').split('T')[0]
+        stock_value = stocks.get('Values')[0]
+    except IndexError as exc:
+        raise EmptyDataException from exc
     if raw_date != stocks_date:
         raise AttributeError('Date match error')
     return [date, offer.replace('.', ','), offer_tmo.replace('.', ','), stock_value]

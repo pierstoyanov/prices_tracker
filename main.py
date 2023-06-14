@@ -7,8 +7,8 @@ from bot import bot
 from bot.daly_data import build_daly_info
 from bot.messages import msg_text_w_keyboard
 from bot.users_actions import get_users_id
-from data_collection.act_requests import data_management_with_requests
-from data_collection.act_requests_template_patten import DataManagementWithRequests
+from data_collection.functional.act_requests import data_management_with_requests
+from data_collection.template_pattern.act_requests_template_patten import DataManagementWithRequests
 from logger.logger import logging
 from request_handlers import viber_request_handler
 
@@ -46,7 +46,7 @@ def get_data():
 
     # selector variable that chooses between
     # act_requests and act_requests_template_pattern
-    use_requests = False
+    use_requests = True
 
     # if request.headers.get(gc_scheduler) == job_name:
     if use_requests:
@@ -54,8 +54,10 @@ def get_data():
         gc.collect()
         return Response(status=200)
     else:
-        DataManagementWithRequests().run()
-    return Response(status=400)
+        result = DataManagementWithRequests().run()
+        if result == 0:
+            return Response(status=200)
+    return Response(status=500)
 
 
 @app.route('/sendmsg', methods=['GET'])

@@ -6,10 +6,10 @@ from bs4 import BeautifulSoup
 from bot.daly_data import get_daly
 from data_collection.exceptions import EmptyDataException, SameDayDataException
 from data_collection.headers import lmba_headers, lme_headers, ua_header
-from data_collection.json_to_input import cu_jsons_to_input, au_json_to_input, \
+from data_collection.to_input_converters.json_to_input import cu_jsons_to_input, au_json_to_input, \
     ag_json_to_input
-from data_collection.pandas_to_input import power_soup_to_data
-from data_collection.soup_to_input import bnb_soup_to_data, wm_soup_to_data_no_query
+from data_collection.to_input_converters.pandas_to_input import power_soup_to_data
+from data_collection.to_input_converters.soup_to_input import bnb_soup_to_data, wm_soup_to_data_no_query
 from google_sheets.google_sheets_api_operations import append_values
 from google_sheets.google_service import build_google_service
 from logger.logger import logging
@@ -43,6 +43,7 @@ def verify_collected_data(input_data: list, last_data: dict):
 
 class DataRequestStoreTemplate:
     """Template for data request and store to google sheets"""
+
     def __init__(self, service, session, sh_id: str, last_data: dict,
                  store_to_page: str, store_range: str, url_headers: tuple,
                  average_cols=None):
@@ -54,7 +55,7 @@ class DataRequestStoreTemplate:
         self.store_to_page = store_to_page
         self.store_range, self.average_cols = store_range, average_cols
         self.raw_response = []
-        self.input_data = []
+        self.input_data: list = []
 
     def request_data(self, url_headers_tuples: tuple):
         """Fetch data from url and store it in instance variable self.raw_response
@@ -84,16 +85,11 @@ class DataRequestStoreTemplate:
         """
         try:
             verify_collected_data(self.input_data, self.last_data)
-            # add average cols formula to input data if needed
-            if self.average_cols:
-                self.input_data.append(average_cols_formula(
-                    self.last_data.get('_rownum'),
-                    self.average_cols))
 
             append_values(service=self.service,
                           spreadsheet_id=self.sh_id,
                           range_name=f'{self.store_to_page}!{self.store_range}',
-                          values=[self.input_data],
+                          values=self.input_data,
                           value_input_option='USER_ENTERED')
         except Exception as e:
             data_logger.exception('%s', e)
@@ -101,6 +97,7 @@ class DataRequestStoreTemplate:
 
 class CuDataRequest(DataRequestStoreTemplate):
     """ inherits from DataRequestStoreTemplate """
+
     def process_data(self):
         data = []
         self.request_data(self.url_headers)
@@ -108,23 +105,25 @@ class CuDataRequest(DataRequestStoreTemplate):
         for response in self.raw_response:
             data.append(response.json())
 
-        self.input_data = cu_jsons_to_input(data)
+        self.input_data.append(cu_jsons_to_input(data))
         self.store_data()
         self.raw_response = []  # clear raw response
 
 
 class WmDataRequest(DataRequestStoreTemplate):
     """ inherits from DataRequestStoreTemplate """
+
     def process_data(self):
         self.request_data(self.url_headers)
         soup = BeautifulSoup(self.raw_response[0].content, 'html.parser')
-        self.input_data = wm_soup_to_data_no_query(soup)
+        self.input_data.append(wm_soup_to_data_no_query(soup))
         self.store_data()
         self.raw_response = []  # clear raw response
 
 
 class AuDataRequest(DataRequestStoreTemplate):
     """ inherits from DataRequestStoreTemplate """
+
     def process_data(self):
         data = []
         self.request_data(self.url_headers)
@@ -132,42 +131,56 @@ class AuDataRequest(DataRequestStoreTemplate):
         for response in self.raw_response:
             data.append(response.json())
 
-        self.input_data = au_json_to_input(data)
+        edited_input: list = au_json_to_input(data)
+        # add average cols formula to input data if needed
+        if self.average_cols:
+            edited_input.append(average_cols_formula(
+                self.last_data.get('_rownum'),
+                self.average_cols)
+            )
+
+        self.input_data.append(edited_input)
         self.store_data()
         self.raw_response = []  # clear raw response
 
 
 class AgDataRequest(DataRequestStoreTemplate):
     """ inherits from DataRequestStoreTemplate """
+
     def process_data(self):
         self.request_data(self.url_headers)
-        self.input_data = ag_json_to_input(self.raw_response[0].json())
+        self.input_data.append(ag_json_to_input([self.raw_response[0].json()]))
         self.store_data()
         self.raw_response = []  # clear raw response
 
 
 class ExchangeRatesRequest(DataRequestStoreTemplate):
     """ inherits from DataRequestStoreTemplate """
+
     def process_data(self):
         self.request_data(self.url_headers)
         soup = BeautifulSoup(self.raw_response[0].content, 'html.parser')
-        self.input_data = bnb_soup_to_data(soup)
+        self.input_data.append(bnb_soup_to_data(soup))
         self.store_data()
         self.raw_response = []  # clear raw response
 
 
 class PowerRequest(DataRequestStoreTemplate):
     """ inherits from DataRequestStoreTemplate """
+
     def process_data(self):
         self.request_data(self.url_headers)
-        soup = BeautifulSoup(self.raw_response[0].content, 'html.parser')
-        self.input_data = power_soup_to_data(response=soup, service=self.service, sh_id=self.sh_id)
+        self.input_data = power_soup_to_data(
+            response=self.raw_response[0],
+            last_date=self.last_data.get("Date")
+        )
         self.store_data()
         self.raw_response = []  # clear raw response
 
 
 class DataManagementWithRequests:
     """Singleton class for arrange staging and executing data collection and storage"""
+
     def __init__(self):
         self.sheets_service = build_google_service(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'))
         self.session = requests.Session()
@@ -184,8 +197,17 @@ class DataManagementWithRequests:
         self.data_requests.append(request)
 
     def execute_data_requests(self):
+        error_count = 0
+
         for request in self.data_requests:
-            request.process_data()
+            try:
+                request.process_data()
+            except Exception as e:
+                data_logger.error(e)
+                error_count += 1
+                continue
+
+        return error_count
 
     def stage_data_requests(self):
         """Hardcoded data request objects for processing"""
@@ -256,7 +278,9 @@ class DataManagementWithRequests:
     def run(self):
         """Main class execution method"""
         self.stage_data_requests()
-        self.execute_data_requests()
+        err_count = self.execute_data_requests()
+
+        return err_count
 
 
 # Press the green button in the gutter to run the script.

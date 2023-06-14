@@ -8,10 +8,10 @@ from bs4 import BeautifulSoup
 from bot.daly_data import get_daly
 from data_collection.exceptions import EmptyDataException, SameDayDataException
 from data_collection.headers import lmba_headers, lme_headers, ua_header
-from data_collection.json_to_input import cu_jsons_to_input, au_json_to_input, \
+from data_collection.to_input_converters.json_to_input import cu_jsons_to_input, au_json_to_input, \
     ag_json_to_input
-from data_collection.pandas_to_input import power_soup_to_data
-from data_collection.soup_to_input import wm_soup_to_data, bnb_soup_to_data, wm_soup_to_data_no_query
+from data_collection.to_input_converters.pandas_to_input import power_soup_to_data
+from data_collection.to_input_converters.soup_to_input import bnb_soup_to_data, wm_soup_to_data_no_query
 from google_sheets.google_sheets_api_operations import append_values
 from google_sheets.google_service import build_google_service
 from logger.logger import logging
@@ -69,7 +69,12 @@ def request_to_pandas_store(service, sh_id: str, url: str, headers: dict, to_dat
             values=input_data,
             value_input_option='USER_ENTERED',
         )
-        data_logger.info(result)
+
+        data_logger.info("%s range updated, rows %s, cells %s ",
+                         result.get("updatedRange"),
+                         result.get("updatedRows"),
+                         result.get("updatedCells")
+                         )
 
     except Exception as e:
         data_logger.exception('%s', e)

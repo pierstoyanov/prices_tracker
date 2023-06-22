@@ -1,12 +1,24 @@
 # syntax=docker/dockerfile:1
 
 FROM python:3.10
+ENV PYTHONUNBUFFERED 1
 
-WORKDIR /PricesTracker
-
-COPY requirements.txt requirements.txt
+# Install dependencies
+COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 
-COPY . .
+# Copy application code
+COPY . /app
 
+WORKDIR /app
+
+ENV RUNINDOCKER=1
+
+# Load environment variables from .env file
+ENV PATH="/${PATH}"
+COPY .env /.env
+
+ENV FLASK_APP=main.py
+
+# Run the application
 CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]

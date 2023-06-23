@@ -6,3 +6,4 @@ secrets/
 log/
 other_code/
 /playwright*
+app_engine/

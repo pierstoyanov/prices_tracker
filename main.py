@@ -1,5 +1,5 @@
-import gc
 import os
+import gc
 
 from dotenv import load_dotenv
 from flask import Flask, request, Response
@@ -13,9 +13,6 @@ from data_collection.template_pattern.act_requests_template_patten import DataMa
 from logger.logger import logging
 from request_handlers import viber_request_handler
 
-# load dotenv vars if running inside docker image
-if os.getenv("RUNINDOCKER"):
-    load_dotenv()
 
 # Logger
 app_logger = logging.getLogger(__name__)
@@ -103,5 +100,9 @@ def register():
 
 
 if __name__ == '__main__':
+    from dotenv import load_dotenv
+
+    load_dotenv()
     # app.run(debug=True, host='localhost', port=8080)
-    app.run()
+    app.run(host='0.0.0.0',
+            port=int(os.environ.get('PORT', 8080)))

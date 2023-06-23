@@ -1,7 +1,14 @@
+README.md
+*.pyc
+*.pyo
+*.pyd
 .idea/
 .vscode/
 .git/
 .venv/
+.secrets/
+.app_engine/
 __pycache__/
 .gitignore
 Dockerfile
+.pytest_cache

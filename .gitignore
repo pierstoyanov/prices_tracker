@@ -1,5 +1,7 @@
 *.png
 *.pdf
+*.env
+.vscode/
 venv/
 .idea/
 secrets/
@@ -7,3 +9,5 @@ log/
 other_code/
 /playwright*
 app_engine/
+__pycache__/
+headers.py

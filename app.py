@@ -1,7 +1,7 @@
 import os
 import gc
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from flask import Flask, request, Response
 
 from bot import bot
@@ -26,7 +26,7 @@ viber = bot.viber
 
 @app.route('/', methods=['POST'])
 def incoming():
-    """ Function to handle incomming requests from viber api."""
+    """ Function to handle incoming requests from viber api."""
     app_logger.debug("received request. %s", request.get_data())
 
     if not viber.verify_signature(
@@ -100,9 +100,8 @@ def register():
 
 
 if __name__ == '__main__':
-    from dotenv import load_dotenv
-
-    load_dotenv()
+    # from dotenv import load_dotenv
+    #
+    # load_dotenv()
     # app.run(debug=True, host='localhost', port=8080)
-    app.run(host='0.0.0.0',
-            port=int(os.environ.get('PORT', 8080)))
+    app.run(debug=True, host='0.0.0.0')

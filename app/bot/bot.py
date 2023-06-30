@@ -3,8 +3,8 @@ from viberbot import Api
 from viberbot.api.bot_configuration import BotConfiguration
 from viberbot.api.messages import TextMessage
 
-from app.logger.logger import logging
-from app.google_sheets.google_service import build_google_service
+from logger.logger import logging
+from google_sheets.google_service import build_google_service
 
 
 # logger

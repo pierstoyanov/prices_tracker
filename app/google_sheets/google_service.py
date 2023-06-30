@@ -2,7 +2,7 @@ from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from app.google_sheets.google_sheets_api_operations import goog_logger
+from google_sheets.google_sheets_api_operations import goog_logger
 
 
 def build_google_service(service_acc_file):

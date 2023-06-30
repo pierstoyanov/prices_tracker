@@ -1,7 +1,7 @@
 import os
 
-from app.bot.bot import sheets_service, bot_logger
-from app.google_sheets.google_sheets_api_operations import get_multiple_named_ranges
+from bot.bot import sheets_service, bot_logger
+from google_sheets.google_sheets_api_operations import get_multiple_named_ranges
 
 
 def test_date(c, cw, au, ag):

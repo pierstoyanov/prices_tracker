@@ -1,5 +1,5 @@
 from viberbot.api.messages import TextMessage, KeyboardMessage
-from app.bot.keyboards import keyboard, welcome_keyboard
+from bot.keyboards import keyboard, welcome_keyboard
 
 
 def msg_welcome_keyboard():

@@ -9,19 +9,23 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
+# Load environment variables from .env file
+ENV PATH="/${PATH}"
+COPY .env /.env
+
+# Envar for service acc location
+ENV GOOGLE_APPLICATION_CREDENTIALS=./service_acc/service-account.json
+
+# Copy service acc file 
+COPY ./secrets/service-account.json /app/service_acc/
+
 # Install pip requirements
 COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 
-# Copy service acc file 
-COPY ../secrets/service-account.json /app/service_acc/
-
 # Copy application files
 WORKDIR /app
-COPY . /app
-
-ENV GOOGLE_APPLICATION_CREDENTIALS=./service_acc/service-account.json
-
+COPY ./app/ /app
 
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
 # For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers
@@ -29,4 +33,4 @@ RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /
 USER appuser
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:main"]

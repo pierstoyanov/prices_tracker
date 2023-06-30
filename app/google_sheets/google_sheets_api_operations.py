@@ -3,7 +3,7 @@ from typing import Literal
 from googleapiclient.errors import HttpError
 
 # logger
-from logger.logger import logging
+from app.logger.logger import logging
 goog_logger = logging.getLogger(__name__)
 
 # Literals for string params in google sheets api

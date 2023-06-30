@@ -2,13 +2,13 @@ import re
 
 from flask import Response
 from viberbot.api.viber_requests import ViberMessageRequest, ViberRequest
-from bot.bot import viber
-from bot.daly_data import build_daly_info
-from bot.messages import msg_subbed, msg_text_w_keyboard, msg_info, \
+from app.bot import viber
+from app.bot import build_daly_info
+from app.bot import msg_subbed, msg_text_w_keyboard, msg_info, \
     msg_unknown, msg_welcome_keyboard, msg_user_keyboard
-from bot.request_data import check_valid_date, build_requested_day_info
-from bot.users_actions import add_new_user, remove_user
-from logger.logger import logging
+from app.bot import check_valid_date, build_requested_day_info
+from app.bot import add_new_user, remove_user
+from app.logger import logging
 
 # logger
 handler_logger = logging.getLogger(__name__)

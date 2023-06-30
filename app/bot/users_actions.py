@@ -1,7 +1,7 @@
 import os
 from googleapiclient.errors import HttpError
-from bot.bot import bot_logger, sheets_service
-from google_sheets.google_sheets_api_operations import find_row_of_item_in_sheet, delete_row
+from app.bot.bot import bot_logger, sheets_service
+from app.google_sheets.google_sheets_api_operations import find_row_of_item_in_sheet, delete_row
 
 spreadsheet_id = os.environ['SPREADSHEET_USERS']
 

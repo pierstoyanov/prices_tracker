@@ -4,13 +4,13 @@ import gc
 # from dotenv import load_dotenv
 from flask import Flask, request, Response
 
-from bot import bot
-from bot.daly_data import build_daly_info
-from bot.messages import msg_text_w_keyboard
-from bot.users_actions import get_users_id
-from data_collection.functional.act_requests import data_management_with_requests
-from data_collection.template_pattern.act_requests_template_patten import DataManagementWithRequests
-from logger.logger import logging
+from app.bot import bot
+from app.bot import build_daly_info
+from app.bot import msg_text_w_keyboard
+from app.bot import get_users_id
+from app.data_collection.functional.act_requests import data_management_with_requests
+from app.data_collection.template_pattern.act_requests_template_patten import DataManagementWithRequests
+from app.logger import logging
 from request_handlers import viber_request_handler
 
 

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from data_collection.exceptions import EmptyDataException
+from app.data_collection.exceptions import EmptyDataException
 
 
 def cu_jsons_to_input(jsons: list):

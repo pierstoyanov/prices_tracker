@@ -5,7 +5,7 @@ services:
     image: pricestracker
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: .Dockerfile
     env_file:
       - .env
     ports:

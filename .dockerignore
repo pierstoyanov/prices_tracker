@@ -27,5 +27,5 @@
 **/README.md
 **/idea/
 **/other_code/
-*/secrets
+# */secrets
 **/.gcloudignore

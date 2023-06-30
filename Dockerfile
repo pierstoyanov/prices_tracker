@@ -13,9 +13,6 @@ ENV PYTHONUNBUFFERED=1
 ENV PATH="/${PATH}"
 COPY .env /.env
 
-# Envar for service acc location
-ENV GOOGLE_APPLICATION_CREDENTIALS=./service_acc/service-account.json
-
 # Copy service acc file 
 COPY ./secrets/service-account.json /app/service_acc/
 

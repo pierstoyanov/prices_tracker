@@ -21,7 +21,12 @@ def get_daly(service, return_dict=False):
         named_ranges=ranges,
         value_render_option='UNFORMATTED_VALUE',
         date_time_render_option='FORMATTED_STRING'
-    ).get('valueRanges')
+    )
+    try:
+        result = result.get('valueRanges')
+    except AttributeError:
+        bot_logger.error("Failed to access sheets")
+        return
 
     if return_dict:
         return dict(zip(ranges,

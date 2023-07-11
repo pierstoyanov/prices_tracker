@@ -92,16 +92,13 @@ def register():
     """Function to register webhook to viber"""
     # 'delivered', 'seen', 'failed', 'subscribed',
     # 'unsubscribed', 'conversation_started'
-    events = ['message', 'seen', 'subscribed',
-              'unsubscribed', 'conversation_started']
-    res = viber.set_webhook(os.environ['WH'], webhook_events=events)
-    app_logger.info('Webhook response: %s', res)
+    webhook_events = ['message', 'seen', 'subscribed',
+              'unsubscribed', 'conversation_started', 'webhook']
+    result = viber.set_webhook(os.environ['WH'],
+                               webhook_events = webhook_events)
+    app_logger.info('Webhook response: %s', result)
     return Response(status=200)
 
 
 if __name__ == '__main__':
-    # from dotenv import load_dotenv
-    #
-    # load_dotenv()
-    # app.run(debug=True, host='localhost', port=8080)
-    app.run(debug=True, host='0.0.0.0')
+    app.run(host='0.0.0.0', port=8080)

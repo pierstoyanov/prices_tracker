@@ -13,7 +13,7 @@ from data_collection.to_input_converters.json_to_input import cu_jsons_to_input,
 from data_collection.to_input_converters.pandas_to_input import power_soup_to_data
 from data_collection.to_input_converters.soup_to_input import bnb_soup_to_data, wm_soup_to_data_no_query
 from google_sheets.google_sheets_api_operations import append_values
-from google_sheets.google_service import build_google_service
+from google_sheets.google_service import build_default_google_service
 from logger.logger import logging
 
 # create local log
@@ -154,7 +154,7 @@ def request_json_and_store(service, sh_id: str, urls: list, headers: dict,
 def data_management_with_requests():
     """Main fn that executes all data gather with requests"""
 
-    sheets_service = build_google_service(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'))
+    sheets_service = build_default_google_service()
     spreadsheet_id = os.environ['SPREADSHEET_DATA']
     # last data
     c, cw, au, ag, rates, power = [dict(zip(x['values'][0], x['values'][1])) for x in get_daly(sheets_service)]

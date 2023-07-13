@@ -4,14 +4,15 @@ from viberbot.api.bot_configuration import BotConfiguration
 from viberbot.api.messages import TextMessage
 
 from logger.logger import logging
-from google_sheets.google_service import build_google_service
+from google_sheets.google_service import \
+    build_google_service, build_default_google_service
 
 
 # logger
 bot_logger = logging.getLogger('bot')
 
 # google api service instance for using sheets
-sheets_service = build_google_service(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'))
+sheets_service = build_default_google_service()
 
 bot_configuration = BotConfiguration(
     name=os.environ['BOT_NAME'],

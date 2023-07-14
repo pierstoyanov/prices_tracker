@@ -43,7 +43,7 @@ def incoming():
 
 @app.route('/collectdata', methods=['GET'])
 def get_data():
-    # check GAE scheduler header
+    # check GCloud scheduler header
     job_name = os.environ['GATHER_JOB']
     gc_scheduler = 'X-CloudScheduler-JobName'
 
@@ -51,15 +51,15 @@ def get_data():
     # act_requests and act_requests_template_pattern
     use_requests = False
 
-    # if request.headers.get(gc_scheduler) == job_name:
-    if use_requests:
-        data_management_with_requests()
-        gc.collect()
-        return Response(status=200)
-    else:
-        result = DataManagementWithRequests().run()
-        if result == 0:
+    if request.headers.get(gc_scheduler) == job_name:
+        if use_requests:
+            data_management_with_requests()
+            gc.collect()
             return Response(status=200)
+        else:
+            result = DataManagementWithRequests().run()
+            if result == 0:
+                return Response(status=200)
     return Response(status=500)
 
 
@@ -72,9 +72,11 @@ def send_msg():
     # daly data
     daly = build_daly_info()
 
-    # check GAE cron header
-    gae_cron = 'X-Appengine-Cron'
-    if request.headers.get(gae_cron):
+    # check Gcloud scheduler header
+    job_name = os.environ['SEND_JOB']
+    gc_scheduler = 'X-CloudScheduler-JobName'
+
+    if request.headers.get(gc_scheduler) == job_name:
         count = len(users)
         for u in users:
             tokens = viber.send_messages(u, [
@@ -101,4 +103,4 @@ def register():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080, debug=True)

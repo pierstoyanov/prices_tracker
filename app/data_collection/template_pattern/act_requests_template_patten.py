@@ -40,8 +40,9 @@ def verify_collected_data(input_data: list, last_data: dict):
     if len(input_data) <= 0:
         raise EmptyDataException
     # check data not same as last day
-    if last_data.get('Date') == input_data[0]:
-        raise SameDayDataException
+    for i in input_data:
+        if last_data.get('Date') == i[0]:
+            raise SameDayDataException
 
 
 class DataRequestStoreTemplate:
@@ -106,6 +107,7 @@ class CuDataRequest(DataRequestStoreTemplate):
         self.request_data(self.url_headers)
 
         for response in self.raw_response:
+
             data.append(response.json())
 
         self.input_data.append(cu_jsons_to_input(data))

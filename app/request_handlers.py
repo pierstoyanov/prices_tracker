@@ -1,7 +1,7 @@
 import re
 
 from flask import Response
-from viberbot.api.viber_requests import ViberMessageRequest, ViberRequest
+from viberbot.api.viber_requests import  ViberRequest, ViberMessageRequest, ViberSubscribedRequest, ViberConversationStartedRequest, ViberUnsubscribedRequest, ViberDeliveredRequest, ViberSeenRequest
 from bot.bot import viber
 from bot.daly_data import build_daly_info
 from bot.messages import msg_subbed, msg_text_w_keyboard, msg_info, \
@@ -75,7 +75,7 @@ def handle_message(viber_request: ViberMessageRequest):
         return Response(status=500)
 
 
-def handle_conversation_started(viber_request: ViberMessageRequest):
+def handle_conversation_started(viber_request: ViberConversationStartedRequest):
     """Handler for conversation started request object"""
     try:
         viber.send_messages(viber_request.user.id, [
@@ -87,7 +87,7 @@ def handle_conversation_started(viber_request: ViberMessageRequest):
         return Response(status=500)
 
 
-def handle_subscribed(viber_request: ViberMessageRequest):
+def handle_subscribed(viber_request: ViberSubscribedRequest):
     """Handler for subscribed request object
     :return: Response object"""
 
@@ -105,23 +105,23 @@ def handle_subscribed(viber_request: ViberMessageRequest):
     return Response(status=200)
 
 
-def handle_unsubscribed(viber_request: ViberMessageRequest):
+def handle_unsubscribed(viber_request: ViberUnsubscribedRequest):
     """Handler for unsubscribed request object
     :return: Response object"""
 
     # unregister user
-    result = remove_user(viber_request.user)
+    result = remove_user(viber_request.user_id)
     if not result:
         return Response(status=500)
     return Response(status=200)
 
 
-def handle_delivered(viber_request: ViberMessageRequest):
+def handle_delivered(viber_request: ViberDeliveredRequest):
     handler_logger.info('User %s received %s', viber_request.user_id, viber_request.message_token)
     return Response(status=200)
 
 
-def handle_seen(viber_request: ViberMessageRequest):
+def handle_seen(viber_request: ViberSeenRequest):
     handler_logger.info('User %s seen %s', viber_request.user_id, viber_request.message_token)
     return Response(status=200)
 

@@ -189,7 +189,7 @@ class DataManagementWithRequests:
     def __init__(self):
         self.sheets_service = build_google_service(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'))
         self.session = requests.Session()
-        self.spreadsheet_id: str = os.environ['SPREADSHEET_DATA']
+        self.spreadsheet_id: str = os.environ.get('SPREADSHEET_DATA')
         self.data_requests: list[DataRequestStoreTemplate] = []
         self.last_data: dict = self.get_last_data()
 

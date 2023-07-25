@@ -3,7 +3,7 @@ from googleapiclient.errors import HttpError
 from bot.bot import bot_logger, sheets_service
 from google_sheets.google_sheets_api_operations import find_row_of_item_in_sheet, delete_row
 
-spreadsheet_id = os.environ['SPREADSHEET_USERS']
+spreadsheet_id = os.environ.get('SPREADSHEET_DATA')
 
 
 def get_users_id(service=sheets_service):

@@ -15,8 +15,8 @@ bot_logger = logging.getLogger('bot')
 sheets_service = build_default_google_service()
 
 bot_configuration = BotConfiguration(
-    name=os.environ['BOT_NAME'],
-    auth_token=os.environ['BOT_TOKEN'],
+    name=os.environ.get('BOT_NAME'),
+    auth_token=os.environ.get('BOT_TOKEN'),
     avatar='http://viber.com/avatar.jpg'
 )
 

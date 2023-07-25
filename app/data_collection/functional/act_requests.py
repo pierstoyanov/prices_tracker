@@ -155,7 +155,7 @@ def data_management_with_requests():
     """Main fn that executes all data gather with requests"""
 
     sheets_service = build_default_google_service()
-    spreadsheet_id = os.environ['SPREADSHEET_DATA']
+    spreadsheet_id = os.environ.get('SPREADSHEET_DATA')
     # last data
     c, cw, au, ag, rates, power = [dict(zip(x['values'][0], x['values'][1])) for x in get_daly(sheets_service)]
 

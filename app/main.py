@@ -44,7 +44,7 @@ def incoming():
 @app.route('/collectdata', methods=['GET'])
 def get_data():
     # check GCloud scheduler header
-    job_name = os.environ['GATHER_JOB']
+    job_name = os.environ.get('GATHER_JOB')
     gc_scheduler = 'X-CloudScheduler-JobName'
 
     # selector variable that chooses between
@@ -73,7 +73,7 @@ def send_msg():
     daly = build_daly_info()
 
     # check Gcloud scheduler header
-    job_name = os.environ['SEND_JOB']
+    job_name = os.environ.get('SEND_JOB')
     gc_scheduler = 'X-CloudScheduler-JobName'
 
     if request.headers.get(gc_scheduler) == job_name:

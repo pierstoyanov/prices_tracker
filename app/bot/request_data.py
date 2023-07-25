@@ -33,7 +33,7 @@ def check_valid_date(message: str):
 
 def query_day(service, rq_date: str, ranges: list):
     """ Returns raw info for specific day. Param: google sheets service, date string in format"""
-    spreadsheet_id = os.environ['SPREADSHEET_DATA']
+    spreadsheet_id = os.environ.get('SPREADSHEET_DATA')
 
     # set query date
     update_rq = update_values_in_sheet(

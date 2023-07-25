@@ -13,7 +13,7 @@ def test_date(c, cw, au, ag):
 
 def get_daly(service, return_dict=False):
     """ Returns raw daly info. Param: google sheets service"""
-    spreadsheet_id = os.environ['SPREADSHEET_DATA']
+    spreadsheet_id = os.environ.get('SPREADSHEET_DATA')
     ranges = ['cudaly', 'cuwmdaly', 'audaly', 'agdaly', 'rates', 'power']
     result = get_multiple_named_ranges(
         service=service,

@@ -68,7 +68,7 @@ def batch_update_table(service, values: list, page: str,
     """"Add multiple rows to page in a table"""
     body = {"values": values}
     result = service.spreadsheets().values().append(
-        spreadsheetId=os.environ['SPREADSHEET_DATA'],
+        spreadsheetId=os.environ.get('SPREADSHEET_DATA'),
         valueInputOption='USER_ENTERED',
         body=body,
         range=f"{page}!{start_col}{start_row}:{end_col}{start_row}"

@@ -7,6 +7,7 @@ from google_sheets.google_sheets_api_operations import goog_logger
 
 
 def build_google_service(service_acc_file):
+    """Build google service for sheets use from service account keyfile"""
     scopes = ['https://www.googleapis.com/auth/spreadsheets',
               'https://www.googleapis.com/auth/drive']
     try:
@@ -26,6 +27,8 @@ def build_google_service(service_acc_file):
 
 
 def build_default_google_service():
+    """"Build google service for sheets using the default credentials
+    provided to the container/app"""
     scopes = ['https://www.googleapis.com/auth/spreadsheets',
               'https://www.googleapis.com/auth/drive']
     try:

@@ -187,7 +187,7 @@ class DataManagementWithRequests:
     """Singleton class for arrange staging and executing data collection and storage"""
 
     def __init__(self):
-        self.sheets_service = build_google_service(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'))
+        self.sheets_service = build_default_google_service()
         self.session = requests.Session()
         self.spreadsheet_id: str = os.environ.get('SPREADSHEET_DATA')
         self.data_requests: list[DataRequestStoreTemplate] = []

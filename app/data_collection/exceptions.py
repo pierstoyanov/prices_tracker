@@ -1,4 +1,3 @@
-
 class EmptyDataException(Exception):
     """Raised when no input data or no data collected"""
     pass

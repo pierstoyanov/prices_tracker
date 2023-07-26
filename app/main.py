@@ -4,15 +4,14 @@ import gc
 # from dotenv import load_dotenv
 from flask import Flask, request, Response
 
-from bot import bot
-from bot.daly_data import build_daly_info
-from bot.messages import msg_text_w_keyboard
-from bot.users_actions import get_users_id
 from data_collection.functional.act_requests import data_management_with_requests
 from data_collection.template_pattern.act_requests_template_patten import DataManagementWithRequests
 from logger.logger import logging
 from request_handlers import viber_request_handler
-
+from bot import bot
+from bot.daly_data import build_daly_info
+from bot.messages import msg_text_w_keyboard
+from bot.users_actions import get_users_id
 
 # Logger
 app_logger = logging.getLogger(__name__)
@@ -49,10 +48,10 @@ def get_data():
 
     # selector variable that chooses between
     # act_requests and act_requests_template_pattern
-    use_requests = False
+    use_functional = False
 
     if request.headers.get(gc_scheduler) == job_name:
-        if use_requests:
+        if use_functional:
             data_management_with_requests()
             gc.collect()
             return Response(status=200)

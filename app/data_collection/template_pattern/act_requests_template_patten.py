@@ -3,7 +3,6 @@ import requests
 from bs4 import BeautifulSoup
 # from memory_profiler import profile
 
-from bot.daly_data import get_daly
 from data_collection.exceptions import EmptyDataException, SameDayDataException
 from data_collection.headers import lmba_headers, lme_headers, ua_header
 from data_collection.to_input_converters.json_to_input import \
@@ -13,9 +12,9 @@ from data_collection.to_input_converters.pandas_to_input import \
 from data_collection.to_input_converters.soup_to_input import \
     bnb_soup_to_data, wm_soup_to_data_no_query
 from google_sheets.google_sheets_api_operations import append_values
-from google_sheets.google_service import \
-    build_google_service, build_default_google_service
+from google_sheets.google_service import build_default_google_service
 from logger.logger import logging
+from bot.daly_data import get_daly
 
 # create local log
 data_logger = logging.getLogger('data_collection.act_requests')

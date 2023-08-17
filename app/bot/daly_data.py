@@ -41,6 +41,14 @@ def build_daly_info():
         s_chart, s_dollar, s_calendar, s_usd, s_pound, s_hv \
             = '\U0001F4C8', '\U0001F4B2', '\U0001F4C5', '\U0001F4B5', '\U0001F4B7', '\U000026A1'
 
+        # determine newer date
+        lm_date, wm_date = datetime.striptime(c["Date"], "%d/%m/%Y"), datetime.striptime(cw["Date"], "%d/%m/%Y"), 
+        if  lm_date > wm_date:
+            c["Date"] = cw["Date"]
+            c["Offer"] = cw["Offer"]
+            c["3mo"] = cw["3mo"]
+            c["Stock"] = cw["Stock"]
+
         text = f'' \
                f'{s_calendar} Дата: {c["Date"]}\n {date_status}\n' \
                f'{s_chart}Мед\n' \

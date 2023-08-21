@@ -1,5 +1,5 @@
 import os
-
+from datetime import datetime
 from bot.bot import sheets_service, bot_logger
 from google_sheets.google_sheets_api_operations import get_multiple_named_ranges
 
@@ -42,16 +42,19 @@ def build_daly_info():
             = '\U0001F4C8', '\U0001F4B2', '\U0001F4C5', '\U0001F4B5', '\U0001F4B7', '\U000026A1'
 
         # determine newer date
-        lm_date, wm_date = datetime.striptime(c["Date"], "%d/%m/%Y"), datetime.striptime(cw["Date"], "%d/%m/%Y"), 
-        if  lm_date > wm_date:
+        lm_date, wm_date = datetime.strptime(c["Date"], "%d.%m.%Y"), \
+                    datetime.strptime(cw["Date"], "%d.%m.%Y"), 
+        symbol = "LME"
+        if  lm_date < wm_date:
             c["Date"] = cw["Date"]
             c["Offer"] = cw["Offer"]
             c["3mo"] = cw["3mo"]
             c["Stock"] = cw["Stock"]
+            symbol = "Westmetal"
 
         text = f'' \
                f'{s_calendar} Дата: {c["Date"]}\n {date_status}\n' \
-               f'{s_chart}Мед\n' \
+               f'{s_chart}Мед {symbol}\n' \
                f'Offer: *{c["Offer"]:,.2f}{s_dollar}*\n' \
                f'3 month: *{c["3mo"]:,.2f}{s_dollar}*\n' \
                f'Stock: *{c["Stock"]:}*\n' \

@@ -1,5 +1,17 @@
 from viberbot.api.messages import TextMessage, KeyboardMessage
-from bot.keyboards import keyboard, welcome_keyboard
+from app.bot.messages.keyboards import keyboard, welcome_keyboard
+
+
+c, chk_mrk, left_arr = '\U000000A9', '\U00002714', '\U00002B05'
+info_txt = "✅ pspricesbot © изпраща дневна информация в 09:00.\n" \
+           "✅ За конкретна дата въведете ден във формат  *'дд/мм/гггг'*.\n" \
+           "✅ Плъзнете наляво ⬅️ за допълнителни настройки" \
+           "от Viber (тихо доставяне, отписване)."
+wrong = "Подадената дата е грешна\u2757 \n"
+wrong_day = "\u2B55 Денят е невалиден.\n"
+wrong_month = "\u2B55 Месецът е невалиден.\n"
+wrong_year = "\u2B55 Годината е невалидна.\n"
+unknown_txt = "Неразпозната команда. За повече информация натиснете: \u2139."
 
 
 def msg_welcome_keyboard():
@@ -11,19 +23,6 @@ def msg_user_keyboard():
     return KeyboardMessage(tracking_data='tracking_data',
                            keyboard=keyboard)
 
-
-c, chk_mrk, left_arr = '\U000000A9', '\U00002714', '\U00002B05'
-info_txt = "✅ pspricesbot © изпраща дневна информация в 09:00.\n" \
-           "✅ За конкретна дата въведете ден във формат  *'дд/мм/гггг'*.\n" \
-           "✅ Плъзнете наляво ⬅️ за допълнителни настройки" \
-           " от Viber (тихо доставяне, отписване)."
-
-wrong = "Подадената дата е грешна\u2757 \n"
-wrong_day = "\u2B55 Денят е невалиден.\n"
-wrong_month = "\u2B55 Месецът е невалиден.\n"
-wrong_year = "\u2B55 Годината е невалидна.\n"
-
-unknown_txt = "Неразпозната команда. За повече информация натиснете: \u2139."
 
 
 def msg_subbed(u):

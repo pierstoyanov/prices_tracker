@@ -1,5 +1,20 @@
 import os
 
+welcome_keyboard = {
+    "Type": "keyboard",
+    "Buttons": [{
+        "Columns": 6,
+        "Rows": 1,
+        "BgColor": "#00FF00",
+        "ActionType": "reply",
+        "ActionBody": "subscribe",
+        "Text": "Aбониране",
+        "TextSize": "large"
+    }
+    ]
+}
+
+
 keyboard = {
     "Type": "keyboard",
     "Buttons": [
@@ -77,19 +92,5 @@ keyboard = {
             "Text": "\u2139",
             "TextSize": "large"
         },
-    ]
-}
-
-welcome_keyboard = {
-    "Type": "keyboard",
-    "Buttons": [{
-        "Columns": 6,
-        "Rows": 1,
-        "BgColor": "#00FF00",
-        "ActionType": "reply",
-        "ActionBody": "subscribe",
-        "Text": "Aбониране",
-        "TextSize": "large"
-    }
     ]
 }

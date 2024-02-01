@@ -1,8 +1,10 @@
 import os
+from logger.logger import logging
 from datetime import datetime
-from bot.bot import sheets_service, bot_logger
+from bot.bot import sheets_service
 from google_sheets.google_sheets_api_operations import get_multiple_named_ranges
 
+messages_logger = logging.getLogger('messages')
 
 def test_date(c, cw, au, ag):
     if c['Date'] == cw['Date'] and cw['Date'] == au['Date'] and au['Date'] == ag['Date']:
@@ -11,7 +13,7 @@ def test_date(c, cw, au, ag):
         return '\u274C'
 
 
-def get_daly(service, return_dict=False):
+def get_daly(service, return_dict=False) -> dict | None:
     """ Returns raw daly info. Param: google sheets service"""
     spreadsheet_id = os.environ.get('SPREADSHEET_DATA')
     ranges = ['cudaly', 'cuwmdaly', 'audaly', 'agdaly', 'rates', 'power']
@@ -25,7 +27,7 @@ def get_daly(service, return_dict=False):
     try:
         result = result.get('valueRanges')
     except AttributeError:
-        bot_logger.error("Failed to access sheets")
+        messages_logger.error("Failed to access sheets")
         return
 
     if return_dict:
@@ -73,5 +75,5 @@ def build_daly_info():
 
         return text
     except KeyError as e:
-        bot_logger.info("Failed to build daly msg.")
+        messages_logger.info("Failed to build daly msg.")
         return e

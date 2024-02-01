@@ -1,10 +1,11 @@
 import os
 from datetime import datetime
-
-from bot.bot import sheets_service, bot_logger
-from bot.messages import wrong_day, wrong_month, wrong_year, wrong
+from logger.logger import logging
+from bot.bot import sheets_service
+from app.bot.messages.static_messages import wrong_day, wrong_month, wrong_year, wrong
 from google_sheets.google_sheets_api_operations import get_multiple_named_ranges, update_values_in_sheet
 
+messages_logger = logging.getLogger('messages')
 
 def test_date(c, cw, au, ag):
     if c['Date'] == cw['Date'] \

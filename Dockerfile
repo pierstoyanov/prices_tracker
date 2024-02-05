@@ -14,7 +14,7 @@ ENV PATH="/${PATH}"
 COPY .env /.env
 
 # Copy service acc file 
-COPY ./secrets/service-account.json /app/service_acc/
+COPY ./secrets/service-account.json /app/service_acc/service-account.json
 
 # Install pip requirements
 COPY requirements.txt .

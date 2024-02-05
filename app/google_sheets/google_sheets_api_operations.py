@@ -33,10 +33,7 @@ def append_values(service, spreadsheet_id: str, range_name: str,
                   values: list,
                   insert_data_option: InsertDataOptionLiterals = 'INSERT_ROWS'):
     """ Append values in to the last row of a named range in spreadsheet"""
-    body = {
-        'values': values
-    }
-
+    body = {'values': values}
     result = service.spreadsheets().values().append(
         spreadsheetId=spreadsheet_id,
         range=range_name,
@@ -167,7 +164,7 @@ def get_last_row_values(service, spreadsheet_id: str,
 
 
 @http_error_handler
-def get_multiple_named_ranges(service, spreadsheet_id: str, named_ranges: list,
+def get_multiple_named_ranges(service, spreadsheet_id: str | None, named_ranges: list,
                               value_render_option: ValueRenderOptionLiterals,
                               date_time_render_option: DateTimeRenderOptionLiterals):
     result = service.spreadsheets().values().batchGet(
@@ -185,9 +182,7 @@ def update_values_in_sheet(service, values: list, spreadsheet_id: str,
                            range_name: str,
                            value_input_option: ValueInputOptionLiterals):
 
-    body = {
-        'values': [values]
-    }
+    body = {'values': values}
 
     result = service.spreadsheets().values().update(
         spreadsheetId=spreadsheet_id,

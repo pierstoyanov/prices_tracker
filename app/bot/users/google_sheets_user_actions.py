@@ -55,7 +55,7 @@ class GoogleSheetsUserActions(UserActions):
         pass
 
 
-    def add_new_user(self, new_user: dict) -> bool | None:
+    def add_new_user(self, key: str, new_user: dict) -> bool | None:
         users = self.get_all_user_ids()
         vals = [[str(x) for x in new_user.__dict__.values()]]
         if len(users) == 0 or new_user.id not in users:
@@ -82,7 +82,7 @@ class GoogleSheetsUserActions(UserActions):
         pass
 
 
-    def remove_user(self, user_id: str) -> None:
+    def remove_user(self, user_id: str) -> bool:
         """Function to remove user by id from sheet.
         :returns: bool"""
         user_row = find_row_of_item_in_sheet(

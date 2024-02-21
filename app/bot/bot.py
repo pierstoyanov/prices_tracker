@@ -2,18 +2,10 @@ import os
 from viberbot import Api
 from viberbot.api.bot_configuration import BotConfiguration
 from viberbot.api.messages import TextMessage
-from app.bot.users.google_sheets_user_actions import GoogleSheetsUserActions
 from bot.users.composite_user_actions import CompositeUserActions
-from bot.users.firebasee_user_actions import FirebaseUserActions
-
+from bot.messages.daily_data import get_daily_data, build_daily_info
 from logger.logger import logging
-from google_sheets.google_service import \
-    build_google_service, build_default_google_service
-
-# google api service instance for using sheets
-sheets_service = build_default_google_service()
-
-bot_logger = logging.getLogger('bot')
+from storage.storage_manager import storage_manager
 
 bot_configuration = BotConfiguration(
     name=os.environ.get('BOT_NAME'),
@@ -34,12 +26,16 @@ class Bot:
         self.bot_logger = logging.getLogger('bot'),
         self.storage_strategy = storage_strategy,
         self.users = CompositeUserActions(storage_strategy)
+        self.sheets_service = storage_manager.get_sheets_service()
         
     def viber(self):
         return self.viber
 
-    def daily_data(self):
-        pass
+    def daily_data(self, *args, **kwargs):
+        return get_daily_data(self.sheets_service, *args, **kwargs)
+
+    def build_daily_info(self):
+        return build_daily_info(self.sheets_service)
 
     def request_data(self):
         pass

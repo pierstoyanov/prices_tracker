@@ -22,6 +22,6 @@ class FirebaseUserActions():
     def update_user(self, key: str, update_data: dict) -> None:
         update_key(self.ref, key, update_data)    
 
-    def remove_user(self, user_id: int) -> None:
+    def remove_user(self, user_id: str) -> None:
         remove_key(self.ref, user_id)
     

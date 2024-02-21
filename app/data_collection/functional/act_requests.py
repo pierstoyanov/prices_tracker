@@ -5,7 +5,6 @@ import requests
 from bs4 import BeautifulSoup
 # from memory_profiler import profile
 
-from bot.daly_data import get_daly
 from data_collection.exceptions import EmptyDataException, SameDayDataException
 from data_collection.headers import lmba_headers, lme_headers, ua_header
 from data_collection.to_input_converters.json_to_input import cu_jsons_to_input, au_json_to_input, \
@@ -13,14 +12,21 @@ from data_collection.to_input_converters.json_to_input import cu_jsons_to_input,
 from data_collection.to_input_converters.pandas_to_input import power_soup_to_data
 from data_collection.to_input_converters.soup_to_input import bnb_soup_to_data, wm_soup_to_data_no_query
 from google_sheets.google_sheets_api_operations import append_values
-from google_sheets.google_service import build_default_google_service
 from logger.logger import logging
+from storage.storage_manager import storage_manager
+from instances import bot
+
 
 # create local log
 data_logger = logging.getLogger('data_collection.act_requests')
 
+# define variables from import
+get_daily = bot.daily_data()
+sheets_service = storage_manager.get_sheets_service()
+
 
 def log_data(data, url):
+    """" Common function to log response status code result"""
     if data == 200:
         data_logger.info('Gathered api data from %s', url)
     else:
@@ -60,7 +66,8 @@ def request_to_pandas_store(service, sh_id: str, url: str, headers: dict, to_dat
         verify_collected_data(input_data, last_data)
 
         if average_cols:
-            input_data.append(average_cols_formula(last_data['_rownum'], average_cols))
+            input_data.append(average_cols_formula(
+                last_data['_rownum'], average_cols))
 
         result = append_values(
             service=service,
@@ -88,7 +95,8 @@ def request_to_soup_store(service, sh_id: str, urls: list, headers: dict,
     Average appends str formula for avrg between cols of the input data cols should be separated by ':' """
     try:
         if params:
-            response = requests.get(urls[0], headers=headers, params=params[0], timeout=10)
+            response = requests.get(
+                urls[0], headers=headers, params=params[0], timeout=10)
         else:
             response = requests.get(urls[0], headers=headers, timeout=10)
 
@@ -100,7 +108,8 @@ def request_to_soup_store(service, sh_id: str, urls: list, headers: dict,
         verify_collected_data(input_data, last_data)
 
         if average_cols:
-            input_data.append(average_cols_formula(last_data['_rownum'], average_cols))
+            input_data.append(average_cols_formula(
+                last_data['_rownum'], average_cols))
 
         result = append_values(
             service=service,
@@ -134,7 +143,8 @@ def request_json_and_store(service, sh_id: str, urls: list, headers: dict,
         verify_collected_data(input_data, last_data)
 
         if average_cols:
-            input_data.append(average_cols_formula(last_data['_rownum'], average_cols))
+            input_data.append(average_cols_formula(
+                last_data['_rownum'], average_cols))
 
         result = append_values(
             service=service,
@@ -154,10 +164,10 @@ def request_json_and_store(service, sh_id: str, urls: list, headers: dict,
 def data_management_with_requests():
     """Main fn that executes all data gather with requests"""
 
-    sheets_service = build_default_google_service()
     spreadsheet_id = os.environ.get('SPREADSHEET_DATA')
     # last data
-    c, cw, au, ag, rates, power = [dict(zip(x['values'][0], x['values'][1])) for x in get_daly(sheets_service)]
+    c, cw, au, ag, rates, power = [
+        dict(zip(x['values'][0], x['values'][1])) for x in get_daily(sheets_service)]
 
     # Cu
     request_json_and_store(

@@ -17,3 +17,4 @@ def start_firebase():
         })
     except Exception as e:
         firebase_logger.error(f"Error: {e}")
+        

@@ -1,8 +1,6 @@
 import os
 import requests
 from bs4 import BeautifulSoup
-# from memory_profiler import profile
-
 from data_collection.exceptions import EmptyDataException, SameDayDataException
 from data_collection.headers import lmba_headers, lme_headers, ua_header
 from data_collection.to_input_converters.json_to_input import \
@@ -12,9 +10,9 @@ from data_collection.to_input_converters.pandas_to_input import \
 from data_collection.to_input_converters.soup_to_input import \
     bnb_soup_to_data, wm_soup_to_data_no_query
 from google_sheets.google_sheets_api_operations import append_values
-from google_sheets.google_service import build_default_google_service
 from logger.logger import logging
-from bot.daly_data import get_daly
+from storage.storage_manager import storage_manager
+from instances import bot
 
 # create local log
 data_logger = logging.getLogger('data_collection.act_requests')
@@ -83,6 +81,7 @@ class DataRequestStoreTemplate:
         raise NotImplementedError
 
     def store_data(self):
+        #TODO CHange to different store methods.
         """ Stores collected data to google sheets
         :return: void
         """
@@ -184,16 +183,15 @@ class PowerRequest(DataRequestStoreTemplate):
 
 class DataManagementWithRequests:
     """Singleton class for arrange staging and executing data collection and storage"""
-
     def __init__(self):
-        self.sheets_service = build_default_google_service()
+        self.sheets_service = storage_manager.get_sheets_service()
         self.session = requests.Session()
         self.spreadsheet_id: str = os.environ.get('SPREADSHEET_DATA')
         self.data_requests: list[DataRequestStoreTemplate] = []
         self.last_data: dict = self.get_last_data()
 
     def get_last_data(self):
-        combined_dict = get_daly(self.sheets_service, return_dict=True)
+        combined_dict = bot.get_last_data(return_dict=True)
         return combined_dict
 
     def add_data_management(self, request: DataRequestStoreTemplate):

@@ -1,9 +1,8 @@
 import os
 from app.bot.users.i_user_actions import UserActions
 from googleapiclient.errors import HttpError
-# from bot.bot import bot_logger, sheets_service
 from logger.logger import logging
-from google_sheets.google_service import build_default_google_service
+from storage.storage_manager import storage_manager
 from google_sheets.google_sheets_api_operations import \
     find_row_of_item_in_sheet, delete_row
 
@@ -11,7 +10,7 @@ from google_sheets.google_sheets_api_operations import \
 class GoogleSheetsUserActions(UserActions):
     def __init__(self):
         self.spreadsheet_id = os.environ.get('SPREADSHEET_USERS')
-        self.service = build_default_google_service()
+        self.service = storage_manager.get_sheets_service()
         self.bot_logger = logging.getLogger('gs_user_actions')
 
 

@@ -1,13 +1,12 @@
 import re
-
 from flask import Response
-from viberbot.api.viber_requests import  ViberRequest, ViberMessageRequest, ViberSubscribedRequest, ViberConversationStartedRequest, ViberUnsubscribedRequest, ViberDeliveredRequest, ViberSeenRequest
-from bot.bot import viber
-from bot.daly_data import build_daly_info
-from bot.messages import msg_subbed, msg_text_w_keyboard, msg_info, \
-    msg_unknown, msg_welcome_keyboard, msg_user_keyboard
-from bot.request_data import check_valid_date, build_requested_day_info
-from bot.users_actions import add_new_user, remove_user
+from viberbot.api.viber_requests import ViberRequest, ViberMessageRequest, \
+    ViberSubscribedRequest, ViberConversationStartedRequest, \
+    ViberUnsubscribedRequest, ViberDeliveredRequest, ViberSeenRequest
+from app.bot.messages.static_messages import msg_subbed, msg_text_w_keyboard, \
+    msg_info, msg_unknown, msg_welcome_keyboard, msg_user_keyboard
+from app.bot.messages.request_data import check_valid_date
+from instances import bot, viber
 from logger.logger import logging
 
 # logger
@@ -24,13 +23,13 @@ def handle_message(viber_request: ViberMessageRequest):
     :return: Response object"""
 
     def handle_subscribe():
-        add_new_user(viber_request.sender)
+        bot.users.add_new_user(viber_request.sender.id, viber_request.sender)
         viber.send_messages(viber_request.sender.id, [
             msg_subbed(viber_request.sender),
         ])
 
     def handle_daily_data():
-        daily = build_daly_info()
+        daily = bot.build_daily_info()
         viber.send_messages(viber_request.sender.id, [
             msg_text_w_keyboard(daily),
         ])
@@ -62,7 +61,7 @@ def handle_message(viber_request: ViberMessageRequest):
             else:
                 viber.send_messages(
                     viber_request.sender.id, [
-                        msg_text_w_keyboard(build_requested_day_info(message))
+                        msg_text_w_keyboard(bot.request_data(message))
                     ])
                 return Response(status=200)
         else:
@@ -92,7 +91,7 @@ def handle_subscribed(viber_request: ViberSubscribedRequest):
     :return: Response object"""
 
     # register user
-    result = add_new_user(viber_request.user)
+    result = bot.users.add_new_user(viber_request.user)
 
     # reply
     viber.send_messages(viber_request.user.id, [
@@ -110,19 +109,21 @@ def handle_unsubscribed(viber_request: ViberUnsubscribedRequest):
     :return: Response object"""
 
     # unregister user
-    result = remove_user(viber_request.user_id)
+    result = bot.users.remove_user(viber_request.user_id)
     if not result:
         return Response(status=500)
     return Response(status=200)
 
 
 def handle_delivered(viber_request: ViberDeliveredRequest):
-    handler_logger.info('User %s received %s', viber_request.user_id, viber_request.message_token)
+    handler_logger.info('User %s received %s',
+                        viber_request.user_id, viber_request.message_token)
     return Response(status=200)
 
 
 def handle_seen(viber_request: ViberSeenRequest):
-    handler_logger.info('User %s seen %s', viber_request.user_id, viber_request.message_token)
+    handler_logger.info('User %s seen %s',
+                        viber_request.user_id, viber_request.message_token)
     return Response(status=200)
 
 

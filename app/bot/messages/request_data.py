@@ -1,11 +1,12 @@
 import os
 from datetime import datetime
 from logger.logger import logging
-from bot.bot import sheets_service
+from storage.storage_manager import storage_manager
 from app.bot.messages.static_messages import wrong_day, wrong_month, wrong_year, wrong
 from google_sheets.google_sheets_api_operations import get_multiple_named_ranges, update_values_in_sheet
 
 messages_logger = logging.getLogger('messages')
+
 
 def test_date(c, cw, au, ag):
     if c['Date'] == cw['Date'] \
@@ -44,7 +45,7 @@ def query_day(service, rq_date: str, ranges: list):
         values=[rq_date],
         value_input_option='USER_ENTERED'
     )
-    bot_logger.info("Query date set!")
+    messages_logger.info("Query date set!")
     
     # get result
     result = get_multiple_named_ranges(service=service,
@@ -57,7 +58,7 @@ def query_day(service, rq_date: str, ranges: list):
     return result
 
 
-def build_requested_day_info(rq_day: str):
+def build_requested_day_info(sheets_service, rq_day: str):
     s_chart, s_dollar, s_calendar, s_usd, s_pound, s_hv = \
         '\U0001F4C8', '\U0001F4B2', '\U0001F4C5', '\U0001F4B5', '\U0001F4B7', '\U000026A1'
     try:
@@ -101,5 +102,5 @@ def build_requested_day_info(rq_day: str):
                    f'Volume *{power["Volume"]:.2F}*'
             return text
     except KeyError as e:
-        bot_logger.info("Failed to build request msg.")
+        messages_logger.info("Failed to build request msg.")
         return e

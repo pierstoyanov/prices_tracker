@@ -24,7 +24,6 @@ def msg_user_keyboard():
                            keyboard=keyboard)
 
 
-
 def msg_subbed(u):
     return TextMessage(keyboard=keyboard,
                        text=f"{u.name},\nБлагодаря за абонамента!\n" + info_txt)

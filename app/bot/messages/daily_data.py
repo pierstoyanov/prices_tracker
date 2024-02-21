@@ -1,7 +1,6 @@
 import os
 from logger.logger import logging
 from datetime import datetime
-from bot.bot import sheets_service
 from google_sheets.google_sheets_api_operations import get_multiple_named_ranges
 
 messages_logger = logging.getLogger('messages')
@@ -13,7 +12,7 @@ def test_date(c, cw, au, ag):
         return '\u274C'
 
 
-def get_daly(service, return_dict=False) -> dict | None:
+def get_daily_data(service, return_dict=False) -> dict:
     """ Returns raw daly info. Param: google sheets service"""
     spreadsheet_id = os.environ.get('SPREADSHEET_DATA')
     ranges = ['cudaly', 'cuwmdaly', 'audaly', 'agdaly', 'rates', 'power']
@@ -36,9 +35,9 @@ def get_daly(service, return_dict=False) -> dict | None:
     return result
 
 
-def build_daly_info():
+def build_daily_info(service):
     try:
-        c, cw, au, ag, rates, power = [dict(zip(x['values'][0], x['values'][1])) for x in get_daly(sheets_service)]
+        c, cw, au, ag, rates, power = [dict(zip(x['values'][0], x['values'][1])) for x in get_daily_data(service)]
         date_status = test_date(c, cw, au, ag)
         s_chart, s_dollar, s_calendar, s_usd, s_pound, s_hv \
             = '\U0001F4C8', '\U0001F4B2', '\U0001F4C5', '\U0001F4B5', '\U0001F4B7', '\U000026A1'

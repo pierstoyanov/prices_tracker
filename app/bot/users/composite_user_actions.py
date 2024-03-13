@@ -1,5 +1,6 @@
 # class using composite design pattern for strategy in i_user_actions
 
+from viberbot.api.user_profile import UserProfile
 from bot.users.firebasee_user_actions import FirebaseUserActions
 from bot.users.google_sheets_user_actions import GoogleSheetsUserActions
 from bot.users.i_user_actions import UserActions
@@ -27,17 +28,22 @@ class CompositeUserActions(UserActions):
     def get_all_users(self):
         return self.managers[0].get_all_users()
 
-    def get_user_by_id(self, user_id: int):
+    def get_user_by_id(self, user_id: str):
         return self.managers[0].get_user_by_id(user_id)
     
-    def add_new_user(self, key:str, user: dict) -> None:
-        for manager in self.managers:
-            manager.add_new_user(key, user)
+    def add_new_user(self, user: UserProfile) -> bool:
+        success = True
+        try:
+            for manager in self.managers:
+                manager.add_new_user(user.id, user)
+        except:
+            success = False
+        return success
 
-    def update_user(self, key:str, user: dict) -> None:
+    def update_user(self, user_id:str, update_data: dict) -> None:
         for manager in self.managers:
-            manager.update_user(key, user)
+            manager.update_user(user_id, update_data)
     
-    def remove_user(self, user_id: int) -> None:
+    def remove_user(self, user_id: str) -> None:      
         for manager in self.managers:
             manager.remove_user(user_id)

@@ -20,10 +20,6 @@ from instances import bot
 # create local log
 data_logger = logging.getLogger('data_collection.act_requests')
 
-# define variables from import
-get_daily = bot.daily_data()
-sheets_service = storage_manager.get_sheets_service()
-
 
 def log_data(data, url):
     """" Common function to log response status code result"""
@@ -49,7 +45,7 @@ def verify_collected_data(input_data: list, last_data: dict):
         raise SameDayDataException
 
 
-def request_to_pandas_store(service, sh_id: str, url: str, headers: dict, to_data_fn: Callable,
+def request_to_pandas_store(sh_id: str, url: str, headers: dict, to_data_fn: Callable,
                             to_page: str, store_range: str, last_data: dict,
                             average_cols: str = None):
     """ Call requests url, send content to pandas df, store with store_fn and google sheets api
@@ -70,7 +66,7 @@ def request_to_pandas_store(service, sh_id: str, url: str, headers: dict, to_dat
                 last_data['_rownum'], average_cols))
 
         result = append_values(
-            service=service,
+            service=storage_manager.get_sheets_service(),
             spreadsheet_id=sh_id,
             range_name=f'{to_page}!{store_range}',
             values=input_data,
@@ -112,7 +108,7 @@ def request_to_soup_store(service, sh_id: str, urls: list, headers: dict,
                 last_data['_rownum'], average_cols))
 
         result = append_values(
-            service=service,
+            service=storage_manager.get_sheets_service(),
             spreadsheet_id=sh_id,
             range_name=f'{store_to_page}!{store_range}',
             values=[input_data],
@@ -125,7 +121,7 @@ def request_to_soup_store(service, sh_id: str, urls: list, headers: dict,
         data_logger.info("Error occurred! %s", e)
 
 
-def request_json_and_store(service, sh_id: str, urls: list, headers: dict,
+def request_json_and_store(sh_id: str, urls: list, headers: dict,
                            json_to_input_fn: Callable,
                            store_to_page: str, store_range: str, last_data: dict,
                            average_cols: str = None):
@@ -147,7 +143,7 @@ def request_json_and_store(service, sh_id: str, urls: list, headers: dict,
                 last_data['_rownum'], average_cols))
 
         result = append_values(
-            service=service,
+            service=storage_manager.get_sheets_service(),
             spreadsheet_id=sh_id,
             range_name=f'{store_to_page}!{store_range}',
             values=[input_data],
@@ -164,14 +160,17 @@ def request_json_and_store(service, sh_id: str, urls: list, headers: dict,
 def data_management_with_requests():
     """Main fn that executes all data gather with requests"""
 
+    # define variables from import
+    get_daily = bot.daily_data()
+    # define sheet
     spreadsheet_id = os.environ.get('SPREADSHEET_DATA')
+
     # last data
     c, cw, au, ag, rates, power = [
-        dict(zip(x['values'][0], x['values'][1])) for x in get_daily(sheets_service)]
+        dict(zip(x['values'][0], x['values'][1])) for x in get_daily()]
 
     # Cu
     request_json_and_store(
-        service=sheets_service,
         sh_id=spreadsheet_id,
         urls=[os.environ.get('CU_JSON_URL'), os.environ.get('CU_JSON_STOCK')],
         headers=lme_headers,
@@ -183,7 +182,6 @@ def data_management_with_requests():
 
     # Westmetal
     request_to_soup_store(
-        service=sheets_service,
         sh_id=spreadsheet_id,
         urls=[os.environ.get('URL_THREE_NQ')],
         headers={},
@@ -195,7 +193,6 @@ def data_management_with_requests():
 
     # Au
     request_json_and_store(
-        service=sheets_service,
         sh_id=spreadsheet_id,
         urls=[os.environ.get('AU_AM_JSON'), os.environ.get('AU_PM_JSON')],
         headers=lmba_headers,
@@ -208,7 +205,6 @@ def data_management_with_requests():
 
     # Ag
     request_json_and_store(
-        service=sheets_service,
         sh_id=spreadsheet_id,
         urls=[os.environ.get('AG_JSON')],
         headers=lmba_headers,
@@ -220,7 +216,6 @@ def data_management_with_requests():
 
     # Exchange rates
     request_to_soup_store(
-        service=sheets_service,
         sh_id=spreadsheet_id,
         urls=[os.environ.get('URL_FOUR')],
         headers={},
@@ -232,7 +227,6 @@ def data_management_with_requests():
 
     # Power
     request_to_pandas_store(
-        service=sheets_service,
         sh_id=spreadsheet_id,
         url=os.environ.get('URL_SIX'),
         headers=ua_header,

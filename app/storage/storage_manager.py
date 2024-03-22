@@ -6,7 +6,8 @@ class StorageManager:
     
     def __init__(self):
         # google api service instance for using sheets
-        self.service = GoogleService.build_default_google_service()
+        # self.service = GoogleService.build_default_google_service()
+        self.service = GoogleService.build_google_service("./service-account.json")
 
     @staticmethod
     def firebase(): # firebase
@@ -18,4 +19,3 @@ class StorageManager:
 
 # Storage manger instance
 storage_manager = StorageManager()
-print(storage_manager)

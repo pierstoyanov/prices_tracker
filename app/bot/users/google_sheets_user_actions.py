@@ -31,7 +31,7 @@ class GoogleSheetsUserActions(UserActions):
             self.bot_logger.error("An error occurred: %s", error)
             return error
 
-    def get_all_users(self):
+    def get_all_users(self) -> list[str]:
         # TODO test&fix
         try:
             result = self.service.spreadsheets().values().get(
@@ -54,7 +54,7 @@ class GoogleSheetsUserActions(UserActions):
         pass
 
 
-    def add_new_user(self, key: str, new_user: dict) -> bool | None:
+    def add_new_user(self, key: str, new_user: dict) -> bool:
         users = self.get_all_user_ids()
         vals = [[str(x) for x in new_user.__dict__.values()]]
         if len(users) == 0 or new_user.id not in users:

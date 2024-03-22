@@ -13,7 +13,7 @@ class FirebaseUserActions():
     def update_mapping(self):
         self.rev_id_map = {v: k for k, v in self.id_map.get().items()}
 
-    def get_all_user_ids(self) -> dict | None:
+    def get_all_user_ids(self) -> list[str]:
         return get_all_values(self.id_map)
 
     def get_all_users(self) -> dict | None:

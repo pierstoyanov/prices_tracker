@@ -3,8 +3,6 @@ from flask import Response
 from viberbot.api.viber_requests import ViberRequest, ViberMessageRequest, \
     ViberSubscribedRequest, ViberConversationStartedRequest, \
     ViberUnsubscribedRequest, ViberDeliveredRequest, ViberSeenRequest
-from app.bot.messages.static_messages import msg_subbed, msg_text_w_keyboard, \
-    msg_info, msg_unknown, msg_welcome_keyboard, msg_user_keyboard
 from app.bot.messages.request_data import check_valid_date
 from instances import bot, viber
 from logger.logger import logging
@@ -25,21 +23,21 @@ def handle_message(viber_request: ViberMessageRequest):
     def handle_subscribe():
         bot.users.add_new_user(viber_request.sender.id, viber_request.sender)
         viber.send_messages(viber_request.sender.id, [
-            msg_subbed(viber_request.sender),
+            bot.messages.msg_subbed(viber_request.sender),
         ])
 
     def handle_daily_data():
         daily = bot.build_daily_info()
         viber.send_messages(viber_request.sender.id, [
-            msg_text_w_keyboard(daily),
+            bot.messages.msg_text_w_keyboard(daily),
         ])
 
     def handle_msg_info():
         viber.send_messages(viber_request.sender.id, [
-            msg_info(),
+            bot.messages.msg_info(),
         ])
 
-    messages_dict = {
+    message_dict = {
         'subscribe': handle_subscribe,
         'dailydata': handle_daily_data,
         'info': handle_msg_info
@@ -47,26 +45,26 @@ def handle_message(viber_request: ViberMessageRequest):
 
     message = viber_request.message.text
     try:
-        if message in messages_dict:
-            messages_dict[message]()
+        if message in message_dict:
+            message_dict[message]()
             return Response(status=200)
         elif re.match(r"^([0-9]{2}/[0-9]{2}/[1-2][0-9]{3})$", message):
             date_check = check_valid_date(message)  # '' or error message
             if date_check:
                 viber.send_messages(
                     viber_request.sender.id, [
-                        msg_text_w_keyboard(date_check)
+                        bot.messages.msg_text_w_keyboard(date_check)
                     ])
                 return Response(status=200)
             else:
                 viber.send_messages(
                     viber_request.sender.id, [
-                        msg_text_w_keyboard(bot.request_data(message))
+                        bot.messages.msg_text_w_keyboard(bot.request_data(message))
                     ])
                 return Response(status=200)
         else:
             viber.send_messages(viber_request.sender.id, [
-                msg_unknown()
+                bot.messages.msg_unknown()
             ])
             return Response(status=200)
     except Exception as e:
@@ -78,7 +76,7 @@ def handle_conversation_started(viber_request: ViberConversationStartedRequest):
     """Handler for conversation started request object"""
     try:
         viber.send_messages(viber_request.user.id, [
-            msg_welcome_keyboard()
+            bot.messages.msg_welcome_keyboard()
         ])
         return Response(status=200)
     except Exception as e:
@@ -95,8 +93,8 @@ def handle_subscribed(viber_request: ViberSubscribedRequest):
 
     # reply
     viber.send_messages(viber_request.user.id, [
-        msg_subbed(viber_request.user),
-        msg_user_keyboard()
+        bot.messages.msg_subbed(viber_request.user),
+        bot.messages.msg_user_keyboard()
     ])
 
     if not result:

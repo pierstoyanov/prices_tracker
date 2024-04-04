@@ -15,6 +15,7 @@ class CompositeUserActions(UserActions):
 
     def set_storage(self, storage_strategy) -> list:
         """ Create user actions managers based on storage strategy."""
+        # first item in list is the primary storage.
         managers = [] # 0=firebase, 1=gsheets
         if storage_strategy == 'firebase' or storage_strategy == 'both':
             managers.append(FirebaseUserActions())
@@ -22,13 +23,16 @@ class CompositeUserActions(UserActions):
             managers.append(GoogleSheetsUserActions())
         return managers
 
-    def get_all_user_ids(self):
+    def get_all_user_ids(self) -> list[str]:
+        # method uses only primary storage source 
         return self.managers[0].get_all_user_ids()
     
-    def get_all_users(self):
+    def get_all_users(self) -> dict | None:
+        # method uses only primary storage source 
         return self.managers[0].get_all_users()
 
-    def get_user_by_id(self, user_id: str):
+    def get_user_by_id(self, user_id: str) -> dict | None:
+        # method uses only primary storage source 
         return self.managers[0].get_user_by_id(user_id)
     
     def add_new_user(self, user: UserProfile) -> bool:
@@ -41,9 +45,17 @@ class CompositeUserActions(UserActions):
         return success
 
     def update_user(self, user_id:str, update_data: dict) -> None:
+        """ Update user in all storage sources. """	
         for manager in self.managers:
-            manager.update_user(user_id, update_data)
-    
-    def remove_user(self, user_id: str) -> None:      
+            try:
+                manager.update_user(user_id, update_data)
+            except: 
+                continue
+
+    def remove_user(self, user_id: str) -> None:
+        """ Remove user from all storage sources. """  
         for manager in self.managers:
-            manager.remove_user(user_id)
+            try:
+                manager.remove_user(user_id)
+            except Exception as e: 
+                continue

@@ -8,10 +8,12 @@ class FirebaseUserActions():
     def __init__(self):
         self.users = db.reference('users')
         self.id_map = db.reference('user_map')
-        self.rev_id_map = {v: k for k, v in self.id_map.get().items()}
+        self.rev_id_map = {v: k for k, v in self.id_map.get().items()} \
+            if self.id_map.get() is not None else {}
 
     def update_mapping(self):
-        self.rev_id_map = {v: k for k, v in self.id_map.get().items()}
+        self.rev_id_map = {v: k for k, v in self.id_map.get().items()} \
+            if self.id_map.get() is not None else {}
 
     def get_all_user_ids(self) -> list[str]:
         return get_all_values(self.id_map)
@@ -26,7 +28,7 @@ class FirebaseUserActions():
         frb_id = self.rev_id_map.get(user_id)
         return get_key(self.users, frb_id)
 
-    def add_new_user(self, user_id: str, user: dict) -> None:
+    def add_new_user(self, user_id: str, user: dict) -> bool:
         if user_id in self.rev_id_map.keys():
             raise Exception("User already exists")
         
@@ -42,6 +44,7 @@ class FirebaseUserActions():
         frb_id = push_data(self.id_map, user_id).key
         add_key(self.users, frb_id, key_data)
         self.update_mapping()
+        return True
 
     def update_user(self, user_id: str, update_data: dict) -> None:
         frb_id = self.rev_id_map.get(user_id)

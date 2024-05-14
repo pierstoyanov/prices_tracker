@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import requests
 from bs4 import BeautifulSoup
@@ -6,10 +7,11 @@ from data_collection.headers import lmba_headers, lme_headers, ua_header
 from data_collection.to_input_converters.json_to_input import \
     cu_jsons_to_input, au_json_to_input, ag_json_to_input
 from data_collection.to_input_converters.pandas_to_input import \
-    power_soup_to_data
+    PowerSoupToPandasToData,  power_soup_to_data
 from data_collection.to_input_converters.soup_to_input import \
     bnb_soup_to_data, wm_soup_to_data_no_query
 from google_sheets.google_sheets_api_operations import append_values
+from firebase_admin import db
 from logger.logger import logging
 from storage.storage_manager import storage_manager
 from instances import bot
@@ -18,18 +20,12 @@ from instances import bot
 data_logger = logging.getLogger('data_collection.act_requests')
 
 
+#### Helper functions
 def log_data(data, url):
     if data == 200:
         data_logger.info('Gathered api data from %s', url)
     else:
         raise ValueError('No data')
-
-
-def average_cols_formula(last_full_row: int, average_cols: str) -> str:
-    """":return: Formula for average between cols of n-th row"""
-    start_col, end_col = average_cols.split(':')
-    return f'=AVERAGE({start_col}{last_full_row + 1}:{end_col}{last_full_row + 1})'
-
 
 def verify_collected_data(input_data: list, last_data: dict):
     """Test collected data against last data in table"""
@@ -40,6 +36,62 @@ def verify_collected_data(input_data: list, last_data: dict):
     for i in input_data:
         if last_data.get('Date') == i[0]:
             raise SameDayDataException
+
+def average_cols_formula(last_full_row: int, average_cols: str) -> str:
+    """":return: Formula for average between cols of n-th row"""
+    start_col, end_col = average_cols.split(':')
+    return f'=AVERAGE({start_col}{last_full_row + 1}:{end_col}{last_full_row + 1})'
+
+
+def convert_date(date: str):
+        # convert a single date from DD.MM.YYYY to YYYY-MM-DD format
+        parsed_date = datetime.strptime(date, "%d.%m.%Y")
+        return parsed_date.strftime("%Y-%m-%d")
+#### /Helper functions
+
+
+class DataFirebaseStore:
+    def __init__(self):
+        self.ref = db.reference('data')
+        self.dates = [] # DD-MM-YYYY
+        self.m = dict.fromkeys(['cu-d', 'cu', 'cu-3m', 'cu-st', \
+                                'ag-d', 'ag',\
+                                'au-d', 'au-am', 'au-pm'])
+        self.p = {}
+        self.r = dict.fromkeys(['d','USD', 'GBP', 'CHF'])
+        self.last = self.ref.child('last').get()
+
+    def set_last(self):
+        return self.ref.child('latest').get()
+    
+    def get_last_pow_data(self):
+        return self.last.get('power', {}).get('d') if self.last else None
+        
+    def test_dates(self):
+        return False if len(self.dates) == 0 else \
+            all(item == self.dates[0] for item in self.dates)
+    
+    def store_data(self):
+        print(self.test_dates())
+        # date = convert_date(self.dates[0])
+
+        data = {
+            'metals': {self.m.get('cu-d'): self.m},
+            'rates': {self.r.get('d'): self.r},
+            'power': self.p
+        }       
+        self.ref.update(data)
+
+        lp_k, lp_v = self.p.popitem()
+        last_data = {
+            'last/metals': {self.m.get('cu-d'): self.m},
+            'last/rates': {self.r.get('d'): self.r},
+            'last/power': {lp_k: lp_v}
+        }
+        self.ref.update(last_data)
+
+
+frb_mngr = DataFirebaseStore()
 
 
 class DataRequestStoreTemplate:
@@ -83,7 +135,7 @@ class DataRequestStoreTemplate:
     def store_data(self):
         #TODO CHange to different store methods.
         """ Stores collected data to google sheets
-        :return: void
+        :return: None
         """
         try:
             verify_collected_data(self.input_data, self.last_data)
@@ -95,6 +147,9 @@ class DataRequestStoreTemplate:
                           value_input_option='USER_ENTERED')
         except Exception as e:
             data_logger.exception('%s', e)
+
+    def get_last_date(self):        
+        return self.last_data.get('Date') if self.last_data else None
 
 
 class CuDataRequest(DataRequestStoreTemplate):
@@ -119,7 +174,16 @@ class WmDataRequest(DataRequestStoreTemplate):
     def process_data(self):
         self.request_data(self.url_headers)
         soup = BeautifulSoup(self.raw_response[0].content, 'html.parser')
-        self.input_data.append(wm_soup_to_data_no_query(soup))
+        
+        input_data = wm_soup_to_data_no_query(soup)
+
+        # export data to firebase manager class
+        frb_mngr.dates.append(input_data[0])
+
+        frb_mngr.m['cu-d'] = convert_date(input_data[0])
+        frb_mngr.m['cu'], frb_mngr.m['cu-3m'], frb_mngr.m['cu-st'] = input_data[1:]
+
+        self.input_data.append(input_data)
         self.store_data()
         self.raw_response = []  # clear raw response
 
@@ -134,15 +198,21 @@ class AuDataRequest(DataRequestStoreTemplate):
         for response in self.raw_response:
             data.append(response.json())
 
-        edited_input: list = au_json_to_input(data)
+        input_data: list = au_json_to_input(data)
+
+        # export data to firebase manager class
+        frb_mngr.dates.append(input_data[0])
+        frb_mngr.m['au-d'] = convert_date(input_data[0])
+        frb_mngr.m['au-am'], frb_mngr.m['au-pm'] = input_data[1:]
+
         # add average cols formula to input data if needed
         if self.average_cols:
-            edited_input.append(average_cols_formula(
+            input_data.append(average_cols_formula(
                 self.last_data.get('_rownum'),
                 self.average_cols)
             )
 
-        self.input_data.append(edited_input)
+        self.input_data.append(input_data)
         self.store_data()
         self.raw_response = []  # clear raw response
 
@@ -152,7 +222,14 @@ class AgDataRequest(DataRequestStoreTemplate):
 
     def process_data(self):
         self.request_data(self.url_headers)
-        self.input_data.append(ag_json_to_input([self.raw_response[0].json()]))
+        input_data = ag_json_to_input([self.raw_response[0].json()])
+
+        # export data to firebase manager class
+        frb_mngr.dates.append(input_data[0])
+        frb_mngr.m['ag-d'] = convert_date(input_data[0])
+        frb_mngr.m['ag'] = input_data[1]
+
+        self.input_data.append(input_data)
         self.store_data()
         self.raw_response = []  # clear raw response
 
@@ -163,7 +240,14 @@ class ExchangeRatesRequest(DataRequestStoreTemplate):
     def process_data(self):
         self.request_data(self.url_headers)
         soup = BeautifulSoup(self.raw_response[0].content, 'html.parser')
-        self.input_data.append(bnb_soup_to_data(soup))
+        input_data = bnb_soup_to_data(soup)
+        
+        # export data to firebase manager class
+        frb_mngr.dates.append(input_data[0])
+        frb_mngr.r['d'] = convert_date(input_data[0])
+        frb_mngr.r['USD'], frb_mngr.r['GBP'], frb_mngr.r['CHF'] = input_data[1:]
+        
+        self.input_data.append(input_data)
         self.store_data()
         self.raw_response = []  # clear raw response
 
@@ -173,16 +257,25 @@ class PowerRequest(DataRequestStoreTemplate):
 
     def process_data(self):
         self.request_data(self.url_headers)
-        self.input_data = power_soup_to_data(
+
+        converter = PowerSoupToPandasToData(
             response=self.raw_response[0],
-            last_date=self.last_data.get("Date")
+            last_date_gsheet=self.get_last_date(),
+            last_date_fb=frb_mngr.get_last_pow_data()
         )
+
+        # export data to firebase manager class
+        frb_mngr.p = converter.convert_for_fb()
+
+        self.input_data = converter.convert_for_gsheets()
         self.store_data()
         self.raw_response = []  # clear raw response
 
 
 class DataManagementWithRequests:
-    """Singleton class for arrange staging and executing data collection and storage"""
+    """Singleton class for arrange staging and 
+    executing data collection and storage
+    """
     def __init__(self):
         self.sheets_service = storage_manager.get_sheets_service()
         self.session = requests.Session()
@@ -281,7 +374,7 @@ class DataManagementWithRequests:
         """Main class execution method"""
         self.stage_data_requests()
         err_count = self.execute_data_requests()
-
+        frb_mngr.store_data()
         return err_count
 
 

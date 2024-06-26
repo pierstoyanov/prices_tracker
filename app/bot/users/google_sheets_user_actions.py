@@ -1,5 +1,5 @@
 import os
-from app.bot.users.i_user_actions import UserActions
+from bot.users.i_user_actions import UserActions
 from googleapiclient.errors import HttpError
 from logger.logger import logging
 from storage.storage_manager import storage_manager

@@ -1,5 +1,5 @@
 from viberbot.api.messages import TextMessage, KeyboardMessage
-from app.bot.messages.keyboards import keyboard, welcome_keyboard
+from bot.messages.keyboards import keyboard, welcome_keyboard
 
 
 c, chk_mrk, left_arr = '\U000000A9', '\U00002714', '\U00002B05'

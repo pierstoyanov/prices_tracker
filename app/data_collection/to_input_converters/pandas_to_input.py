@@ -14,9 +14,9 @@ def power_soup_to_data(response, last_date):
             continue
 
         dfi = groups.get_group(key)
-        bgn = dfi.get("Price (BGN)").mean() / 100
-        eur = dfi.get("Price (EUR)").mean() / 100
-        vol = dfi.get("Volume").sum() / 10
+        bgn = round(dfi.get("Price (BGN)").mean() / 100, 5)
+        eur = round(dfi.get("Price (EUR)").mean() / 100, 5)
+        vol = round(dfi.get("Volume").sum() / 10, 5)
         result.append([day.strftime('%d.%m.%Y'), bgn, eur, vol])
 
     return result
@@ -45,9 +45,9 @@ class PowerSoupToPandasToData:
                 continue
 
             dfi = self.groups.get_group(key)
-            bgn = dfi.get("Price (BGN)").mean() / 100
-            eur = dfi.get("Price (EUR)").mean() / 100
-            vol = dfi.get("Volume").sum() / 10
+            bgn = round(dfi.get("Price (BGN)").mean() / 100, 5)
+            eur = round(dfi.get("Price (EUR)").mean() / 100, 5)
+            vol = round(dfi.get("Volume").sum() / 10, 5) 
             result.append([day.strftime('%d.%m.%Y'), bgn, eur, vol])
 
         return result
@@ -62,9 +62,9 @@ class PowerSoupToPandasToData:
                 continue
 
             dfi = self.groups.get_group(key)
-            bgn = dfi.get("Price (BGN)").mean() / 100
-            eur = dfi.get("Price (EUR)").mean() / 100
-            vol = dfi.get("Volume").sum() / 10
+            bgn = round(dfi.get("Price (BGN)").mean() / 100, 5)
+            eur = round(dfi.get("Price (EUR)").mean() / 100, 5)
+            vol = round(dfi.get("Volume").sum() / 10, 5)
             result.update({
             day.strftime("%Y-%m-%d"): {
                 'd': day.strftime("%Y-%m-%d"), 

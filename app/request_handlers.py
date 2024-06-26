@@ -3,7 +3,7 @@ from flask import Response
 from viberbot.api.viber_requests import ViberRequest, ViberMessageRequest, \
     ViberSubscribedRequest, ViberConversationStartedRequest, \
     ViberUnsubscribedRequest, ViberDeliveredRequest, ViberSeenRequest
-from app.bot.messages.request_data import check_valid_date
+from bot.messages.request_data import check_valid_date
 from instances import bot, viber
 from logger.logger import logging
 

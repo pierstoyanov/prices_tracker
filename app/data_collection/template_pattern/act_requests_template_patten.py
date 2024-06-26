@@ -59,10 +59,34 @@ class DataFirebaseStore:
                                 'au-d', 'au-am', 'au-pm'])
         self.p = {}
         self.r = dict.fromkeys(['d','USD', 'GBP', 'CHF'])
-        self.last = self.ref.child('last').get()
+        self.last = self.set_last()
 
     def set_last(self):
-        return self.ref.child('latest').get()
+        last = self.ref.child('last').get()
+
+        if not last:
+            new = self.build_last_data()
+            self.ref.update(new)
+            return new
+
+        return last
+    
+    def build_last_data(self):
+        m_ref = db.reference('data/metals')
+        p_ref = db.reference('data/power')
+        r_ref = db.reference('data/rates')
+
+        m = m_ref.order_by_key().limit_to_last(1).get()
+        p = p_ref.order_by_key().limit_to_last(1).get()
+        r = r_ref.order_by_key().limit_to_last(1).get()
+
+        new_last_data = {
+            'last/metals': m,
+            'last/power': p,
+            'last/rates': r,
+        }
+
+        return new_last_data
     
     def get_last_pow_data(self):
         return self.last.get('power', {}).get('d') if self.last else None
@@ -72,22 +96,23 @@ class DataFirebaseStore:
             all(item == self.dates[0] for item in self.dates)
     
     def store_data(self):
-        print(self.test_dates())
+        # print(self.test_dates())
         # date = convert_date(self.dates[0])
-
-        data = {
-            'metals': {self.m.get('cu-d'): self.m},
-            'rates': {self.r.get('d'): self.r},
-            'power': self.p
-        }       
-        self.ref.update(data)
-
-        lp_k, lp_v = self.p.popitem()
+         
+        self.ref.child('metals').update({self.m.get('cu-d'): self.m})
+        self.ref.child('rates').update({self.r.get('d'): self.r})
+        if not any(self.p):
+            self.ref.child('power').update(self.p)
+ 
         last_data = {
             'last/metals': {self.m.get('cu-d'): self.m},
-            'last/rates': {self.r.get('d'): self.r},
-            'last/power': {lp_k: lp_v}
+            'last/rates': {self.r.get('d'): self.r}
         }
+
+        if not any (self.p):
+            lp_k, lp_v = self.p.popitem()
+            last_data['last/power'] = {lp_k: lp_v}
+
         self.ref.update(last_data)
 
 
@@ -306,17 +331,17 @@ class DataManagementWithRequests:
 
     def stage_data_requests(self):
         """Hardcoded data request objects for processing"""
-        # copper
-        self.add_data_management(CuDataRequest(
-            service=self.sheets_service,
-            session=self.session,
-            sh_id=self.spreadsheet_id,
-            last_data=self.last_data["cudaly"],
-            store_to_page='copper',
-            store_range='A2:D',
-            url_headers=((os.environ.get('CU_JSON_URL'), lme_headers),
-                         (os.environ.get('CU_JSON_STOCK'), lme_headers))
-        ))
+        # # copper
+        # self.add_data_management(CuDataRequest(
+        #     service=self.sheets_service,
+        #     session=self.session,
+        #     sh_id=self.spreadsheet_id,
+        #     last_data=self.last_data["cudaly"],
+        #     store_to_page='copper',
+        #     store_range='A2:D',
+        #     url_headers=((os.environ.get('CU_JSON_URL'), lme_headers),
+        #                  (os.environ.get('CU_JSON_STOCK'), lme_headers))
+        # ))
         # copper wm
         self.add_data_management(WmDataRequest(
             service=self.sheets_service,

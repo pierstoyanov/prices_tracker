@@ -1,5 +1,7 @@
-# logger
+from firebase_admin.exceptions import FirebaseError
 from logger.logger import logging
+
+# logger
 frb_logger = logging.getLogger(__name__)
 
 
@@ -8,10 +10,9 @@ def firebase_error_handler(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except Exception as e:
+        except FirebaseError as e:
             frb_logger.error('Firebase HTTP error occurred %s', e)
             return e
-        
     return wrapper
 
 
@@ -65,3 +66,11 @@ def find_key_by_value(ref, value):
         if val == value:
             return key
     return None
+
+
+@firebase_error_handler
+def get_latest_entry(ref):
+    """ This function returns the latest entry in the ref. """
+    query = ref.order_by_key().limit_to_last(1).get()
+
+    return query if query else None

@@ -10,14 +10,17 @@ from data_collection.to_input_converters.pandas_to_input import \
     PowerSoupToPandasToData,  power_soup_to_data
 from data_collection.to_input_converters.soup_to_input import \
     bnb_soup_to_data, wm_soup_to_data_no_query
+from data_unit import DataUnit
+from firebase_rt_db.firebase_api_operations import get_latest_entry
 from google_sheets.google_sheets_api_operations import append_values
 from firebase_admin import db
 from logger.logger import logging
 from storage.storage_manager import storage_manager
 from instances import bot
 
+
 # create local log
-data_logger = logging.getLogger('data_collection.act_requests')
+data_logger = logging.getLogger(__name__)
 
 
 #### Helper functions
@@ -50,20 +53,23 @@ def convert_date(date: str):
 #### /Helper functions
 
 
+# Init new DataUnit
+new_data = DataUnit()
+
 class DataFirebaseStore:
+    """ Singleton for managing writing collected data to 
+    firebase realtime database.
+    :return: void
+    """
     def __init__(self):
         self.ref = db.reference('data')
-        self.dates = [] # DD-MM-YYYY
-        self.m = dict.fromkeys(['cu-d', 'cu', 'cu-3m', 'cu-st', \
-                                'ag-d', 'ag',\
-                                'au-d', 'au-am', 'au-pm'])
-        self.p = {}
-        self.r = dict.fromkeys(['d','USD', 'GBP', 'CHF'])
+        self.data: DataUnit
         self.last = self.set_last()
 
     def set_last(self):
+        # get last from db
         last = self.ref.child('last').get()
-
+        # if last is empty, try to biild it again 
         if not last:
             new = self.build_last_data()
             self.ref.update(new)
@@ -72,53 +78,67 @@ class DataFirebaseStore:
         return last
     
     def build_last_data(self):
-        m_ref = db.reference('data/metals')
-        p_ref = db.reference('data/power')
-        r_ref = db.reference('data/rates')
+        try:
+            m = get_latest_entry(db.reference('data/metals'))
+            p = get_latest_entry(db.reference('data/power'))
+            r = get_latest_entry(db.reference('data/rates'))
+            return {
+                'last/metals': m,
+                'last/power': p,
+                'last/rates': r,
+            }
+        except Exception as e:
+            data_logger.exception('%s', e)
+        return {}
 
-        m = m_ref.order_by_key().limit_to_last(1).get()
-        p = p_ref.order_by_key().limit_to_last(1).get()
-        r = r_ref.order_by_key().limit_to_last(1).get()
-
-        new_last_data = {
-            'last/metals': m,
-            'last/power': p,
-            'last/rates': r,
-        }
-
-        return new_last_data
-    
-    def get_last_pow_data(self):
+    def get_last_pow_date(self):
         return self.last.get('power', {}).get('d') if self.last else None
-        
-    def test_dates(self):
-        return False if len(self.dates) == 0 else \
-            all(item == self.dates[0] for item in self.dates)
-    
+
+    def get_m_date(self):
+        for key in self.data.m:
+            # return first key ending with "-d" that is not None or -1
+            if "-d" in key and self.data.m[key] is not None \
+                and self.data.m[key] != -1:
+                return self.data.m[key]
+        raise Exception("No valid date for m stored.")
+
+    def get_r_date(self) -> int:
+        d = self.data.r.get('d')
+        if d == -1 or d == None:
+            raise Exception("No valid date for r stored.")
+        return d
+
     def store_data(self):
-        # print(self.test_dates())
-        # date = convert_date(self.dates[0])
-         
-        self.ref.child('metals').update({self.m.get('cu-d'): self.m})
-        self.ref.child('rates').update({self.r.get('d'): self.r})
-        if not any(self.p):
-            self.ref.child('power').update(self.p)
- 
-        last_data = {
-            'last/metals': {self.m.get('cu-d'): self.m},
-            'last/rates': {self.r.get('d'): self.r}
-        }
+        """ Store data to firebase nodes.
+        :return: void
+        """
+        try: # store m 
+            m_date = self.get_m_date()
 
-        if not any (self.p):
-            lp_k, lp_v = self.p.popitem()
-            last_data['last/power'] = {lp_k: lp_v}
+            self.ref.child('metals').update({m_date: self.data.m})
+            self.last.update({'metals': {m_date: self.data.m}})
+        except Exception as e:
+            data_logger.error('%s', e)
 
-        self.ref.update(last_data)
+        try: # store r
+            r_date = self.get_r_date()
+            self.ref.child('rates').update({r_date: self.data.r})
+            self.last.update({'rates': {r_date: self.data.r}})
+        except Exception as e:
+            data_logger.error(e)
+        
+        if any(self.data.p): # store p
+            self.ref.child('power').update(self.data.p)
+            lp_k, lp_v = self.data.p.popitem()
+            self.last.update({'power': {lp_k: lp_v}})
+
+        self.ref.child('last').update(self.last)
 
 
+# init DataFirebaseStore instance
 frb_mngr = DataFirebaseStore()
 
-
+# Template for retreiving data and storing it in gsheets
 class DataRequestStoreTemplate:
     """Template for data request and store to google sheets"""
 
@@ -158,9 +178,8 @@ class DataRequestStoreTemplate:
         raise NotImplementedError
 
     def store_data(self):
-        #TODO CHange to different store methods.
         """ Stores collected data to google sheets
-        :return: None
+        :return: void
         """
         try:
             verify_collected_data(self.input_data, self.last_data)
@@ -188,6 +207,8 @@ class CuDataRequest(DataRequestStoreTemplate):
 
             data.append(response.json())
 
+        # add to frb not yet impl.
+
         self.input_data.append(cu_jsons_to_input(data))
         self.store_data()
         self.raw_response = []  # clear raw response
@@ -202,11 +223,9 @@ class WmDataRequest(DataRequestStoreTemplate):
         
         input_data = wm_soup_to_data_no_query(soup)
 
-        # export data to firebase manager class
-        frb_mngr.dates.append(input_data[0])
-
-        frb_mngr.m['cu-d'] = convert_date(input_data[0])
-        frb_mngr.m['cu'], frb_mngr.m['cu-3m'], frb_mngr.m['cu-st'] = input_data[1:]
+        # export data to data unit object
+        new_data.m['cu-d'] = convert_date(input_data[0])
+        new_data.m['cu'], new_data.m['cu-3m'], new_data.m['cu-st'] = input_data[1:]
 
         self.input_data.append(input_data)
         self.store_data()
@@ -225,10 +244,9 @@ class AuDataRequest(DataRequestStoreTemplate):
 
         input_data: list = au_json_to_input(data)
 
-        # export data to firebase manager class
-        frb_mngr.dates.append(input_data[0])
-        frb_mngr.m['au-d'] = convert_date(input_data[0])
-        frb_mngr.m['au-am'], frb_mngr.m['au-pm'] = input_data[1:]
+        # export data to data unit object
+        new_data.m['au-d'] = convert_date(input_data[0])
+        new_data.m['au-am'], new_data.m['au-pm'] = input_data[1:]
 
         # add average cols formula to input data if needed
         if self.average_cols:
@@ -249,10 +267,9 @@ class AgDataRequest(DataRequestStoreTemplate):
         self.request_data(self.url_headers)
         input_data = ag_json_to_input([self.raw_response[0].json()])
 
-        # export data to firebase manager class
-        frb_mngr.dates.append(input_data[0])
-        frb_mngr.m['ag-d'] = convert_date(input_data[0])
-        frb_mngr.m['ag'] = input_data[1]
+        # export data to data unit object
+        new_data.m['ag-d'] = convert_date(input_data[0])
+        new_data.m['ag'] = input_data[1]
 
         self.input_data.append(input_data)
         self.store_data()
@@ -267,10 +284,9 @@ class ExchangeRatesRequest(DataRequestStoreTemplate):
         soup = BeautifulSoup(self.raw_response[0].content, 'html.parser')
         input_data = bnb_soup_to_data(soup)
         
-        # export data to firebase manager class
-        frb_mngr.dates.append(input_data[0])
-        frb_mngr.r['d'] = convert_date(input_data[0])
-        frb_mngr.r['USD'], frb_mngr.r['GBP'], frb_mngr.r['CHF'] = input_data[1:]
+        # export data to data unit object
+        new_data.r['d'] = convert_date(input_data[0])
+        new_data.r['USD'], new_data.r['GBP'], new_data.r['CHF'] = input_data[1:]
         
         self.input_data.append(input_data)
         self.store_data()
@@ -286,11 +302,11 @@ class PowerRequest(DataRequestStoreTemplate):
         converter = PowerSoupToPandasToData(
             response=self.raw_response[0],
             last_date_gsheet=self.get_last_date(),
-            last_date_fb=frb_mngr.get_last_pow_data()
+            last_date_fb=frb_mngr.get_last_pow_date()
         )
 
-        # export data to firebase manager class
-        frb_mngr.p = converter.convert_for_fb()
+        # export data to data unit object
+        new_data.p = converter.convert_for_fb()
 
         self.input_data = converter.convert_for_gsheets()
         self.store_data()
@@ -331,7 +347,7 @@ class DataManagementWithRequests:
 
     def stage_data_requests(self):
         """Hardcoded data request objects for processing"""
-        # # copper
+        # # # copper
         # self.add_data_management(CuDataRequest(
         #     service=self.sheets_service,
         #     session=self.session,
@@ -399,7 +415,10 @@ class DataManagementWithRequests:
         """Main class execution method"""
         self.stage_data_requests()
         err_count = self.execute_data_requests()
+        
+        frb_mngr.data = new_data
         frb_mngr.store_data()
+
         return err_count
 
 

@@ -1,10 +1,12 @@
 import os
+from data_unit import DataUnit
 from logger.logger import logging
 from datetime import datetime
 from firebase_admin import db
 from google_sheets.google_sheets_api_operations import get_multiple_named_ranges
+from bot.messages.symbols import symbols as s
 
-messages_logger = logging.getLogger('messages')
+messages_logger = logging.getLogger(__name__)
 
 def test_date(c, cw, au, ag):
     if c['Date'] == cw['Date'] and cw['Date'] == au['Date'] and au['Date'] == ag['Date']:
@@ -53,8 +55,6 @@ def build_daily_info(service):
     try:
         c, cw, au, ag, rates, power = [dict(zip(x['values'][0], x['values'][1])) for x in get_daily_data_gsheets(service)]
         date_status = test_date(c, cw, au, ag)
-        s_chart, s_dollar, s_calendar, s_usd, s_pound, s_hv \
-            = '\U0001F4C8', '\U0001F4B2', '\U0001F4C5', '\U0001F4B5', '\U0001F4B7', '\U000026A1'
 
         # determine newer date
         lm_date, wm_date = datetime.strptime(c["Date"], "%d.%m.%Y"), \
@@ -68,20 +68,20 @@ def build_daily_info(service):
             symbol = "Westmetal"
 
         text = f'' \
-               f'{s_calendar} Дата: {c["Date"]}\n {date_status}\n' \
-               f'{s_chart}Мед {symbol}\n' \
-               f'Offer: *{c["Offer"]:,.2f}{s_dollar}*\n' \
-               f'3 month: *{c["3mo"]:,.2f}{s_dollar}*\n' \
+               f'{s["calendar"]} Дата: {c["Date"]}\n {date_status}\n' \
+               f'{s["chart"]}Мед {symbol}\n' \
+               f'Offer: *{c["Offer"]:,.2f}{s["dollar"]}*\n' \
+               f'3 month: *{c["3mo"]:,.2f}{s["dollar"]}*\n' \
                f'Stock: *{c["Stock"]:}*\n' \
-               f'{s_chart} Злато\n' \
-               f'AM: *{au["Gold AM"]:,.3F}{s_dollar}*\n' \
-               f'PM *{au["Gold PM"]:,.3F}{s_dollar}*\n' \
-               f'Average: *{au["Average"]:.3F}{s_dollar}*\n' \
-               f'{s_chart} Сребро *{ag["Silver"]:.4F}{s_dollar}*\n' \
-               f'{s_usd} BGN/USD: *{rates["USD"]}*\n' \
-               f'{s_pound} BGN/GBP: *{rates["GBP"]}*\n' \
-               f'{s_usd} BGN/CHF: *{rates["CHF"]}*\n' \
-               f'{s_hv} Ел. енергия: {power["Date"]}\n' \
+               f'{s["chart"]} Злато\n' \
+               f'AM: *{au["Gold AM"]:,.3F}{s["dollar"]}*\n' \
+               f'PM *{au["Gold PM"]:,.3F}{s["dollar"]}*\n' \
+               f'Average: *{au["Average"]:.3F}{s["dollar"]}*\n' \
+               f'{s["chart"]} Сребро *{ag["Silver"]:.4F}{s["dollar"]}*\n' \
+               f'{s["USD"]} BGN/USD: *{rates["USD"]}*\n' \
+               f'{s["GBP"]} BGN/GBP: *{rates["GBP"]}*\n' \
+               f'{s["USD"]} BGN/CHF: *{rates["CHF"]}*\n' \
+               f'{s["highVolt"]} Ел. енергия: {power["Date"]}\n' \
                f'BGN: *{power["BGN"]:.2F}*\n' \
                f'EUR: *{power["EUR"]:.2F}*\n' \
                f'Volume *{power["Volume"]:.2F}*'
@@ -89,4 +89,46 @@ def build_daily_info(service):
         return text
     except KeyError as e:
         messages_logger.info("Failed to build daly msg.")
-        return e
+    return ''
+
+
+class BuildDailyInfo():
+    def __init__(self):
+        self.du = DataUnit()
+    
+        # date: {'cu-d', 'cu', 'cu-3m', 'cu-st', 'ag-d', \
+        # 'ag', 'au-d', 'au-am', 'au-pm'}
+    def populate_from_frb(self):
+        self.data_unit.fill_data_from_firebase()
+    
+    def populate_from_gsheets(self):
+        self.data_unit.fill_data_from_gsheets()
+    
+    def build_text(self):
+        text = f'' \
+        f'{s["calendar"]} Дата: {c["Date"]}\n' \
+        f'{s["chart"]}Мед\n' \
+        f'Offer: *{c["Offer"]:,.2f}{s["dollar"]}*\n' \
+        f'3 month: *{c["3mo"]:,.2f}{s["dollar"]}*\n' \
+        f'Stock: *{c["Stock"]:}*\n' \
+        f'{s["chart"]} Злато\n' \
+        f'AM: *{au["Gold AM"]:,.3F}{s["dollar"]}*\n' \
+        f'PM *{au["Gold PM"]:,.3F}{s["dollar"]}*\n' \
+        f'Average: *{au["Average"]:.3F}{s["dollar"]}*\n' \
+        f'{s["chart"]} Сребро *{ag["Silver"]:.4F}{s["dollar"]}*\n' \
+        f'{s["USD"]} BGN/USD: *{rates["USD"]}*\n' \
+        f'{s["GBP"]} BGN/GBP: *{rates["GBP"]}*\n' \
+        f'{s["USD"]} BGN/CHF: *{rates["CHF"]}*\n' \
+        f'{s["highVolt"]} Ел. енергия: {power["Date"]}\n' \
+        f'BGN: *{power["BGN"]:.2F}*\n' \
+        f'EUR: *{power["EUR"]:.2F}*\n' \
+        f'Volume *{power["Volume"]:.2F}*'
+
+        return text
+
+    def get_last_frb(self):
+        last = self.ref.child('last').get()
+
+    def get_last_gs(self):
+        #TODO
+        pass

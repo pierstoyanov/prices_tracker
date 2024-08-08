@@ -21,14 +21,14 @@ def handle_message(viber_request: ViberMessageRequest):
     :return: Response object"""
 
     def handle_subscribe():
-        bot.users.add_new_user(viber_request.sender.id, viber_request.sender)
-        viber.send_messages(viber_request.sender.id, [
+        bot.users.add_new_user(viber_request.sender.id, viber_request.sender) # type: ignore
+        viber.send_messages(viber_request.sender.id, [ # type: ignore
             bot.messages.msg_subbed(viber_request.sender),
         ])
 
     def handle_daily_data():
         daily = bot.build_daily_info()
-        viber.send_messages(viber_request.sender.id, [
+        viber.send_messages(viber_request.sender.id, [ # type: ignore
             bot.messages.msg_text_w_keyboard(daily),
         ])
 
@@ -43,7 +43,7 @@ def handle_message(viber_request: ViberMessageRequest):
         'info': handle_msg_info
     }
 
-    message = viber_request.message.text
+    message = viber_request.message.text # type: ignore
     try:
         if message in message_dict:
             message_dict[message]()
@@ -52,7 +52,7 @@ def handle_message(viber_request: ViberMessageRequest):
             date_check = check_valid_date(message)  # '' or error message
             if date_check:
                 viber.send_messages(
-                    viber_request.sender.id, [
+                    viber_request.sender.id, [ # type: ignore
                         bot.messages.msg_text_w_keyboard(date_check)
                     ])
                 return Response(status=200)
@@ -89,7 +89,7 @@ def handle_subscribed(viber_request: ViberSubscribedRequest):
     :return: Response object"""
 
     # register user
-    result = bot.users.add_new_user(viber_request.user)
+    result = bot.users.add_new_user(viber_request.user) # type: ignore
 
     # reply
     viber.send_messages(viber_request.user.id, [
@@ -107,7 +107,7 @@ def handle_unsubscribed(viber_request: ViberUnsubscribedRequest):
     :return: Response object"""
 
     # unregister user
-    result = bot.users.remove_user(viber_request.user_id)
+    result = bot.users.remove_user(viber_request.user_id) # type: ignore
     if not result:
         return Response(status=500)
     return Response(status=200)

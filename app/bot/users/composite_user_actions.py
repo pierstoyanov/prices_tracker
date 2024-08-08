@@ -1,6 +1,6 @@
 # class using composite design pattern for strategy in i_user_actions
 
-from viberbot.api.user_profile import UserProfile
+from typing import Optional
 from bot.users.firebasee_user_actions import FirebaseUserActions
 from bot.users.google_sheets_user_actions import GoogleSheetsUserActions
 from bot.users.i_user_actions import UserActions
@@ -16,10 +16,10 @@ class CompositeUserActions(UserActions):
     def set_storage(self, storage_strategy) -> list:
         """ Create user actions managers based on storage strategy."""
         # first item in list is the primary storage.
-        managers = [] # 0=firebase, 1=gsheets
-        if storage_strategy == 'firebase' or storage_strategy == 'both':
+        managers = [] # 0=firebase, 1=gsheets 2=both
+        if storage_strategy == 0 or storage_strategy == 2:
             managers.append(FirebaseUserActions())
-        if storage_strategy == 'gsheets' or storage_strategy == 'both':
+        if storage_strategy == 1 or storage_strategy == 2:
             managers.append(GoogleSheetsUserActions())
         return managers
 
@@ -35,7 +35,7 @@ class CompositeUserActions(UserActions):
         # method uses only primary storage source 
         return self.managers[0].get_user_by_id(user_id)
     
-    def add_new_user(self, user: UserProfile) -> bool:
+    def add_new_user(self, user) -> bool:
         success = True
         try:
             for manager in self.managers:

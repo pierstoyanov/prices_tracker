@@ -1,10 +1,13 @@
-from typing import List
 from firebase_admin import db
+from logger.logger import logging
+from bot.users.i_user_actions import UserActions
 from firebase_rt_db.firebase_api_operations import push_data, add_key, \
     find_key_by_value, get_all_keys, get_all_values, get_key, remove_key, update_key
 
 
-class FirebaseUserActions():
+class FirebaseUserActions(UserActions):
+    frb_logger = logging.getLogger(__name__)    
+
     def __init__(self):
         self.users = db.reference('users')
         self.id_map = db.reference('user_map')
@@ -28,8 +31,8 @@ class FirebaseUserActions():
         frb_id = self.rev_id_map.get(user_id)
         return get_key(self.users, frb_id)
 
-    def add_new_user(self, user_id: str, user: dict) -> bool:
-        if user_id in self.rev_id_map.keys():
+    def add_new_user(self, user) -> bool:
+        if user.id in self.rev_id_map.keys():
             raise Exception("User already exists")
         
         key_data = {"api_version": user.api_version,
@@ -41,9 +44,12 @@ class FirebaseUserActions():
                     "lastSeen":"",
                     "lastDelivered": ""}
 
-        frb_id = push_data(self.id_map, user_id).key
-        add_key(self.users, frb_id, key_data)
-        self.update_mapping()
+        try: 
+            frb_id = push_data(self.id_map, user.id).key
+            add_key(self.users, frb_id, key_data)
+            self.update_mapping()
+        except:
+            self.frb_logger.error(e)
         return True
 
     def update_user(self, user_id: str, update_data: dict) -> None:

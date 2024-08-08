@@ -18,7 +18,7 @@ from instances import bot
 
 
 # create local log
-data_logger = logging.getLogger('data_collection.act_requests')
+data_logger = logging.getLogger(__name__)
 
 
 def log_data(data, url):
@@ -162,6 +162,7 @@ def data_management_with_requests():
 
     # define variables from import
     get_daily = bot.daily_data()
+    
     # define sheet
     spreadsheet_id = os.environ.get('SPREADSHEET_DATA')
 

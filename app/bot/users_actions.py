@@ -2,10 +2,10 @@ import os
 from googleapiclient.errors import HttpError
 from bot.bot import bot_logger
 from google_sheets.google_sheets_api_operations import find_row_of_item_in_sheet, delete_row
-from storage.storage_manager import StorageManager
+from storage.storage_manager import StorageManagerSingleton
 
 spreadsheet_id = os.environ.get('SPREADSHEET_USERS')
-sheets_service = StorageManager.get_sheets_service()
+sheets_service = StorageManagerSingleton.get_sheets_service()
 
 def get_users_id(service=sheets_service):
     try:

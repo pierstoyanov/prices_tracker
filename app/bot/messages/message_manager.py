@@ -1,19 +1,57 @@
 
-from datetime import datetime
 import os
+from datetime import datetime
+from numpy import average
+
+from data_unit import DataUnit
 from bot.messages.symbols import symbols
 from logger.logger import logging
 from google_sheets.google_sheets_api_operations import get_multiple_named_ranges
-from firebase_admin import db
+from bot.messages.symbols import symbols as s
 
 class MessageManager():
-    def __init__(self, storage=0, sheets_service=None):
-        self.messages_logger = logging.getLogger('messages')
-        self.storage_service = storage
+    messages_logger = logging.getLogger(__name__)
+    
+    def __init__(self, storage_strategy=0, sheets_service=None):
+        self.storage_strategy = storage_strategy
         self.sheets_service = sheets_service
-        self.data_metals = db.reference('data/metals')
-        self.data_power = db.reference('data/power')
-        self.data_rates = db.reference('data/rates')
+        self.du = DataUnit()
+
+    def populate_daily_data(self):
+        if self.storage_strategy in (0, 2):
+            self.du.fill_data_from_firebase()
+
+    def build_text(self):
+        """ This method adds the retrieved data to a text string. """
+        m = self.du.m
+        r = self.du.r
+        p = self.du.p
+
+        avrg = (m["au-am"] + m["au-pm"]) / 2 # type: ignore
+
+        text = f'' \
+        f'{s["calendar"]} Дата: {m["cu-d"]}\n' \
+        f'{s["chart"]}Мед\n' \
+        f'Offer: *{m["cu"]:,.2f}{s["dollar"]}*\n' \
+        f'3 month: *{m["cu-3m"]:,.2f}{s["dollar"]}*\n' \
+        f'Stock: *{m["cu-st"]:}*\n' \
+        f'{s["chart"]} Злато\n' \
+        f'AM: *{m["au-am"]:,.3F}{s["dollar"]}*\n' \
+        f'PM *{m["au-pm"]:,.3F}{s["dollar"]}*\n' \
+        f'Average: *{avrg:.3F}{s["dollar"]}*\n' \
+        f'{s["chart"]} Сребро *{m["ag"]:.4F}{s["dollar"]}*\n' \
+        f'<hr>'
+        f'{s["calendar"]} Дата: {r["d"]}\n'
+        f'{s["USD"]} BGN/USD: *{r["USD"]}*\n' \
+        f'{s["GBP"]} BGN/GBP: *{r["GBP"]}*\n' \
+        f'{s["USD"]} BGN/CHF: *{r["CHF"]}*\n' \
+        f'{s["highVolt"]} Ел. енергия: {p["Date"]}\n' \
+        f'BGN: *{p["BGN"]:.2F}*\n' \
+        f'EUR: *{p["EUR"]:.2F}*\n' \
+        f'Volume *{p["Volume"]:.2F}*'
+
+        return text
+    
 
     @staticmethod
     def test_date(c, cw, au, ag):
@@ -37,7 +75,6 @@ class MessageManager():
             result = result.get('valueRanges')
         except AttributeError:
             self.messages_logger.error("Failed to access sheets")
-            return
 
         if return_dict:
             #TODO convert to unified data format
@@ -50,50 +87,6 @@ class MessageManager():
                             [dict(zip(x['values'][0], x['values'][1])) for x in result]))
         return result
 
-    def get_daily_data_fb(self) -> tuple | None:
-        ref = db.reference('data')
-        # Query the data to get the latest entry
-        latest_metals = self.data_metals.order_by_key().limit_to_last(1).get()
-        latest_power = self.data_power.order_by_key().limit_to_last(1).get()
-        latest_rates = self.data_rates.order_by_key().limit_to_last(1).get()
-        
-
-
-        # Check the data is not None
-        if not latest_metals:
-            return None
-        
-        key_metals, data_metals = next(iter(latest_metals.items()))
-        key_power, data_power = next(iter(latest_power.items()))
-        key_rates, data_rates = next(iter(latest_rates.items()))
-
-        return key_metals, data_metals, key_power, data_power, key_rates, data_rates
-
-    
-    def build_daily_info_firebase(self):
-        pass
-
-    def populate_text(self, data):
-        d = data
-        s = symbols
-        return f'' \
-        f'{s["calendar"]} Дата: {d["m"]["Date"]}\n' \
-        f'{s["chart"]} Мед\n' \
-        f'Offer: *{d["m"]["Offer"]:,.2f}{s["dollar"]}*\n' \
-        f'3 month: *{d["m"]["3mo"]:,.2f}{s["dollar"]}*\n' \
-        f'Stock: *{d["m"]["Stock"]:}*\n' \
-        f'{s["chart"]} Злато*\n' \
-        f'AM: *{d["m"]["Gold AM"]:,.3F}{s["dollar"]}*\n' \
-        f'PM *{d["m"]["Gold PM"]:,.3F}{s["dollar"]}*\n' \
-        f'Average: *{d["m"]["Average"]:.3F}{s["dollar"]}*\n' \
-        f'{s["chart"]} Сребро *{d["m"]["Silver"]:.4F}{s["dollar"]}*\n' \
-        f'{s["usd"]} BGN/USD: *{d["r"]["USD"]}*\n' \
-        f'{s["pound"]} BGN/GBP: *{d["r"]["GBP"]}*\n' \
-        f'{s["usd"]} BGN/CHF: *{d["r"]["CHF"]}*\n' \
-        f'{s["hv"]} Ел. енергия: {d["p"]["Date"]}\n' \
-        f'BGN: *{d["p"]["BGN"]:.2F}*\n' \
-        f'EUR: *{d["p"]["EUR"]:.2F}*\n' \
-        f'Volume *{d["p"]["Volume"]:.2F}*'
 
     def build_daily_info_gsheets(self):
         try:

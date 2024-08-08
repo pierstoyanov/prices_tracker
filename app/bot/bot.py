@@ -6,7 +6,6 @@ from bot.messages.message_manager import MessageManager
 from bot.users.composite_user_actions import CompositeUserActions
 from bot.messages.daily_data import get_daily_data_gsheets, build_daily_info
 from logger.logger import logging
-from storage.storage_manager import storage_manager
 
 
 # begin bot class
@@ -16,15 +15,15 @@ class Bot:
         auth_token=os.environ.get('BOT_TOKEN'),
         avatar='http://viber.com/avatar.jpg'
     )
+    bot_logger = logging.getLogger(__name__)
 
-    def __init__(self, storage_strategy: str):
+    def __init__(self, storage_strategy: int, sheets_service):
         self.viber = Api(self.bot_configuration)
-        self.bot_logger = logging.getLogger('bot')
         self.storage_strategy = storage_strategy,
         self.users = CompositeUserActions(storage_strategy)
-        self.sheets_service = storage_manager.get_sheets_service()
+        self.sheets_service = sheets_service
         self.messages = static_messages
-        self.message_manager = MessageManager(sheets_service=self.sheets_service)
+        self.message_manager = MessageManager(storage_strategy, sheets_service)
 
     def get_daily(self, *args, **kwargs):
         return get_daily_data_gsheets(self.sheets_service, *args, **kwargs)
@@ -35,5 +34,6 @@ class Bot:
     def build_daily_info(self):
         return build_daily_info(self.sheets_service)
 
-    def request_data(self):
-        pass
+    def request_data(self, requested_dat) -> str:
+        #TODO
+        return ''

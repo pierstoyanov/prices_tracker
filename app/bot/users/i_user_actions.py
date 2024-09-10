@@ -10,11 +10,11 @@ class UserActions(ABC):
         pass
 
     @abstractmethod
-    def get_all_users(self) -> List:
+    def get_all_users(self) -> dict | None:
         pass
 
     @abstractmethod
-    def get_user_by_id(self, user_id: int) -> List:
+    def get_user_by_id(self, user_id: str) -> dict | None:
         pass
     
     @abstractmethod
@@ -26,5 +26,5 @@ class UserActions(ABC):
         pass
     
     @abstractmethod
-    def remove_user(self, user_id: str) -> None:
+    def remove_user(self, user_id: str) -> bool:
         pass

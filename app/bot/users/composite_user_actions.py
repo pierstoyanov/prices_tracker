@@ -1,6 +1,6 @@
 # class using composite design pattern for strategy in i_user_actions
 
-from typing import Optional
+from numpy import False_
 from bot.users.firebasee_user_actions import FirebaseUserActions
 from bot.users.google_sheets_user_actions import GoogleSheetsUserActions
 from bot.users.i_user_actions import UserActions
@@ -11,7 +11,7 @@ class CompositeUserActions(UserActions):
 
     def __init__(self, storage_strategy):
         self.storage: str = storage_strategy
-        self.managers: list = self.set_storage(storage_strategy)
+        self.managers: list[UserActions] = self.set_storage(storage_strategy)
 
     def set_storage(self, storage_strategy) -> list:
         """ Create user actions managers based on storage strategy."""
@@ -35,27 +35,39 @@ class CompositeUserActions(UserActions):
         # method uses only primary storage source 
         return self.managers[0].get_user_by_id(user_id)
     
+    def apply_to_managers(self, operation, *args, **kwargs) -> bool:
+        """
+        Template method that applies a given operation to all managers.
+        
+        :param operation: A method or function to call for each manager.
+        :return: True if the operation succeeds for all managers, False otherwise.
+        """
+        success_counter = 0
+        
+        for manager in self.managers:
+            success_counter += operation(manager, *args, **kwargs)
+        
+        return success_counter == len(self.managers)
+    
     def add_new_user(self, user) -> bool:
-        success = True
-        try:
-            for manager in self.managers:
-                manager.add_new_user(user.id, user)
-        except:
-            success = False
-        return success
+        return self.apply_to_managers(
+            lambda mngr, usr: mngr.add_new_user(usr),
+            user)
 
-    def update_user(self, user_id:str, update_data: dict) -> None:
+    def update_user(self, user_id:str, update_data: dict):
         """ Update user in all storage sources. """	
+        success = True
         for manager in self.managers:
             try:
                 manager.update_user(user_id, update_data)
             except: 
+                success = False
                 continue
+        return success
 
-    def remove_user(self, user_id: str) -> None:
-        """ Remove user from all storage sources. """  
-        for manager in self.managers:
-            try:
-                manager.remove_user(user_id)
-            except Exception as e: 
-                continue
+    def remove_user(self, user_id: str) -> bool:
+        """ Remove user from all storage sources. """ 
+        return self.apply_to_managers(
+            lambda manager, usr_id: manager.remove_user(usr_id), 
+            user_id
+        )

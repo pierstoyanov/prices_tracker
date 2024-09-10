@@ -1,4 +1,5 @@
 import os
+from viberbot.api.user_profile import UserProfile
 from bot.users.i_user_actions import UserActions
 from googleapiclient.errors import HttpError
 from logger.logger import logging
@@ -53,10 +54,10 @@ class GoogleSheetsUserActions(UserActions):
         # returntype tbd
         pass
 
-    def add_new_user(self, user: dict) -> bool:
+    def add_new_user(self, user: UserProfile) -> bool:
         users = self.get_all_user_ids()
         vals = [[str(x) for x in user.__dict__.values()]]
-        user_id = user.get('id')
+        user_id = user.id
         if len(users) == 0 or user_id not in users:
             body = {
                 'values': vals

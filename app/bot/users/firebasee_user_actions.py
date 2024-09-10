@@ -10,7 +10,7 @@ class FirebaseUserActions(UserActions):
 
     def __init__(self):
         self.users = db.reference('users')
-        self.id_map = db.reference('user_map')
+        self.id_map = db.reference('start/user_map')
         self.rev_id_map = {v: k for k, v in self.id_map.get().items()} \
             if self.id_map.get() is not None else {}
 
@@ -48,24 +48,32 @@ class FirebaseUserActions(UserActions):
             frb_id = push_data(self.id_map, user.id).key
             add_key(self.users, frb_id, key_data)
             self.update_mapping()
-        except:
+        except Exception as e:
             self.frb_logger.error(e)
         return True
 
-    def update_user(self, user_id: str, update_data: dict) -> None:
+    def update_user(self, user_id: str, update_data: dict) -> bool:
+        frb_id = self.rev_id_map.get(user_id)
+    
+        if frb_id is None:
+            raise Exception("User not found")
+
+        try:    
+            update_key(self.users, frb_id, update_data)
+            return True
+        except: 
+            return False
+
+    def remove_user(self, user_id: str) -> bool:
         frb_id = self.rev_id_map.get(user_id)
 
         if frb_id is None:
             raise Exception("User not found")
 
-        update_key(self.users, frb_id, update_data)
-
-    def remove_user(self, user_id: str) -> None:
-        frb_id = self.rev_id_map.get(user_id)
-
-        if frb_id is None:
-            raise Exception("User not found")
-
-        remove_key(self.id_map, frb_id)
-        remove_key(self.users, frb_id)
-        self.update_mapping()
+        try:
+            remove_key(self.id_map, frb_id)
+            remove_key(self.users, frb_id)
+            self.update_mapping()
+            return True
+        except:
+            return False

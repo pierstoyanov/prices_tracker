@@ -16,7 +16,7 @@ from google_sheets.google_sheets_api_operations import append_values
 from firebase_admin import db
 from logger.logger import logging
 from storage.storage_manager import storage_manager
-from instances import bot
+from instances import bot, last_data
 
 
 # create local log
@@ -62,17 +62,18 @@ class DataFirebaseStore:
     :return: void
     """
     def __init__(self):
-        self.ref = db.reference('data')
+        self.ref_data = db.reference('data')
+        self.ref_last = db.reference('start/last')
         self.data: DataUnit
         self.last = self.set_last()
 
     def set_last(self):
         # get last from db
-        last = self.ref.child('last').get()
+        last = self.ref_data.child('start/last').get()
         # if last is empty, try to biild it again 
         if not last:
             new = self.build_last_data()
-            self.ref.update(new)
+            self.ref_data.update(new)
             return new
 
         return last
@@ -83,9 +84,9 @@ class DataFirebaseStore:
             p = get_latest_entry(db.reference('data/power'))
             r = get_latest_entry(db.reference('data/rates'))
             return {
-                'last/metals': m,
-                'last/power': p,
-                'last/rates': r,
+                'metals': m,
+                'power': p,
+                'rates': r,
             }
         except Exception as e:
             data_logger.exception('%s', e)
@@ -115,24 +116,24 @@ class DataFirebaseStore:
         try: # store m 
             m_date = self.get_m_date()
 
-            self.ref.child('metals').update({m_date: self.data.m})
+            self.ref_data.child('metals').update({m_date: self.data.m})
             self.last.update({'metals': {m_date: self.data.m}})
         except Exception as e:
             data_logger.error('%s', e)
 
         try: # store r
             r_date = self.get_r_date()
-            self.ref.child('rates').update({r_date: self.data.r})
+            self.ref_data.child('rates').update({r_date: self.data.r})
             self.last.update({'rates': {r_date: self.data.r}})
         except Exception as e:
             data_logger.error(e)
         
         if any(self.data.p): # store p
-            self.ref.child('power').update(self.data.p)
+            self.ref_data.child('power').update(self.data.p)
             lp_k, lp_v = self.data.p.popitem()
             self.last.update({'power': {lp_k: lp_v}})
 
-        self.ref.child('last').update(self.last)
+        self.ref_last.update(self.last)
 
 
 # init DataFirebaseStore instance
@@ -182,6 +183,7 @@ class DataRequestStoreTemplate:
         :return: void
         """
         try:
+            # verify for g_sheets 
             verify_collected_data(self.input_data, self.last_data)
 
             append_values(service=self.service,
@@ -300,9 +302,7 @@ class PowerRequest(DataRequestStoreTemplate):
         self.request_data(self.url_headers)
 
         converter = PowerSoupToPandasToData(
-            response=self.raw_response[0],
-            last_date_gsheet=self.get_last_date(),
-            last_date_fb=frb_mngr.get_last_pow_date()
+            response=self.raw_response[0], last_date_gsheet=self.last_data.get('Date'), last_date_fb=frb_mngr.get_last_pow_date()
         )
 
         # export data to data unit object
@@ -314,7 +314,7 @@ class PowerRequest(DataRequestStoreTemplate):
 
 
 class DataManagementWithRequests:
-    """Singleton class for arrange staging and 
+    """Singleton class to arrange staging and 
     executing data collection and storage
     """
     def __init__(self):
@@ -324,7 +324,8 @@ class DataManagementWithRequests:
         self.data_requests: list[DataRequestStoreTemplate] = []
         self.last_data: dict = self.get_last_data()
 
-    def get_last_data(self):
+    def get_last_data(self):# -> dict[Any, Any]:
+        """ Get the last data from gsheets."""
         combined_dict = bot.get_last_data(return_dict=True)
         return combined_dict
 

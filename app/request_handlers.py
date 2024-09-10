@@ -27,7 +27,7 @@ def handle_message(viber_request: ViberMessageRequest):
         ])
 
     def handle_daily_data():
-        daily = bot.build_daily_info()
+        daily = bot.message_manager.daily
         viber.send_messages(viber_request.sender.id, [ # type: ignore
             bot.messages.msg_text_w_keyboard(daily),
         ])
@@ -114,6 +114,15 @@ def handle_unsubscribed(viber_request: ViberUnsubscribedRequest):
 
 
 def handle_delivered(viber_request: ViberDeliveredRequest):
+    result = bot.users.delivered_to_user(
+        user=viber_request, 
+        timestamp=viber_request.timestamp
+    )
+    
+    if not result:
+        return Response(status=500)
+    return Response(status=200)
+
     handler_logger.info('User %s received %s',
                         viber_request.user_id, viber_request.message_token)
     return Response(status=200)

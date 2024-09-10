@@ -8,6 +8,7 @@ from bot.messages.symbols import symbols as s
 
 messages_logger = logging.getLogger(__name__)
 
+##### functional #####
 def test_date(c, cw, au, ag):
     if c['Date'] == cw['Date'] and cw['Date'] == au['Date'] and au['Date'] == ag['Date']:
         return '\u2705'
@@ -90,45 +91,53 @@ def build_daily_info(service):
     except KeyError as e:
         messages_logger.info("Failed to build daly msg.")
     return ''
+##### end functional #####
 
-
-class BuildDailyInfo():
+class DailyBuilder():
     def __init__(self):
         self.du = DataUnit()
     
         # date: {'cu-d', 'cu', 'cu-3m', 'cu-st', 'ag-d', \
         # 'ag', 'au-d', 'au-am', 'au-pm'}
+
     def populate_from_frb(self):
-        self.data_unit.fill_data_from_firebase()
+        self.du.fill_data_from_firebase()
     
     def populate_from_gsheets(self):
-        self.data_unit.fill_data_from_gsheets()
+        self.du.fill_data_from_gsheets()
     
     def build_text(self):
+        """ This method adds the retrieved data to a text string. """
+
+        if self.du.test_unit_is_filled():
+            return ""
+        
+        m = self.du.m
+        r = self.du.r
+        p = self.du.p
+
+        avrg = (m["au-am"] + m["au-pm"]) / 2 # type: ignore
+
         text = f'' \
-        f'{s["calendar"]} Дата: {c["Date"]}\n' \
+        f'{s["calendar"]} Дата: {m["cu-d"]}\n' \
         f'{s["chart"]}Мед\n' \
-        f'Offer: *{c["Offer"]:,.2f}{s["dollar"]}*\n' \
-        f'3 month: *{c["3mo"]:,.2f}{s["dollar"]}*\n' \
-        f'Stock: *{c["Stock"]:}*\n' \
+        f'Offer: *{m["cu"]:,.2f}{s["dollar"]}*\n' \
+        f'3 month: *{m["cu-3m"]:,.2f}{s["dollar"]}*\n' \
+        f'Stock: *{m["cu-st"]:}*\n' \
         f'{s["chart"]} Злато\n' \
-        f'AM: *{au["Gold AM"]:,.3F}{s["dollar"]}*\n' \
-        f'PM *{au["Gold PM"]:,.3F}{s["dollar"]}*\n' \
-        f'Average: *{au["Average"]:.3F}{s["dollar"]}*\n' \
-        f'{s["chart"]} Сребро *{ag["Silver"]:.4F}{s["dollar"]}*\n' \
-        f'{s["USD"]} BGN/USD: *{rates["USD"]}*\n' \
-        f'{s["GBP"]} BGN/GBP: *{rates["GBP"]}*\n' \
-        f'{s["USD"]} BGN/CHF: *{rates["CHF"]}*\n' \
-        f'{s["highVolt"]} Ел. енергия: {power["Date"]}\n' \
-        f'BGN: *{power["BGN"]:.2F}*\n' \
-        f'EUR: *{power["EUR"]:.2F}*\n' \
-        f'Volume *{power["Volume"]:.2F}*'
+        f'AM: *{m["au-am"]:,.3F}{s["dollar"]}*\n' \
+        f'PM *{m["au-pm"]:,.3F}{s["dollar"]}*\n' \
+        f'Average: *{avrg:.3F}{s["dollar"]}*\n' \
+        f'{s["chart"]} Сребро *{m["ag"]:.4F}{s["dollar"]}*\n' \
+        f'<hr>'
+        f'{s["calendar"]} Дата: {r["d"]}\n'
+        f'{s["USD"]} BGN/USD: *{r["USD"]}*\n' \
+        f'{s["GBP"]} BGN/GBP: *{r["GBP"]}*\n' \
+        f'{s["USD"]} BGN/CHF: *{r["CHF"]}*\n' \
+        f'{s["highVolt"]} Ел. енергия: {p["Date"]}\n' \
+        f'BGN: *{p["BGN"]:.2F}*\n' \
+        f'EUR: *{p["EUR"]:.2F}*\n' \
+        f'Volume *{p["Volume"]:.2F}*'
 
         return text
-
-    def get_last_frb(self):
-        last = self.ref.child('last').get()
-
-    def get_last_gs(self):
-        #TODO
-        pass
+    

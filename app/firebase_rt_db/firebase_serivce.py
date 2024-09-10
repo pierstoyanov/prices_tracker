@@ -10,8 +10,14 @@ firebase_logger = logging.getLogger(__name__)
 def start_firebase():
     """ launches firebase connection """
     try: 
-        key = json.loads(os.environ.get('FIREBASE'))
-        creds = credentials.Certificate(key)
+        key = os.environ.get('FIREBASE')
+        
+        if not key:
+            creds = credentials.ApplicationDefault()
+        else:     
+            key = json.loads(key)
+            creds = credentials.Certificate(key) 
+
         firebase_admin.initialize_app(creds, {
             'databaseURL': os.environ.get('FIREBASE_URL')
         })

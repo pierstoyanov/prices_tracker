@@ -1,6 +1,4 @@
 import os
-
-from pytz import NonExistentTimeError
 from logger.logger import logging
 from firebase_admin import db
 from google_sheets.google_sheets_api_operations import get_multiple_named_ranges
@@ -24,7 +22,7 @@ class DataUnit:
         self.logger = logging.getLogger(__name__)
     
     def fill_data_from_firebase(self) -> None:
-        ref = db.reference('data/last')
+        ref = db.reference('start/last')
         try:
             data = ref.get()
 
@@ -87,4 +85,16 @@ class DataUnit:
             'VOL': power.get('VOL')
         }
         self.p.update(p_mapping)
-                
+    
+    def test_unit_is_filled(self):
+        """
+        check if m collection is filled
+        :returns: bool
+        """
+        if not any(self.m.values()):
+            self.fill_data_from_gsheets()
+            if not any(self.m.values()):
+                return False
+            return True
+        else: 
+            return True

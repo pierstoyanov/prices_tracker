@@ -2,7 +2,7 @@ from firebase_admin import db
 from logger.logger import logging
 from bot.users.i_user_actions import UserActions
 from firebase_rt_db.firebase_api_operations import push_data, add_key, \
-    find_key_by_value, get_all_keys, get_all_values, get_key, remove_key, update_key
+    get_all_keys, get_all_values, get_key, remove_key, update_key
 
 
 class FirebaseUserActions(UserActions):
@@ -11,12 +11,12 @@ class FirebaseUserActions(UserActions):
     def __init__(self):
         self.users = db.reference('users')
         self.id_map = db.reference('start/user_map')
-        self.rev_id_map = {v: k for k, v in self.id_map.get().items()} \
-            if self.id_map.get() is not None else {}
+        self.rev_id_map = self.update_mapping()
 
     def update_mapping(self):
-        self.rev_id_map = {v: k for k, v in self.id_map.get().items()} \
-            if self.id_map.get() is not None else {}
+        id_map = self.id_map.get()
+        self.rev_id_map = {v: k for k, v in id_map.items()} \
+            if id_map is not None else {}
 
     def get_all_user_ids(self) -> list[str]:
         return get_all_values(self.id_map)

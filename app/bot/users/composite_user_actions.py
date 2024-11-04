@@ -9,16 +9,16 @@ from bot.users.i_user_actions import UserActions
 class CompositeUserActions(UserActions):
     """ This class uses composite design pattern to command the storage strategy instances. """
 
-    def __init__(self, storage_strategy):
+    def __init__(self, storage_strategy, start_usr_map):
         self.storage: str = storage_strategy
-        self.managers: list[UserActions] = self.set_storage(storage_strategy)
+        self.managers: list[UserActions] = self.set_storage(storage_strategy, start_usr_map)
 
-    def set_storage(self, storage_strategy) -> list:
+    def set_storage(self, storage_strategy, start_usr_map) -> list:
         """ Create user actions managers based on storage strategy."""
         # first item in list is the primary storage.
         managers = [] # 0=firebase, 1=gsheets 2=both
         if storage_strategy == 0 or storage_strategy == 2:
-            managers.append(FirebaseUserActions())
+            managers.append(FirebaseUserActions(start_usr_map))
         if storage_strategy == 1 or storage_strategy == 2:
             managers.append(GoogleSheetsUserActions())
         return managers

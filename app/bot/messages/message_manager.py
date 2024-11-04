@@ -8,23 +8,17 @@ import os
 class MessageManager():
     messages_logger = logging.getLogger(__name__)
     
-    def __init__(self, storage_strategy=0):
+    def __init__(self, last_data, storage_strategy=0):
         self.storage_strategy = storage_strategy
-        self.daily_builder = self.set_daily_builder()
+        self.daily_builder = self.set_daily_builder(last_data)
         self.daily = self.populate_daily_text()
         self.sheets_service = sm.get_sheets_service()
 
     def populate_daily_text(self):
         self.daily = self.daily_builder.build_text()
 
-    def set_daily_builder(self):
-        daily_builder = DailyBuilder()
-
-        if self.storage_strategy in [0, 2]:
-            daily_builder.populate_from_frb()
-        else:
-            daily_builder.populate_from_gsheets()
-        
+    def set_daily_builder(self, last_data):
+        daily_builder = DailyBuilder(last_data)
         return daily_builder
 
     def request_data(self, rq_data):

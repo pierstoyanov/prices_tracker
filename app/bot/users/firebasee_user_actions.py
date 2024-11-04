@@ -8,10 +8,10 @@ from firebase_rt_db.firebase_api_operations import push_data, add_key, \
 class FirebaseUserActions(UserActions):
     frb_logger = logging.getLogger(__name__)    
 
-    def __init__(self):
+    def __init__(self, start_usr_map):
         self.users = db.reference('users')
         self.id_map = db.reference('start/user_map')
-        self.rev_id_map = self.update_mapping()
+        self.rev_id_map = start_usr_map
 
     def update_mapping(self):
         id_map = self.id_map.get()

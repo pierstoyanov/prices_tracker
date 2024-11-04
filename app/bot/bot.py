@@ -18,13 +18,16 @@ class Bot:
     )
     bot_logger = logging.getLogger(__name__)
 
-    def __init__(self, storage_strategy: int, sheets_service):
+    def __init__(self, storage_strategy: int, sheets_service, start_data=None):
         self.viber = Api(self.bot_configuration)
         self.storage_strategy = storage_strategy,
-        self.users = CompositeUserActions(sm.get_storage_strategy())
+        self.start_data = start_data
+        self.users = CompositeUserActions(storage_strategy, 
+                                          start_usr_map=start_data.user_map)
         self.sheets_service = sheets_service
         self.messages = static_messages
-        self.message_manager = MessageManager()
+        self.message_manager = MessageManager(start_data.last_data,
+                                              storage_strategy)
 
 
     def get_daiy_data_unit(self):

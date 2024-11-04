@@ -16,7 +16,7 @@ from google_sheets.google_sheets_api_operations import append_values
 from firebase_admin import db
 from logger.logger import logging
 from storage.storage_manager import storage_manager
-from instances import bot, last_data
+from instances import bot, start_data
 
 
 # create local log
@@ -61,53 +61,25 @@ class DataFirebaseStore:
     firebase realtime database.
     :return: void
     """
-    def __init__(self):
+    def __init__(self, last : DataUnit):
         self.ref_data = db.reference('data')
         self.ref_last = db.reference('start/last')
         self.data: DataUnit
-        self.last = self.set_last()
-
-    def set_last(self):
-        # get last from db
-        last = self.ref_data.child('start/last').get()
-        # if last is empty, try to biild it again 
-        if not last:
-            new = self.build_last_data()
-            self.ref_data.update(new)
-            return new
-
-        return last
-    
-    def build_last_data(self):
-        try:
-            m = get_latest_entry(db.reference('data/metals'))
-            p = get_latest_entry(db.reference('data/power'))
-            r = get_latest_entry(db.reference('data/rates'))
-            return {
-                'metals': m,
-                'power': p,
-                'rates': r,
-            }
-        except Exception as e:
-            data_logger.exception('%s', e)
-        return {}
+        self.last = last
 
     def get_last_pow_date(self):
-        return self.last.get('power', {}).get('d') if self.last else None
+        return self.last.power.d
 
     def get_m_date(self):
-        for key in self.data.m:
+        for key in self.data.metals:
             # return first key ending with "-d" that is not None or -1
-            if "-d" in key and self.data.m[key] is not None \
-                and self.data.m[key] != -1:
-                return self.data.m[key]
+            if "-d" in key and self.data.metals[key] is not None \
+                and self.data.metals[key] != -1:
+                return self.data.metals[key]
         raise Exception("No valid date for m stored.")
 
     def get_r_date(self) -> int:
-        d = self.data.r.get('d')
-        if d == -1 or d == None:
-            raise Exception("No valid date for r stored.")
-        return d
+        return self.last.rates.d
 
     def store_data(self):
         """ Store data to firebase nodes.
@@ -116,28 +88,28 @@ class DataFirebaseStore:
         try: # store m 
             m_date = self.get_m_date()
 
-            self.ref_data.child('metals').update({m_date: self.data.m})
-            self.last.update({'metals': {m_date: self.data.m}})
+            self.ref_data.child('metals').update({m_date: self.data.metals})
+            self.last.update({'metals': {m_date: self.data.metals}})
         except Exception as e:
             data_logger.error('%s', e)
 
         try: # store r
             r_date = self.get_r_date()
-            self.ref_data.child('rates').update({r_date: self.data.r})
-            self.last.update({'rates': {r_date: self.data.r}})
+            self.ref_data.child('rates').update({r_date: self.data.rates})
+            self.last.update({'rates': {r_date: self.data.rates}})
         except Exception as e:
             data_logger.error(e)
         
-        if any(self.data.p): # store p
-            self.ref_data.child('power').update(self.data.p)
-            lp_k, lp_v = self.data.p.popitem()
-            self.last.update({'power': {lp_k: lp_v}})
+        if any(self.data.power): # store p
+            self.ref_data.child('power').update(self.data.power)
+            lp_k, lp_v = self.data.power.popitem()
+            self.last.power.update({lp_k: lp_v})
 
         self.ref_last.update(self.last)
 
 
 # init DataFirebaseStore instance
-frb_mngr = DataFirebaseStore()
+frb_mngr = DataFirebaseStore(start_data.last_data)
 
 # Template for retreiving data and storing it in gsheets
 class DataRequestStoreTemplate:
@@ -226,8 +198,8 @@ class WmDataRequest(DataRequestStoreTemplate):
         input_data = wm_soup_to_data_no_query(soup)
 
         # export data to data unit object
-        new_data.m['cu-d'] = convert_date(input_data[0])
-        new_data.m['cu'], new_data.m['cu-3m'], new_data.m['cu-st'] = input_data[1:]
+        new_data.metals['cu-d'] = convert_date(input_data[0])
+        new_data.metals['cu'], new_data.metals['cu-3m'], new_data.metals['cu-st'] = input_data[1:]
 
         self.input_data.append(input_data)
         self.store_data()
@@ -247,8 +219,8 @@ class AuDataRequest(DataRequestStoreTemplate):
         input_data: list = au_json_to_input(data)
 
         # export data to data unit object
-        new_data.m['au-d'] = convert_date(input_data[0])
-        new_data.m['au-am'], new_data.m['au-pm'] = input_data[1:]
+        new_data.metals['au-d'] = convert_date(input_data[0])
+        new_data.metals['au-am'], new_data.metals['au-pm'] = input_data[1:]
 
         # add average cols formula to input data if needed
         if self.average_cols:
@@ -270,8 +242,8 @@ class AgDataRequest(DataRequestStoreTemplate):
         input_data = ag_json_to_input([self.raw_response[0].json()])
 
         # export data to data unit object
-        new_data.m['ag-d'] = convert_date(input_data[0])
-        new_data.m['ag'] = input_data[1]
+        new_data.metals['ag-d'] = convert_date(input_data[0])
+        new_data.metals['ag'] = input_data[1]
 
         self.input_data.append(input_data)
         self.store_data()
@@ -287,8 +259,8 @@ class ExchangeRatesRequest(DataRequestStoreTemplate):
         input_data = bnb_soup_to_data(soup)
         
         # export data to data unit object
-        new_data.r['d'] = convert_date(input_data[0])
-        new_data.r['USD'], new_data.r['GBP'], new_data.r['CHF'] = input_data[1:]
+        new_data.rates['d'] = convert_date(input_data[0])
+        new_data.rates['USD'], new_data.rates['GBP'], new_data.rates['CHF'] = input_data[1:]
         
         self.input_data.append(input_data)
         self.store_data()
@@ -306,7 +278,7 @@ class PowerRequest(DataRequestStoreTemplate):
         )
 
         # export data to data unit object
-        new_data.p = converter.convert_for_fb()
+        new_data.power = converter.convert_for_fb()
 
         self.input_data = converter.convert_for_gsheets()
         self.store_data()

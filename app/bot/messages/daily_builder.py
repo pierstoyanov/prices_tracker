@@ -6,6 +6,7 @@ from firebase_admin import db
 from google_sheets.google_sheets_api_operations import get_multiple_named_ranges
 from bot.messages.symbols import symbols as s
 
+
 messages_logger = logging.getLogger(__name__)
 
 ##### functional #####
@@ -94,17 +95,11 @@ def build_daily_info(service):
 ##### end functional #####
 
 class DailyBuilder():
-    def __init__(self):
-        self.du = DataUnit()
-    
+    def __init__(self, last_data):
+        self.du = last_data
+
         # date: {'cu-d', 'cu', 'cu-3m', 'cu-st', 'ag-d', \
         # 'ag', 'au-d', 'au-am', 'au-pm'}
-
-    def populate_from_frb(self):
-        self.du.fill_data_from_firebase()
-    
-    def populate_from_gsheets(self):
-        self.du.fill_data_from_gsheets()
     
     def build_text(self):
         """ This method adds the retrieved data to a text string. """

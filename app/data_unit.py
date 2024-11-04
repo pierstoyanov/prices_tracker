@@ -3,6 +3,7 @@ from logger.logger import logging
 from firebase_admin import db
 from google_sheets.google_sheets_api_operations import get_multiple_named_ranges
 from storage.storage_manager import storage_manager as sm
+from firebase_rt_db.firebase_api_operations import get_latest_entry
 
 class DataUnit:
     def __init__(self):
@@ -15,32 +16,45 @@ class DataUnit:
             Power keys: 'd', 'BGN', 'EUR', 'VOL'
         """
         
-        self.m = dict.fromkeys(['cu-d', 'cu', 'cu-3m', 'cu-st', 'ag-d', \
+        self.metals = dict.fromkeys(['cu-d', 'cu', 'cu-3m', 'cu-st', 'ag-d', \
             'ag', 'au-d', 'au-am', 'au-pm'], None)
-        self.r = dict.fromkeys(['d','USD', 'GBP', 'CHF'], None)
-        self.p = dict.fromkeys([ 'd', 'BGN', 'EUR', 'VOL'], None)
+        self.rates = dict.fromkeys(['d','USD', 'GBP', 'CHF'], None)
+        self.power = dict.fromkeys([ 'd', 'BGN', 'EUR', 'VOL'], None)
         self.logger = logging.getLogger(__name__)
     
-    def fill_data_from_firebase(self) -> None:
-        ref = db.reference('start/last')
+    def fill_last_from_firebase(self, last) -> None:
+        """Fill DataUnit with the last data from start object. 
+        If not available, build it from data object."""
+        
+        # get last from start if not passed as arg
+        if not last:
+            last = db.reference('start/last').get()
+
+        # if last object is empty, try to biild it again 
+        if not last:
+            self._fill_last_from_firebase_data()
+            return
+        
+        self.metals.update(last.get('metals'))
+        self.rates.update(last.get('rates'))
+        self.power.update(last.get('power'))
+    
+    def _fill_last_from_firebase_data(self) -> None:
+        "This updates the DataUnit to last from data object."
         try:
-            data = ref.get()
+            m = get_latest_entry(db.reference('data/metals'))
+            self.metals.update(m)
 
-            m = data.get("metals", {}).values()[0] # type: ignore
-            r = data.get("rates", {}).values()[0] # type: ignore
-            p = data.get("power", {}).values()[0] # type: ignore
+            p = get_latest_entry(db.reference('data/power'))
+            self.power.update(p)
 
-            for key in self.m.keys():
-                self.m[key] = m[key]
-            for key in self.r.keys():
-                self.r[key] = r[key]
-            for key in self.p.keys():
-                self.p[key] = p[key]
-                
+            r = get_latest_entry(db.reference('data/rates'))
+            self.rates.update(r)
+
         except Exception as e:
-            self.logger.error(e)
+            self.logger.exception('%s', e)
 
-    def get_daily_data_gsheets(self, service=sm.get_sheets_service()) -> list:
+    def _get_daily_data_gsheets(self, service=sm.get_sheets_service()) -> list:
         """ Returns raw daly info. Param: google sheets service"""
         spreadsheet_id = os.environ.get('SPREADSHEET_DATA')
         ranges = ['cudaly', 'cuwmdaly', 'audaly', 'agdaly', 'rates', 'power']
@@ -54,8 +68,8 @@ class DataUnit:
         
         return [dict(zip(x['values'][0], x['values'][1])) for x in result]
 
-    def fill_data_from_gsheets(self) -> None:
-        c, cw, au, ag, rates, power = self.get_daily_data_gsheets()
+    def fill_last_data_from_gsheets(self) -> None:
+        c, cw, au, ag, rates, power = self._get_daily_data_gsheets()
 
         m_mapping = {
             'cu-d': cw.get('Date'),
@@ -68,7 +82,7 @@ class DataUnit:
             'au-am': au.get('Gold AM'),
             'au-pm': au.get('Gold PM')
         }
-        self.m.update(m_mapping)
+        self.metals.update(m_mapping)
         
         r_mapping = {
             'd': rates.get('Date'),
@@ -76,7 +90,7 @@ class DataUnit:
             'GBP': rates.get('BGN'),
             'CHF': rates.get('CHF')
         }
-        self.r.update(r_mapping)
+        self.rates.update(r_mapping)
 
         p_mapping = {
             'd': power.get('Date'),
@@ -84,16 +98,16 @@ class DataUnit:
             'EUR': power.get('EUR'),
             'VOL': power.get('VOL')
         }
-        self.p.update(p_mapping)
+        self.power.update(p_mapping)
     
     def test_unit_is_filled(self):
         """
         check if m collection is filled
         :returns: bool
         """
-        if not any(self.m.values()):
-            self.fill_data_from_gsheets()
-            if not any(self.m.values()):
+        if not any(self.metals.values()):
+            self.fill_last_data_from_gsheets()
+            if not any(self.metals.values()):
                 return False
             return True
         else: 

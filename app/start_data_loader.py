@@ -5,9 +5,10 @@ from storage.storage_manager import storage_manager
 
 class StartDataLoader:
     def __init__(self):
+        """user_map type: dict, last_data type: DataUnit"""
         self.start = db.reference('start').get()
-        self.user_map = self.set_user_map()
-        self.last_data = self.set_last_data()
+        self.user_map : dict = self.set_user_map()
+        self.last_data : DataUnit = self.set_last_data()
     
     def set_user_map(self):
         return self.start.get('user_map')

@@ -13,3 +13,5 @@ other_code/
 app_engine/
 __pycache__/
 headers.py
+service.yaml
+service-account.json

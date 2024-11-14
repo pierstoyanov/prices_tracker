@@ -6,6 +6,7 @@ from storage.storage_manager import storage_manager as sm
 from firebase_rt_db.firebase_api_operations import get_latest_entry
 
 class DataUnit:
+    logger = logging.getLogger(__name__)
     def __init__(self):
         """
             Collections: metals, rates, power;
@@ -20,7 +21,7 @@ class DataUnit:
             'ag', 'au-d', 'au-am', 'au-pm'], None)
         self.rates = dict.fromkeys(['d','USD', 'GBP', 'CHF'], None)
         self.power = dict.fromkeys([ 'd', 'BGN', 'EUR', 'VOL'], None)
-        self.logger = logging.getLogger(__name__)
+        # self.logger = logging.getLogger(__name__)
     
     def fill_last_from_firebase(self, last) -> None:
         """Fill DataUnit with the last data from start object. 
@@ -35,9 +36,15 @@ class DataUnit:
             self._fill_last_from_firebase_data()
             return
         
-        self.metals.update(last.get('metals'))
-        self.rates.update(last.get('rates'))
-        self.power.update(last.get('power'))
+        last_metals = last.get('metals')
+        if last_metals:
+            self.metals.update(last.get('metals'))
+        last_rates = last.get('rates')
+        if last_rates:
+            self.rates.update(last_rates)
+        last_power = last.get('power')
+        if last_power:
+            self.power.update(last_power)
     
     def _fill_last_from_firebase_data(self) -> None:
         "This updates the DataUnit to last from data object."
@@ -112,3 +119,5 @@ class DataUnit:
             return True
         else: 
             return True
+    
+

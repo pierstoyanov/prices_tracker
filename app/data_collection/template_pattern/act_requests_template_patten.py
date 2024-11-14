@@ -57,8 +57,7 @@ def convert_date(date: str):
 new_data = DataUnit()
 
 class DataFirebaseStore:
-    """ Singleton for managing writing collected data to 
-    firebase realtime database.
+    """ Singleton for managing writing collected data to firebase realtime database.
     :return: void
     """
     def __init__(self, last : DataUnit):
@@ -68,8 +67,11 @@ class DataFirebaseStore:
         self.last = last
 
     def get_last_pow_date(self):
-        return self.last.power.d
+        return self.last.power.get("d")
 
+    def get_last_rate_date(self) -> int:
+        return self.last.rates.get('d')
+    
     def get_m_date(self):
         for key in self.data.metals:
             # return first key ending with "-d" that is not None or -1
@@ -77,9 +79,6 @@ class DataFirebaseStore:
                 and self.data.metals[key] != -1:
                 return self.data.metals[key]
         raise Exception("No valid date for m stored.")
-
-    def get_r_date(self) -> int:
-        return self.last.rates.d
 
     def store_data(self):
         """ Store data to firebase nodes.
@@ -89,14 +88,14 @@ class DataFirebaseStore:
             m_date = self.get_m_date()
 
             self.ref_data.child('metals').update({m_date: self.data.metals})
-            self.last.update({'metals': {m_date: self.data.metals}})
+            self.last.metals.update({m_date: self.data.metals})
         except Exception as e:
             data_logger.error('%s', e)
 
         try: # store r
-            r_date = self.get_r_date()
+            r_date = self.get_last_rate_date()
             self.ref_data.child('rates').update({r_date: self.data.rates})
-            self.last.update({'rates': {r_date: self.data.rates}})
+            self.last.rates.update({r_date: self.data.rates})
         except Exception as e:
             data_logger.error(e)
         
@@ -105,7 +104,10 @@ class DataFirebaseStore:
             lp_k, lp_v = self.data.power.popitem()
             self.last.power.update({lp_k: lp_v})
 
-        self.ref_last.update(self.last)
+        try:
+            self.ref_last.update(self.last.__dict__)
+        except ValueError as e:
+            data_logger.error(e)
 
 
 # init DataFirebaseStore instance
@@ -146,7 +148,8 @@ class DataRequestStoreTemplate:
                 data_logger.exception('%s', e)
 
     def process_data(self):
-        """Process data from raw_response and store it in instance variable self.input_data.
+        """Process data from raw_response and store it 
+        in instance variable self.input_data.
         Implemented in child classes"""
         raise NotImplementedError
 
@@ -199,7 +202,8 @@ class WmDataRequest(DataRequestStoreTemplate):
 
         # export data to data unit object
         new_data.metals['cu-d'] = convert_date(input_data[0])
-        new_data.metals['cu'], new_data.metals['cu-3m'], new_data.metals['cu-st'] = input_data[1:]
+        new_data.metals['cu'], new_data.metals['cu-3m'], 
+        new_data.metals['cu-st'] = input_data[1:]
 
         self.input_data.append(input_data)
         self.store_data()
@@ -260,7 +264,8 @@ class ExchangeRatesRequest(DataRequestStoreTemplate):
         
         # export data to data unit object
         new_data.rates['d'] = convert_date(input_data[0])
-        new_data.rates['USD'], new_data.rates['GBP'], new_data.rates['CHF'] = input_data[1:]
+        new_data.rates['USD'], new_data.rates['GBP'], 
+        new_data.rates['CHF'] = input_data[1:]
         
         self.input_data.append(input_data)
         self.store_data()
@@ -274,7 +279,8 @@ class PowerRequest(DataRequestStoreTemplate):
         self.request_data(self.url_headers)
 
         converter = PowerSoupToPandasToData(
-            response=self.raw_response[0], last_date_gsheet=self.last_data.get('Date'), last_date_fb=frb_mngr.get_last_pow_date()
+            response=self.raw_response[0], last_date_gsheet=
+            self.last_data.get('Date'), last_date_fb=frb_mngr.get_last_pow_date()
         )
 
         # export data to data unit object

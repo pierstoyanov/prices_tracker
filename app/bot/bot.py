@@ -30,8 +30,9 @@ class Bot:
                                               storage_strategy)
 
 
-    def get_daiy_data_unit(self):
-        return self.message_manager.daily_builder.du
+    def get_daiy_msg(self):
+        return self.messages.msg_text_w_keyboard(
+            self.message_manager.daily)
 
     def get_daily_info(self):
         ## functional

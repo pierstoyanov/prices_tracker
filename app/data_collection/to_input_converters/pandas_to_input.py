@@ -28,7 +28,7 @@ class PowerSoupToPandasToData:
     def __init__(self, response, last_date_gsheet=None, last_date_fb=None):
         self.df_grouped = self.create_groups(response)
         self.last_date_gsheets = self.get_last_date(last_date_gsheet, "%d.%m.%Y")
-        self.last_date_fb = self.get_last_date(last_date_fb, "%d-%m-%Y")
+        self.last_date_fb = self.get_last_date(last_date_fb, "%Y-%m-%d")
 
     def create_groups(self, response):
 

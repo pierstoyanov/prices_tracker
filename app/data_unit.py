@@ -12,7 +12,7 @@ class DataUnit:
             Collections: metals, rates, power;
 
             Metals keys: 'cu-d', 'cu', 'cu-3m', 'cu-st', 'ag-d', \
-                ag', 'au-d', 'au-am', 'au-pm'
+                        ag', 'au-d', 'au-am', 'au-pm'
             Rates keys: 'd','USD', 'GBP', 'CHF'
             Power keys: 'd', 'BGN', 'EUR', 'VOL'
         """
@@ -23,40 +23,68 @@ class DataUnit:
         self.power = dict.fromkeys([ 'd', 'BGN', 'EUR', 'VOL'], None)
         # self.logger = logging.getLogger(__name__)
     
+    def _fill_attribute_dict(self, data_dict, collection_name):
+        """Fills a unit attribute/colelction with data from the provided dict.
+        Provided dict has all, or some of the attr keys.  
+        """
+        current_dict = getattr(self, collection_name, None)
+
+        for k,v in data_dict.items():
+            if k in current_dict:
+                current_dict[k] = v
+
+
     def fill_last_from_firebase(self, last) -> None:
         """Fill DataUnit with the last data from start object. 
         If not available, build it from data object."""
         
-        # get last from start if not passed as arg
+        # get last from start object if not passed as arg
         if not last:
             last = db.reference('start/last').get()
 
-        # if last object is empty, try to biild it again 
+        # if last object is still empty, try to biild it again from data
         if not last:
             self._fill_last_from_firebase_data()
             return
         
         last_metals = last.get('metals')
         if last_metals:
-            self.metals.update(last.get('metals'))
+            self._fill_attribute_dict(last_metals, 'metals')
+
         last_rates = last.get('rates')
         if last_rates:
-            self.rates.update(last_rates)
+            self._fill_attribute_dict(last_rates, 'rates')
+        
         last_power = last.get('power')
         if last_power:
-            self.power.update(last_power)
+            self._fill_attribute_dict(last_power, 'power')
     
     def _fill_last_from_firebase_data(self) -> None:
-        "This updates the DataUnit to last from data object."
+        """Fill DataUnit with the last data from the main data object.
+        This is used the the quickaccess object start fails."""
         try:
+            failed_data_fills_counter = 0
+
             m = get_latest_entry(db.reference('data/metals'))
-            self.metals.update(m)
+            if m:
+                self.metals.update(m)
+            else:
+                failed_data_fills_counter+=1
 
             p = get_latest_entry(db.reference('data/power'))
-            self.power.update(p)
+            if p:
+                self.power.update(p)
+            else:
+                failed_data_fills_counter+=1
 
             r = get_latest_entry(db.reference('data/rates'))
-            self.rates.update(r)
+            if r:
+                self.rates.update(r)
+            else:
+                failed_data_fills_counter+=1
+            
+            if failed_data_fills_counter != 0: # check all 3 were filled 
+                self.fill_last_data_from_gsheets()
 
         except Exception as e:
             self.logger.exception('%s', e)
@@ -76,6 +104,7 @@ class DataUnit:
         return [dict(zip(x['values'][0], x['values'][1])) for x in result]
 
     def fill_last_data_from_gsheets(self) -> None:
+        #TODO Convert day format to ISO format
         c, cw, au, ag, rates, power = self._get_daily_data_gsheets()
 
         m_mapping = {
@@ -103,7 +132,7 @@ class DataUnit:
             'd': power.get('Date'),
             'BGN': power.get('BGN'),
             'EUR': power.get('EUR'),
-            'VOL': power.get('VOL')
+            'VOL': power.get('Volume')
         }
         self.power.update(p_mapping)
     
@@ -112,6 +141,7 @@ class DataUnit:
         check if m collection is filled
         :returns: bool
         """
+        #TODO change to test all 3 collections
         if not any(self.metals.values()):
             self.fill_last_data_from_gsheets()
             if not any(self.metals.values()):

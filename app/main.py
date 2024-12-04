@@ -59,23 +59,23 @@ def incoming():
 
 @app.route('/collectdata', methods=['GET'])
 def get_data():
-    # check GCloud scheduler header
-    job_name = os.environ.get('GATHER_JOB')
-    gc_scheduler = 'X-CloudScheduler-JobName'
+    # # check GCloud scheduler header
+    # job_name = os.environ.get('GATHER_JOB')
+    # gc_scheduler = 'X-CloudScheduler-JobName'
 
     # selector variable that chooses between
     # act_requests and act_requests_template_pattern
     use_functional = False
 
-    if request.headers.get(gc_scheduler) == job_name:
-        if use_functional:
-            data_management_with_requests()
-            gc.collect()
+    # if request.headers.get(gc_scheduler) == job_name:
+    if use_functional:
+        data_management_with_requests()
+        gc.collect()
+        return Response(status=200)
+    else:
+        result = DataManagementWithRequests().run()
+        if result == 0:
             return Response(status=200)
-        else:
-            result = DataManagementWithRequests().run()
-            if result == 0:
-                return Response(status=200)
     return Response(status=500)
 
 
@@ -85,9 +85,6 @@ def send_msg():
     users = bot.users.get_all_user_ids()
     # app_logger.info('Users id\'s are: %s', users)
 
-    # daly data
-    daily = bot.build_daily_info()
-
     # check Gcloud scheduler header
     job_name = os.environ.get('SEND_JOB')
     gc_scheduler = 'X-CloudScheduler-JobName'
@@ -96,7 +93,7 @@ def send_msg():
         count = len(users)
         for u in users:
             tokens = viber.send_messages(u, [
-                bot.messages.msg_text_w_keyboard(daily),
+                bot.get_daiy_msg()
             ])
             if tokens:
                 count -= 1

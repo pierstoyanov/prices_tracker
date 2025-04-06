@@ -14,8 +14,8 @@ class MessageManager():
         self.daily = self.populate_daily_text()
         self.sheets_service = sm.get_sheets_service()
 
-    def populate_daily_text(self):
-        self.daily = self.daily_builder.build_text()
+    def populate_daily_text(self) -> str:
+       return self.daily_builder.build_text()
 
     def set_daily_builder(self, last_data):
         daily_builder = DailyBuilder(last_data)

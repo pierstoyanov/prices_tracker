@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3.8'
 
 services:
   pricestracker:
@@ -8,9 +8,11 @@ services:
       dockerfile: .Dockerfile
     env_file: .env
     user: 5678:5678
-    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 -m flask run --no-debugger --no-reload --host 0.0.0.0 --port 8080"]
     ports:
-      - 8080:8080
-      - 5678:5678
+          - 8080:8080
+          - 5678:5678
     environment:
       - FLASK_APP=main.py
+    voluems: .:/app
+    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 -m flask run --no-debugger --no-reload --host 0.0.0.0 --port 8080"]
+    

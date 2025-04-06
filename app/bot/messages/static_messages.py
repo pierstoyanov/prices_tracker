@@ -1,8 +1,7 @@
 from viberbot.api.messages import TextMessage, KeyboardMessage
-from app.bot.messages.keyboards import keyboard, welcome_keyboard
+from bot.messages.keyboards import keyboard, welcome_keyboard
 
 
-c, chk_mrk, left_arr = '\U000000A9', '\U00002714', '\U00002B05'
 info_txt = "✅ pspricesbot © изпраща дневна информация в 09:00.\n" \
            "✅ За конкретна дата въведете ден във формат  *'дд/мм/гггг'*.\n" \
            "✅ Плъзнете наляво ⬅️ за допълнителни настройки" \

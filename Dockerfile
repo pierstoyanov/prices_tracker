@@ -1,5 +1,5 @@
 # For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:3.10-slim
+FROM python:3.12-alpine
 
 EXPOSE 8080
 
@@ -9,20 +9,17 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
-# Load environment variables from .env file
 ENV PATH="/${PATH}"
-COPY .env /.env
-
-# Copy service acc file 
-COPY ./secrets/service-account.json /app/service_acc/service-account.json
+# COPY .env /
 
 # Install pip requirements
 COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 
-# Copy application files
 WORKDIR /app
-COPY ./app/ /app
+COPY app /app
+
+COPY service_acc service_acc/
 
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
 # For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers

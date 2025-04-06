@@ -202,7 +202,7 @@ class WmDataRequest(DataRequestStoreTemplate):
 
         # export data to data unit object
         new_data.metals['cu-d'] = convert_date(input_data[0])
-        new_data.metals['cu'], new_data.metals['cu-3m'], 
+        new_data.metals['cu'], new_data.metals['cu-3m'], \
         new_data.metals['cu-st'] = input_data[1:]
 
         self.input_data.append(input_data)
@@ -264,8 +264,8 @@ class ExchangeRatesRequest(DataRequestStoreTemplate):
         
         # export data to data unit object
         new_data.rates['d'] = convert_date(input_data[0])
-        new_data.rates['USD'], new_data.rates['GBP'], 
-        new_data.rates['CHF'] = input_data[1:]
+        (new_data.rates['USD'], new_data.rates['GBP'], new_data.rates['CHF']) \
+            = input_data[1:]
         
         self.input_data.append(input_data)
         self.store_data()
@@ -279,8 +279,9 @@ class PowerRequest(DataRequestStoreTemplate):
         self.request_data(self.url_headers)
 
         converter = PowerSoupToPandasToData(
-            response=self.raw_response[0], last_date_gsheet=
-            self.last_data.get('Date'), last_date_fb=frb_mngr.get_last_pow_date()
+            response=self.raw_response[0], 
+            last_date_gsheet=self.last_data.get('Date'), 
+            last_date_fb=frb_mngr.get_last_pow_date()
         )
 
         # export data to data unit object
@@ -338,37 +339,37 @@ class DataManagementWithRequests:
         #                  (os.environ.get('CU_JSON_STOCK'), lme_headers))
         # ))
         # copper wm
-        self.add_data_management(WmDataRequest(
-            service=self.sheets_service,
-            session=self.session,
-            sh_id=self.spreadsheet_id,
-            last_data=self.last_data["cuwmdaly"],
-            store_to_page='copperwm',
-            store_range='A2:D',
-            url_headers=((os.environ.get('URL_THREE_NQ'), {}),)
-        ))
-        # gold
-        self.add_data_management(AuDataRequest(
-            service=self.sheets_service,
-            session=self.session,
-            sh_id=self.spreadsheet_id,
-            last_data=self.last_data["audaly"],
-            store_to_page='gold',
-            store_range='A2:D',
-            average_cols='B:C',
-            url_headers=((os.environ.get('AU_AM_JSON'), lmba_headers),
-                         (os.environ.get('AU_PM_JSON'), lmba_headers))
-        ))
-        # silver
-        self.add_data_management(AgDataRequest(
-            service=self.sheets_service,
-            session=self.session,
-            sh_id=self.spreadsheet_id,
-            last_data=self.last_data["agdaly"],
-            store_to_page='silver',
-            store_range='A2:B',
-            url_headers=((os.environ.get('AG_JSON'), lmba_headers),)
-        ))
+        # self.add_data_management(WmDataRequest(
+        #     service=self.sheets_service,
+        #     session=self.session,
+        #     sh_id=self.spreadsheet_id,
+        #     last_data=self.last_data["cuwmdaly"],
+        #     store_to_page='copperwm',
+        #     store_range='A2:D',
+        #     url_headers=((os.environ.get('URL_THREE_NQ'), {}),)
+        # ))
+        # # gold
+        # self.add_data_management(AuDataRequest(
+        #     service=self.sheets_service,
+        #     session=self.session,
+        #     sh_id=self.spreadsheet_id,
+        #     last_data=self.last_data["audaly"],
+        #     store_to_page='gold',
+        #     store_range='A2:D',
+        #     average_cols='B:C',
+        #     url_headers=((os.environ.get('AU_AM_JSON'), lmba_headers),
+        #                  (os.environ.get('AU_PM_JSON'), lmba_headers))
+        # ))
+        # # silver
+        # self.add_data_management(AgDataRequest(
+        #     service=self.sheets_service,
+        #     session=self.session,
+        #     sh_id=self.spreadsheet_id,
+        #     last_data=self.last_data["agdaly"],
+        #     store_to_page='silver',
+        #     store_range='A2:B',
+        #     url_headers=((os.environ.get('AG_JSON'), lmba_headers),)
+        # ))
         # exchange rates
         self.add_data_management(ExchangeRatesRequest(
             service=self.sheets_service,
@@ -380,15 +381,15 @@ class DataManagementWithRequests:
             url_headers=((os.environ.get('URL_FOUR'), {}),)
         ))
         # power
-        self.add_data_management(PowerRequest(
-            service=self.sheets_service,
-            session=self.session,
-            sh_id=self.spreadsheet_id,
-            last_data=self.last_data["power"],
-            store_to_page='power',
-            store_range='A2:D',
-            url_headers=((os.environ.get('URL_SIX'), ua_header),)
-        ))
+        # self.add_data_management(PowerRequest(
+        #     service=self.sheets_service,
+        #     session=self.session,
+        #     sh_id=self.spreadsheet_id,
+        #     last_data=self.last_data["power"],
+        #     store_to_page='power',
+        #     store_range='A2:D',
+        #     url_headers=((os.environ.get('URL_SIX'), ua_header),)
+        # ))
 
     def run(self):
         """Main class execution method"""

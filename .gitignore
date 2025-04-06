@@ -13,6 +13,5 @@ other_code/
 app_engine/
 __pycache__/
 headers.py
-.venv
 service.yaml
 service-account.json

@@ -20,7 +20,7 @@ class Bot:
 
     def __init__(self, storage_strategy: int, sheets_service, start_data=None):
         self.viber = Api(self.bot_configuration)
-        self.storage_strategy = storage_strategy,
+        self.storage_strategy = storage_strategy
         self.start_data = start_data
         self.users = CompositeUserActions(storage_strategy, 
                                           start_usr_map=start_data.user_map)

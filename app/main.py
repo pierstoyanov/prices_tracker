@@ -2,8 +2,8 @@ import os
 import gc
 import threading
 
-from cachetools import TTLCache
-from flask import Flask, request, Response
+from cachetools import TTLCache #TODO Replace with flask_caching
+from flask import Flask, abort, request, Response
 from data_collection.functional.act_requests import data_management_with_requests
 from data_collection.template_pattern.act_requests_template_patten import DataManagementWithRequests, DataRequestStoreTemplate, WmDataRequest
 from logger.logger import logging
@@ -22,13 +22,13 @@ app = Flask(__name__)
 
 # viber equest cache, ttl = max viber api retry time
 cache = TTLCache(50,900)
-cache_lock = threading.Lock() 
+cache_lock = threading.Lock()
 
 
 @app.route('/', methods=['POST'])
 def incoming():
     """ Function to handle incoming requests from viber api."""
-    
+
     request_json = request.get_json()
     request_raw_data = request.get_data()
     signature = request.headers.get('X-Viber-Content-Signature')
@@ -38,7 +38,7 @@ def incoming():
             request_data=request_raw_data,
             signature=signature):
         return Response(status=403)
-    
+   
     # get request ID
     id = request_json.get('message_token')
 
@@ -107,6 +107,10 @@ def register():
     """Function to register webhook to viber"""
     # 'delivered', 'seen', 'failed', 'subscribed',
     # 'unsubscribed', 'conversation_started'
+
+    register_key = os.environ.get('REGISTER_KEY')
+    if request.headers.get("X-AUTH-KEY") != register_key:
+        abort(404)
 
     # viber.unset_webhook()
     webhook_events = ['message', 'subscribed',

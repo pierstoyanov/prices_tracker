@@ -1,18 +1,20 @@
-version: '3.8'
-
 services:
-  pricestracker:
-    image: pricestracker
-    build:
-      context: .
-      dockerfile: .Dockerfile
-    env_file: .env
-    user: 5678:5678
+  flask-app:
+    build: .
+    image: flask-app:dev
+    container_name: flask-debug-container
     ports:
-          - 8080:8080
-          - 5678:5678
+      - "8000:8000"  # Flask/Gunicorn port
+      - "5678:5678"  # Debugger port
+    volumes:
+      - ./app:/app
+      - ./service_acc:/app/service_acc
+    env_file:
+      - .env
     environment:
-      - FLASK_APP=main.py
-    voluems: .:/app
-    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 -m flask run --no-debugger --no-reload --host 0.0.0.0 --port 8080"]
-    
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/service_acc/service-account.json
+    # This overrides the Dockerfile CMD to install the debugger on the fly
+    command: >
+      sh -c "pip install debugpy && 
+             python -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5678 --wait-for-client 
+             -m gunicorn --workers 1 --threads 1 --timeout 3600 --bind 0.0.0.0:8000 app:app"

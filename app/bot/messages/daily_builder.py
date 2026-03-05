@@ -1,4 +1,6 @@
 import os
+
+from jinja2 import Template
 from data_unit import DataUnit
 from logger.logger import logging
 from datetime import datetime
@@ -104,12 +106,12 @@ class DailyBuilder():
     def build_text(self):
         """ This method adds the retrieved data to a text string. """
 
-        if self.du.test_unit_is_filled():
+        if not self.du.test_unit_is_filled():
             return ""
-        
-        m = self.du.m
-        r = self.du.r
-        p = self.du.p
+       
+        m = self.du.metals
+        r = self.du.rates
+        p = self.du.power
 
         avrg = (m["au-am"] + m["au-pm"]) / 2 # type: ignore
 
@@ -129,10 +131,57 @@ class DailyBuilder():
         f'{s["USD"]} BGN/USD: *{r["USD"]}*\n' \
         f'{s["GBP"]} BGN/GBP: *{r["GBP"]}*\n' \
         f'{s["USD"]} BGN/CHF: *{r["CHF"]}*\n' \
-        f'{s["highVolt"]} Ел. енергия: {p["Date"]}\n' \
+        f'{s["highVolt"]} Ел. енергия: {p["d"]}\n' \
         f'BGN: *{p["BGN"]:.2F}*\n' \
         f'EUR: *{p["EUR"]:.2F}*\n' \
-        f'Volume *{p["Volume"]:.2F}*'
+        f'Volume *{p["VOL"]:.2F}*'
 
         return text
-    
+
+    def build_text_jinja(self):
+        if not self.du.test_unit_is_filled():
+            return ""
+       
+        m = self.du.metals
+        r = self.du.rates
+        p = self.du.power
+
+        avrg = (m["au-am"] + m["au-pm"]) / 2 # type: ignore
+        context = {
+            # Symbols
+            **s,
+            "calendar": s["calendar"],
+            "USD_icon": s["USD"],  # Renamed to avoid confusion with currency
+            "GBP_icon": s["GBP"],
+
+            # Market Data (m)
+            "cu_d": m.get("cu-d"),
+            "cu": m.get("cu"),
+            "cu_3m": m.get("cu-3m"),
+            "cu_st": m.get("cu-st"),
+            "au_am": m.get("au-am"),
+            "au_pm": m.get("au-pm"),
+            "ag": m.get("ag"),
+            "avrg": avrg,
+
+            # Rates (r)
+            "r_d": r.get("d"),
+            "r_usd": r.get("USD"),
+            "r_gbp": r.get("GBP"),
+            "r_chf": r.get("CHF"),
+
+            # Power Data (p)
+            "p_d": p.get("d"),
+            "bgn": p.get("BGN"),
+            "eur": p.get("EUR"),
+            "vol": p.get("VOL")
+        }
+
+        # 2. Load and Render
+        with open('./messages/text/daily_msg.txt', 'r', encoding='utf-8') as f:
+            template_str = f.read()
+
+        template = Template(template_str)
+        final_text = template.render(context)
+
+        return final_text

@@ -1,12 +1,31 @@
+"""
+A dictionary of common UTF-8 emoji symbols for use in templates and UI. Each key represents a semantic name for the emoji.
+Available keys:
+    - calendar: 📅
+    - chartUp: 📈
+    - chartDown: 📉
+    - dollar: 💲
+    - usdNote: 💵
+    - eurNote: 💶
+    - gbpNote: 💷
+    - highVolt: ⚡
+    - checkMark: ✅
+    - crossMark: ❎
+    - leftArrow: ⬅️
+    - rightArrow: ➡
+"""
+
 symbols = {
-    "chart": '\U0001F4C8',
-    "dollar": '\U0001F4B2',
     "calendar": '\U0001F4C5',
-    "USD": '\U0001F4B5',
-    "GBP": '\U0001F4B7',
+    "chartUp": '\U0001F4C8',
+    "chartDown": '\U0001F4C9',
+    "dollar": '\U0001F4B2',
+    "usdNote": '\U0001F4B5',
+    "eurNote": '\U0001F4B6',
+    "gbpNote": '\U0001F4B7',
     "highVolt": '\U000026A1',
     "checkMark": '\U00002714',
+    "crossMark": '\U0000274E',
     "leftArrow": '\U00002B05',
+    "rightArrow": '\U000027A1',
 }
-
-c, chk_mrk, left_arr = '\U000000A9', '\U00002714', '\U00002B05'

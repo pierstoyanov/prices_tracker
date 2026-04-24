@@ -5,11 +5,9 @@ import threading
 from cachetools import TTLCache #TODO Replace with flask_caching
 from flask import Flask, abort, request, Response
 from data_collection.functional.act_requests import data_management_with_requests
-from data_collection.template_pattern.act_requests_template_patten import DataManagementWithRequests, DataRequestStoreTemplate, WmDataRequest
+from data_collection.template_pattern.act_requests_template_patten import DataManagementWithRequests
 from logger.logger import logging
 from request_handlers import viber_request_handler
-
-from bot.users.firebasee_user_actions import FirebaseUserActions
 
 from instances import bot, viber
 

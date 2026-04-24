@@ -13,6 +13,9 @@ Available keys:
     - crossMark: ❎
     - leftArrow: ⬅️
     - rightArrow: ➡
+    - hammer: 🔨
+    - hammerAndPick: ⚒️
+    - currencyExchange: 💱
 """
 
 symbols = {
@@ -28,4 +31,7 @@ symbols = {
     "crossMark": '\U0000274E',
     "leftArrow": '\U00002B05',
     "rightArrow": '\U000027A1',
+    "hammer": '\U0001F528',
+    "hammerAndPick": '\U00002692', 
+    "currencyExchange": '\U0001F4B1'
 }

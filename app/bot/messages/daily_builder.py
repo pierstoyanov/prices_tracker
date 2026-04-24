@@ -49,9 +49,8 @@ class DailyBuilder():
 
             # Power Data (p)
             "p_d": p.get("d", "N/A"),
-            "bgn": p.get("BGN", "N/A"),
-            "eur": p.get("EUR", "N/A"),
-            "vol": p.get("VOL", "N/A")
+            "p_eur": p.get("EUR", "N/A"),
+            "p_vol": p.get("VOL", "N/A")
         }
 
         # 2. Load and Render
